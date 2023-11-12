@@ -7,15 +7,14 @@
 struct MenuPage* CurrentMenu;
 struct Sprite* cursor;
 
-/*
-    Forward declare options so they can reference the menu state
-*/
+// Forward declare options here so they can poke state around later
 void Menu_StartGame();
 void Menu_LoadGame();
 void Menu_GotoOptions();
-void Menu_ReturnToMainMenu();
+void Menu_SoundOptions();
 void Menu_GotoMainMenu();
 
+// Define menu constructs here
 #define MenuTopSize 3
 struct MenuItem MenuTopItems[MenuTopSize] = 
 {
@@ -31,7 +30,7 @@ struct MenuPage MenuTop =
 #define MenuOptionsSize 2
 struct MenuItem MenuOptionsItems[MenuOptionsSize] =
 {
-    { "SOUND OPTIONS", Menu_SoundOptions },
+    { "SOUND OPTIONS", Menu_SoundOptions },         // "label", (void*)()
     { "BACK TO MAIN MENU", Menu_GotoMainMenu },
 };
 struct MenuPage MenuOptions = 
@@ -39,6 +38,7 @@ struct MenuPage MenuOptions =
     2, MenuOptionsItems, 0
 };
 
+// Now implement the callbacks here
 void Menu_StartGame()
 {
     VDP_drawText("StartGame", 0,1);
@@ -60,9 +60,7 @@ void Menu_GotoMainMenu()
     CurrentMenu = &MenuTop;
 }
 
-/*
-    Menu mechanics
-*/
+// Joystick
 void StateMenu_Joystick(u16 Joy, u16 Changed, u16 State)
 {
     if (Changed & State & BUTTON_UP)
@@ -79,18 +77,20 @@ void StateMenu_Joystick(u16 Joy, u16 Changed, u16 State)
     }
 }
 
+// State entry points
 void StateMenu_Start()
 {
     JOY_setEventHandler(&StateMenu_Joystick);
-    Menu_ReturnToMainMenu();
+    Menu_GotoMainMenu();    // Init menu
     
     SPR_init();
     cursor = SPR_addSprite(&gfx_cursor, 0, 0, 0);
 }
 void StateMenu_Tick()
 {
-    u8 i;
     VDP_drawText("Main Menu",0,0);
+    
+    u8 i;
     for(i=0; i < CurrentMenu->Size; ++i)
     {
         struct MenuItem* Item = &CurrentMenu->Items[i];
@@ -99,8 +99,9 @@ void StateMenu_Tick()
         VDP_clearText(X, Y, 20);
         VDP_drawText(Item->Label, X + (CurrentMenu->Selected != i),Y);
     }
-    u16 SelectedX = 4 * 8;
-    u16 SelectedY = (2 + CurrentMenu->Selected) * 8;
+    s8 SelectedX = 4 * 8;
+    s8 SelectedY = (2 + CurrentMenu->Selected) * 8;
     SPR_setPosition(cursor, SelectedX, SelectedY);
+    
     SPR_update();
 }
