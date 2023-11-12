@@ -1,7 +1,6 @@
 #include <genesis.h>
 #include "game.h"
 
-
 #include "StateMenu.h"
 
 int main()

@@ -86,6 +86,10 @@ void StateMenu_Start()
     SPR_init();
     cursor = SPR_addSprite(&gfx_cursor, 0, 0, 0);
 }
+void StateMenu_End()
+{
+    SPR_end();
+}
 void StateMenu_Tick()
 {
     VDP_drawText("Main Menu",0,0);
