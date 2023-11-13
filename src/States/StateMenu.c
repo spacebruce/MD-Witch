@@ -4,6 +4,8 @@
 #include <genesis.h>
 #include "ui/menu.h"
 
+#include "State.h"
+
 struct MenuPage* CurrentMenu;
 struct Sprite* cursor;
 
@@ -12,36 +14,39 @@ void Menu_StartGame();
 void Menu_LoadGame();
 void Menu_GotoOptions();
 void Menu_SoundOptions();
+void Menu_VideoOptions();
 void Menu_GotoMainMenu();
 
 // Define menu constructs here
 #define MenuTopSize 3
 struct MenuItem MenuTopItems[MenuTopSize] = 
 {
-    { "START GAME", Menu_StartGame },
-    { "LOAD GAME", Menu_LoadGame },
+    { "START", Menu_StartGame },
+    { "LOAD", Menu_LoadGame },
     { "OPTIONS", Menu_GotoOptions },
 };
 struct MenuPage MenuTop = 
 {
-    3, MenuTopItems, 0
+    MenuTopSize, MenuTopItems, 0
 };
 
-#define MenuOptionsSize 2
+#define MenuOptionsSize 3
 struct MenuItem MenuOptionsItems[MenuOptionsSize] =
 {
-    { "SOUND OPTIONS", Menu_SoundOptions },         // "label", (void*)()
-    { "BACK TO MAIN MENU", Menu_GotoMainMenu },
+    { "SOUND", Menu_SoundOptions },         // "label", (void*)()
+    { "VIDEO", Menu_VideoOptions },         // "label", (void*)()
+    { "BACK^", Menu_GotoMainMenu },
 };
 struct MenuPage MenuOptions = 
 {
-    2, MenuOptionsItems, 0
+    MenuOptionsSize, MenuOptionsItems, 0
 };
 
 // Now implement the callbacks here
 void Menu_StartGame()
 {
     VDP_drawText("StartGame", 0,1);
+    STATE_NEXT = STATE_GAME;
 }
 void Menu_LoadGame()
 {
@@ -50,6 +55,10 @@ void Menu_LoadGame()
 void Menu_SoundOptions()
 {
     VDP_drawText("Sound Options!", 0,1);
+}
+void Menu_VideoOptions()
+{
+    VDP_drawText("Video Options!", 0,1);
 }
 void Menu_GotoOptions()
 {
@@ -63,11 +72,11 @@ void Menu_GotoMainMenu()
 // Joystick
 void StateMenu_Joystick(u16 Joy, u16 Changed, u16 State)
 {
-    if (Changed & State & BUTTON_UP)
+    if (Changed & State & BUTTON_LEFT)
     {
         CurrentMenu->Selected = max(CurrentMenu->Selected - 1, 0);
     }
-    else if (Changed & State & BUTTON_DOWN)
+    else if (Changed & State & BUTTON_RIGHT)
     {
         CurrentMenu->Selected = min(CurrentMenu->Selected + 1, CurrentMenu->Size - 1);
     }
@@ -93,19 +102,27 @@ void StateMenu_End()
 void StateMenu_Tick()
 {
     VDP_drawText("Main Menu",0,0);
-    
     u8 i;
+    s16 X, Y, CX,CY;
+    Y = 22 + (CurrentMenu != &MenuTop); //Offset 1 tile down if a submenu
+    VDP_clearText(0, Y, 40);
+    VDP_clearText(0, Y + 1, 40);
     for(i=0; i < CurrentMenu->Size; ++i)
     {
         struct MenuItem* Item = &CurrentMenu->Items[i];
-        s8 X = 5;
-        s8 Y = 2 + (i * 1);
-        VDP_clearText(X, Y, 20);
-        VDP_drawText(Item->Label, X + (CurrentMenu->Selected != i),Y);
+        X = 6 + (i * 10);
+        if(CurrentMenu->Selected == i)
+        {
+            CX = (X - 1) * 8;
+            CY = Y * 8;
+        }
+        VDP_drawText(Item->Label, X,Y);
     }
-    s8 SelectedX = 4 * 8;
-    s8 SelectedY = (2 + CurrentMenu->Selected) * 8;
-    SPR_setPosition(cursor, SelectedX, SelectedY);
-    
+    SPR_setPosition(cursor, CX, CY);
     SPR_update();
 }
+
+struct StateType StateMenu = 
+{
+    StateMenu_Start, StateMenu_End, StateMenu_Tick,
+};
