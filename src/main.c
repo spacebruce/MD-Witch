@@ -6,7 +6,6 @@
 
 int main()
 {
-	StateMenu.Start();
 	while(1)
 	{        
 		// Messy state machine, gomenasai
