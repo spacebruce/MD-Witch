@@ -1,6 +1,9 @@
 #include "StateGame.h"
 #include "State.h"
 
+#include "../Objects/Player.h"
+Player player;
+
 void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
 {
 
