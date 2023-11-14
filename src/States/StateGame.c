@@ -41,9 +41,7 @@ void StateGame_Tick()
     if(!Paused)
     {
         PlayerUpdate(&Player);
-        
-        pal = (pal + 1) % 64;
-        if(pal == 0)
+        if(Player.Lives < 0)
             STATE_NEXT = STATE_MENU;
     }
 

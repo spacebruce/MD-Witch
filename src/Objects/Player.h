@@ -1,12 +1,16 @@
 #pragma once
-
+#include <genesis.h>
 #include "Actor.h"
 
 typedef struct
 {
     Actor Base;    
+    Sprite* sprite;
+    // 
     fix16 MomentumX;
     fix16 MomentumY;
+    //
+    s8 Lives = 3;
 } PlayerType;
 
 void PlayerInit(PlayerType* P);
