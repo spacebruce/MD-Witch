@@ -3,7 +3,8 @@
         "genesis.h": "c",
         "font.h": "c",
         "statemenu.h": "c",
-        "stategame.h": "c"
+        "stategame.h": "c",
+        "pal.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

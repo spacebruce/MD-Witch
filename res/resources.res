@@ -1,2 +1,2 @@
 
-SPRITE gfx_cursor "cursor.bmp" 1 1 NONE 
+SPRITE gfx_cursor "sprites/cursor.bmp" 1 1 NONE 
