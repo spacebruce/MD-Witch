@@ -1,6 +1,8 @@
 #include "StateGame.h"
 #include "State.h"
 
+#include "resources.h"
+
 #include "../Objects/Player.h"
 
 bool Paused;
@@ -18,6 +20,8 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
     }
     else
     {
+        if(Changed & State & BUTTON_A)
+            Player.Lives = -1;
         // Redirect to pause menu?
     }
 }
@@ -27,6 +31,10 @@ void StateGame_Start()
     
     SPR_init();
     PlayerInit(&Player);
+
+    VDP_loadTileSet(bgtile.tileset,1,DMA);
+    VDP_fillTileMapRect(BG_B, 1,0,0,40,30);
+    PAL_setPalette(PAL0, bgtile.palette->data, DMA);
 }
 void StateGame_End()
 {
@@ -35,7 +43,6 @@ void StateGame_End()
     VDP_clearPlane(BG_B, TRUE);
 }
 
-s8 pal = 0;
 void StateGame_Tick()
 {
     if(!Paused)
@@ -46,12 +53,11 @@ void StateGame_Tick()
     }
 
     PlayerDraw(&Player);
-    VDP_setBackgroundColor(pal);
-    VDP_drawTextBG(BG_B, "This is what a game looks like", 0,20);
+    VDP_drawTextBG(BG_A, "This is what a game looks like", 0,20);
 
     if(Paused)
     {
-        VDP_drawTextBG(BG_B, "Paused!", 10,0);
+        VDP_drawTextBG(BG_A, "Paused!", 10,0);
         return;
     }
     

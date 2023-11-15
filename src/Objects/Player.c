@@ -8,7 +8,8 @@ void PlayerInput(PlayerType* P, u16 Joy, u16 Changed, u16 State)
 void PlayerInit(PlayerType* P)
 {
     P->sprite = SPR_addSprite(&gfx_cursor, 32,32,  TILE_ATTR(PAL1, FALSE, FALSE, FALSE));
-    //PAL_setPalette(PAL1, P->sprite.palette->data, DMA);
+    //
+    P->Lives = 3;
 }
 void PlayerFree(PlayerType* P)
 {

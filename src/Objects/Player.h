@@ -10,7 +10,7 @@ typedef struct
     fix16 MomentumX;
     fix16 MomentumY;
     //
-    s8 Lives = 3;
+    s8 Lives;
 } PlayerType;
 
 void PlayerInit(PlayerType* P);

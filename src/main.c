@@ -12,6 +12,8 @@ int main(bool hardreset)
 	JOY_init();
 	SPR_init();
 
+	SYS_showFrameLoad(TRUE);
+
 	// Messy state machine, gomenasai
 	while(1)
 	{        

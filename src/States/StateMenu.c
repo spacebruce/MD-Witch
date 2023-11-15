@@ -97,6 +97,9 @@ void StateMenu_Start()
 }
 void StateMenu_End()
 {
+    VDP_clearPlane(BG_A, TRUE);
+    VDP_clearPlane(BG_B, TRUE);
+    VDP_clearSprites();
     SPR_end();
 }
 void StateMenu_Tick()
