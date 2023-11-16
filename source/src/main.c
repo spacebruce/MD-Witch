@@ -4,11 +4,19 @@
 #include "States/StateMenu.h"
 #include "States/StateGame.h"
 
-int main()
+int main(bool hardreset)
 {
+	// Init console
+	if(!hardreset)
+		SYS_hardReset();
+	JOY_init();
+	SPR_init();
+
+	SYS_showFrameLoad(TRUE);
+
+	// Messy state machine, gomenasai
 	while(1)
 	{        
-		// Messy state machine, gomenasai
 		if(STATE_CURRENT != STATE_NEXT)
 		{
 			if(STATE_CURRENT != 0xFF)

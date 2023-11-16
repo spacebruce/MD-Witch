@@ -1,5 +1,4 @@
-#ifndef STATEGAME_H
-#define STATEGAME_H
+#pragma once
 
 #include <genesis.h>
 #include "States/State.h"
@@ -9,5 +8,3 @@ void StateGame_End();
 void StateGame_Tick();
 
 extern struct StateType StateGame;
-
-#endif
