@@ -2,14 +2,18 @@
 #include <genesis.h>
 #include <resources.h>
 
+#include "../defines.h"
+
 void PlayerInput(PlayerType* P, u16 Joy, u16 Changed, u16 State)
 {
 }
 void PlayerInit(PlayerType* P)
 {
-    P->sprite = SPR_addSprite(&gfx_cursor, 32,32,  TILE_ATTR(PAL1, FALSE, FALSE, FALSE));
+    // graphics
+    P->sprite = SPR_addSprite(&sprPlayer, 32,32, TILE_ATTR(PLAYER_PALETTE, 1, FALSE, FALSE));
+    PAL_setPalette(PLAYER_PALETTE, sprPlayer.palette->data, DMA);   // do this at drawtime for flashing/effects?
     //
-    P->Lives = 3;
+    P->Lives = 1;
 }
 void PlayerFree(PlayerType* P)
 {
