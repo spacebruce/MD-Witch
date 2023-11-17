@@ -15,7 +15,7 @@ void PlayerInput(PlayerType* P, u16 Joy, u16 Changed, u16 State)
     }
     else if(State & BUTTON_LEFT)
     {
-        P->MomentumX = FIX16(-1.5);
+        P->MomentumX = -FIX16(1.5);
     }
     else if ((Changed & BUTTON_LEFT) | (Changed & BUTTON_RIGHT))
         P->MomentumX = FIX16(0);
@@ -38,7 +38,8 @@ void PlayerUpdate(PlayerType* P)
 {
     P->Base.X += fix16ToInt(P->MomentumX);
     P->Base.Y += fix16ToInt(P->MomentumY);
-    SPR_setHFlip(P->sprite, P->MomentumX < 0);
+    if(P->MomentumX != 0)
+        SPR_setHFlip(P->sprite, P->MomentumX < 0);
 }
 void PlayerDraw(PlayerType* P)
 {

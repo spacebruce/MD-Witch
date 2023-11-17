@@ -82,7 +82,7 @@ void StateGame_Tick()
 {
     int i;
     for(i = 0; i < NUM_LINES; ++i)
-        BGA_Scroll[i] = frame + i;
+        BGA_Scroll[i] = 0;//frame;// + i;
     frame++;
         
     if(!Paused)
