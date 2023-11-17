@@ -36,6 +36,14 @@ void StateGame_Start()
     PlayerInit(&Player);
 
     GAME_LEVELPTR = GetLevelFromID(1);
+    if(GAME_LEVELPTR != NULL)
+    {
+        GAME_LEVELPTR->Init();
+    }
+    else
+    {
+        STATE_NEXT = STATE_MENU;    //Maybe go to an error handler screen?
+    }
 }
 void StateGame_End()
 {
@@ -50,6 +58,11 @@ void StateGame_EndTick()
 }
 void StateGame_Tick()
 {
+    if(GAME_LEVELPTR != NULL)
+    {
+        GAME_LEVELPTR->Tick();
+        GAME_LEVELPTR->Draw();
+    }
 
     if(!Paused)
     {
