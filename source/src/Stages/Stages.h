@@ -8,7 +8,7 @@ typedef struct
     const StageBase* Pointer;
 } StageGroup;
 
-#include "Stage11.h"
+#include "E1M1.h"
 
 /*
     Map of stage ID's to the correct data structure
@@ -16,7 +16,7 @@ typedef struct
 static const StageGroup Stages[] = 
 {
     // { 0, &Cutscene1 },
-    { 1, &Stage11 },
+    { 1, &E1M1 },
     // { 2, &Stage12 },
     // { 3, &Stage13 },
 };

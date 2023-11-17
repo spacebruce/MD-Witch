@@ -5,4 +5,4 @@
     Green hill zone!
 */
 
-extern const StageBase Stage11; 
+extern const StageBase E1M1; 

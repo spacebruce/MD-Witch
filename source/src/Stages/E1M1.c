@@ -1,4 +1,4 @@
-#include "Stage11.h"
+#include "E1M1.h"
 
 #include <genesis.h>
 #include <resources.h>
@@ -19,9 +19,9 @@ u8 level1[8][8] =
     {0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-void Stage11_Init()
+void E1M1_Init()
 {
-    //Stage11_DataInit(&StageData.Stage11);   // Init global vars for current stage
+    //StageE1M1_DataInit(&StageData.E1M1);   // Init global vars for current stage
     VDP_setPlaneSize(32,32, TRUE);
     VDP_setScrollingMode(HSCROLL_LINE, VSCROLL_PLANE);
 
@@ -40,7 +40,7 @@ void Stage11_Init()
         }
     }
 }
-void Stage11_Tick()
+void E1M1_Tick()
 {
     // Scroll BG
     int i;
@@ -48,14 +48,15 @@ void Stage11_Tick()
         BGA_Scroll[i] = 0;//frame;// + i;
     
 }
-void Stage11_Draw()
+void E1M1_Draw()
 {
 
 }
 
-const StageBase Stage11 = 
+const StageBase E1M1 = 
 {
-    Stage11_Init,
-    Stage11_Tick,
-    Stage11_Draw,
+    "E1M1",
+    E1M1_Init,
+    E1M1_Tick,
+    E1M1_Draw,
 };

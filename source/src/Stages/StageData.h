@@ -16,7 +16,7 @@ typedef struct {} Stage13Data;
 
 union 
 {
-    Stage11Data Stage11;
+    Stage11Data E1M1;
     Stage12Data Stage12;
     Stage13Data Stage13;
 } StageData;    

@@ -9,6 +9,7 @@ typedef void (*StageFunction)();
 
 typedef struct 
 {
+    const char* Name;
     StageFunction Init;
     StageFunction Tick;
     StageFunction Draw;

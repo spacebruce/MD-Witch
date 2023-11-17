@@ -72,7 +72,7 @@ void StateGame_Tick()
     }
 
     PlayerDraw(&Player);
-    VDP_drawTextBG(BG_A, "This is NOT what a game looks like", 0,20);
+    VDP_drawTextBG(BG_A, GAME_LEVELPTR->Name, 0,20);
 
     SPR_update();
     if(Paused)
