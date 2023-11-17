@@ -23,4 +23,4 @@ typedef struct
 
 extern enum STATE_ID STATE_CURRENT;
 extern enum STATE_ID STATE_NEXT;
-extern StateType* StatePtr;
+extern const StateType* StatePtr;

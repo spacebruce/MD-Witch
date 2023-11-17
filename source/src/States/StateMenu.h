@@ -8,4 +8,4 @@ void StateMenu_End();
 void StateMenu_Tick();
 void StateMenu_EndTick();
 
-extern StateType StateMenu;
+extern const StateType StateMenu;
