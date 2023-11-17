@@ -124,8 +124,11 @@ void StateMenu_Tick()
     SPR_setPosition(cursor, CX, CY);
     SPR_update();
 }
+void StateMenu_EndTick()
+{
+}
 
 struct StateType StateMenu = 
 {
-    StateMenu_Start, StateMenu_End, StateMenu_Tick,
+    StateMenu_Start, StateMenu_End, StateMenu_Tick, StateMenu_EndTick,
 };

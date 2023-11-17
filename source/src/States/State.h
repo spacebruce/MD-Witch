@@ -13,13 +13,14 @@ enum STATE_ID
 //
 typedef void (*StateFunction)();
 
-struct StateType
+typedef struct
 {
     StateFunction Start;
     StateFunction End;
     StateFunction Tick;
-};
+    StateFunction EndTick;
+} StateType;
 
 extern enum STATE_ID STATE_CURRENT;
 extern enum STATE_ID STATE_NEXT;
-extern struct StateType* StatePtr;
+extern StateType* StatePtr;

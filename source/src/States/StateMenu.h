@@ -6,5 +6,6 @@
 void StateMenu_Start();
 void StateMenu_End();
 void StateMenu_Tick();
+void StateMenu_EndTick();
 
 extern struct StateType StateMenu;

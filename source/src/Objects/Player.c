@@ -6,6 +6,7 @@
 
 void PlayerInput(PlayerType* P, u16 Joy, u16 Changed, u16 State)
 {
+    
 }
 void PlayerInit(PlayerType* P)
 {
@@ -21,10 +22,8 @@ void PlayerFree(PlayerType* P)
 }
 void PlayerUpdate(PlayerType* P)
 {
-    P->Base.X = random() % 400;
-    P->Base.Y = random() % 260;
-    //P->Base.X += P->MomentumX;
-    //P->Base.Y += P->MomentumY;
+    P->Base.X = (P->Base.X + 4) % 400;
+    P->Base.Y = 100;
 }
 void PlayerDraw(PlayerType* P)
 {

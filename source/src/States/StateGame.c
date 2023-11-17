@@ -4,12 +4,15 @@
 #include "resources.h"
 #include "../defines.h"
 
+#include "../VDPState.h"
+
 #include "../Objects/Player.h"
 
 bool Paused;
 PlayerType Player;
 
-u8 level1[8][8] = {
+u8 level1[8][8] = 
+{
     {0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0},
@@ -45,6 +48,8 @@ void StateGame_Start()
     PlayerInit(&Player);
 
     VDP_setPlaneSize(32,32, TRUE);
+    VDP_setScrollingMode(HSCROLL_LINE, VSCROLL_PLANE);
+
     PAL_setPalette(LEVEL_PALETTE, floortiles.palette->data,CPU);
     VDP_loadTileSet(floortiles.tileset,1,CPU);
     u8 x = 0;
@@ -68,8 +73,18 @@ void StateGame_End()
     VDP_clearPlane(BG_B, TRUE);
 }
 
+int frame = 0;
+void StateGame_EndTick()
+{
+    VDP_setHorizontalScrollLine(BG_B, 0, BGA_Scroll, NUM_LINES, 1);
+}
 void StateGame_Tick()
 {
+    int i;
+    for(i = 0; i < NUM_LINES; ++i)
+        BGA_Scroll[i] = frame + i;
+    frame++;
+        
     if(!Paused)
     {
         PlayerUpdate(&Player);
@@ -86,10 +101,9 @@ void StateGame_Tick()
         return;
     }
     SPR_update();
-    
 }
 
 struct StateType StateGame = 
 {
-    StateGame_Start, StateGame_End, StateGame_Tick,
+    StateGame_Start, StateGame_End, StateGame_Tick, StateGame_EndTick
 };

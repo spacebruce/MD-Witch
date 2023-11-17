@@ -34,6 +34,7 @@ int main(bool hardreset)
 			StatePtr->Tick();
 		}
 		SYS_doVBlankProcess();
+		StatePtr->EndTick();
 	}
 	return (0);
 }
