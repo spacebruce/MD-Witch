@@ -103,7 +103,7 @@ void StateGame_Tick()
     SPR_update();
 }
 
-struct StateType StateGame = 
+StateType StateGame = 
 {
     StateGame_Start, StateGame_End, StateGame_Tick, StateGame_EndTick
 };

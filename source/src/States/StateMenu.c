@@ -128,7 +128,7 @@ void StateMenu_EndTick()
 {
 }
 
-struct StateType StateMenu = 
+StateType StateMenu = 
 {
     StateMenu_Start, StateMenu_End, StateMenu_Tick, StateMenu_EndTick,
 };

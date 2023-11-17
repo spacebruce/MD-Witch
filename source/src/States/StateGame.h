@@ -8,4 +8,4 @@ void StateGame_End();
 void StateGame_Tick();
 void StateGame_EndTick();
 
-extern struct StateType StateGame;
+extern StateType StateGame;
