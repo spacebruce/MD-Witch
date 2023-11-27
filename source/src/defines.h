@@ -1,14 +1,11 @@
+#pragma once
 
-/*
-    Tilemap : Level tiles the player interacts with
-    Stuff : background
-*/
-#define TILEMAP_PLANE BG_A
-#define STUFF_PLANE BG_B
-/*
-    What palette does what. The MD supports 4 in total...
-*/
-#define LEVEL_PALETTE 0
-#define PLAYER_PALETTE 1
-#define ENEMY_PALETTE 2
-#define UNUSED_PALETTE 3
+#define true 1
+#define false 0
+
+#define DEBUG_MODE true
+
+#define PAL_BACKGROUND PAL0
+#define PAL_PLAYER PAL1
+#define PAL_STUFF PAL2
+#define PAL_ENEMIES PAL3

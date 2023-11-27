@@ -1,40 +1,46 @@
 #include <genesis.h>
+#include "defines.h"
 
-#include "States/State.h"
-#include "States/StateMenu.h"
-#include "States/StateGame.h"
+#include "GameContext.h"
+#include "resources.h"
+
+#include "StateGame.h"
+#include "StateMenu.h"
+
+Map *map;
 
 int main(bool hardreset)
 {
-	// Init console
-	if(!hardreset)
-		SYS_hardReset();
-	JOY_init();
-	SPR_init();
+    if(!hardreset)
+        SYS_hardReset();
+    JOY_init();
+    SPR_init();
 
-	SYS_showFrameLoad(TRUE);
+	GameContextInit();
 
-	// Messy state machine, gomenasai
+	GameContext.CurrentStateID = 0xFF;
+	GameContext.NextStateID = STATE_MENU;
 	while(1)
-	{        
-		if(STATE_CURRENT != STATE_NEXT)
+	{
+		if(GameContext.CurrentStateID != GameContext.NextStateID)
 		{
-			if(STATE_CURRENT != 0xFF)
-				StatePtr->End();
-			STATE_CURRENT = STATE_NEXT;
-			switch(STATE_CURRENT)
+			if(GameContext.CurrentStateID != 0xFF)
 			{
-				case STATE_MENU:	StatePtr = &StateMenu;	break;
-				case STATE_GAME:	StatePtr = &StateGame;	break;
+				GameContext.CurrentState->End();
+			}	
+			GameContext.CurrentStateID = GameContext.NextStateID;
+			switch(GameContext.CurrentStateID)
+			{
+				case STATE_MENU:	GameContext.CurrentState = &StateMenu;	break;
+				case STATE_GAME:	GameContext.CurrentState = &StateGame;	break;
 			}
-			StatePtr->Start();
+			GameContext.CurrentState->Start();
 		}
 		else
 		{
-			StatePtr->Tick();
+			GameContext.CurrentState->Tick();
 		}
-		SYS_doVBlankProcess();
-		StatePtr->EndTick();
+    	SYS_doVBlankProcess();
 	}
 	return (0);
 }

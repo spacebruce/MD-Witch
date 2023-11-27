@@ -19,5 +19,6 @@ out/src/main.o: src/main.c C:/dev/sgdk190/inc/genesis.h \
  C:/dev/sgdk190/inc/joy.h C:/dev/sgdk190/inc/timer.h \
  C:/dev/sgdk190/inc/task.h C:/dev/sgdk190/inc/task_cst.h \
  C:/dev/sgdk190/inc/ext/flash-save/flash.h C:/dev/sgdk190/inc/types.h \
- C:/dev/sgdk190/inc/ext/flash-save/saveman.h src/States/State.h \
- src/States/StateMenu.h src/States/StateGame.h
+ C:/dev/sgdk190/inc/ext/flash-save/saveman.h src/defines.h \
+ src/GameContext.h src/Types/StateType.h src/Types/StageBase.h \
+ res/resources.h src/StateGame.h src/StateMenu.h

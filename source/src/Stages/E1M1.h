@@ -1,5 +1,5 @@
 #pragma once
-#include "StageBase.h"
+#include "../Types/StageBase.h"
 
 /*
     Green hill zone!
