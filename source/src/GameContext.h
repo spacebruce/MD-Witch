@@ -21,9 +21,11 @@ struct GameContextType
     fix16 Speedup;
     //
     Map* CurrentMap;
-    StageBase* CurrentStage;
+    const StageBase* CurrentStage;
     u8 CurrentStageID;
     u8 NextStageID;
+    u16 StageFrame;
+    fix32 StageTime;
     bool Paused;
     //
     u16 Frame;
@@ -34,3 +36,4 @@ struct GameContextType
 extern struct GameContextType GameContext;
 
 void GameContextInit();
+void GameContextTick();

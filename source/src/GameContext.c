@@ -8,6 +8,8 @@ void GameContextInit()
 		SYS_showFrameLoad(false);
 	#endif
 
+	GameContext.Frame = 0;
+
 	if(IS_PAL_SYSTEM)
 	{
 		GameContext.Framerate = 50;
@@ -17,5 +19,14 @@ void GameContextInit()
 	{
 		GameContext.Framerate = 60;
 		GameContext.Speedup = FIX16(1);
+	}
+}
+
+void GameContextTick()
+{
+	++GameContext.Frame;
+	if(!GameContext.Paused)
+	{
+		++GameContext.StageFrame;
 	}
 }
