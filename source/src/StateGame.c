@@ -81,21 +81,20 @@ void StateGame_End()
 void StateGame_Tick()
 {
     // Stage logic
-    if(GameContext.CurrentStageID != GameContext.NextStageID)
+    if(GameContext.CurrentStageID != GameContext.NextStageID)   // If stage change triggered
     {
         if(GameContext.CurrentStage != NULL)
         {
             GameContext.CurrentStage->Cleanup();    // Clear out stage memory/vram
         }
-        GameContext.CurrentStage = GetStageData(GameContext.NextStageID);
+        GameContext.CurrentStage = &E1M1;//GetStageData(GameContext.NextStageID);
         GameContext.CurrentStageID = GameContext.NextStageID;
-        if(GameContext.CurrentStage == NULL)
+        if(GameContext.CurrentStage != NULL)        // If stage loaded
         {
             GameContext.CurrentStage->Init();       // Init incoming stage
-            VDP_setTextPalette(PAL_PLAYER);
-            VDP_setTextPlane(BG_A);
-            GameContext.StageFrame = 0;
-            Player.Base.x = GameContext.PlayerSpawn.x;
+            GameContext.Paused = false;             // Ensure game is unpaused
+            GameContext.StageFrame = 0;             // Reset stage timer    
+            Player.Base.x = GameContext.PlayerSpawn.x;  // Move player to spawn location
             Player.Base.y = GameContext.PlayerSpawn.y;
         }
     }

@@ -8,7 +8,20 @@ void updateObjectPlayer(ObjectPlayer *object)
     {
         object->VelocityY = FIX16(0);
         if((object->changed & BUTTON_A) == BUTTON_A)
+        {
             object->VelocityY = FIX16(-5);
+        }
+        
+        object->VelocityX = fix16Div(object->VelocityX, FIX16(1.1));
+
+        if((object->state & BUTTON_LEFT) == BUTTON_LEFT)
+        {
+            object->VelocityX = fix16Add(object->VelocityX, FIX16(-1));
+        }
+        else if ((object->state & BUTTON_RIGHT) == BUTTON_RIGHT)
+        {
+            object->VelocityX = fix16Add(object->VelocityX, FIX16(1));
+        }
     }
     else
     {
