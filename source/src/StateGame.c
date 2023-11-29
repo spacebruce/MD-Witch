@@ -92,6 +92,8 @@ void StateGame_Tick()
         if(GameContext.CurrentStage == NULL)
         {
             GameContext.CurrentStage->Init();       // Init incoming stage
+            VDP_setTextPalette(PAL_PLAYER);
+            VDP_setTextPlane(BG_A);
             GameContext.StageFrame = 0;
             Player.Base.x = GameContext.PlayerSpawn.x;
             Player.Base.y = GameContext.PlayerSpawn.y;

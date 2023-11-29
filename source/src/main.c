@@ -36,10 +36,8 @@ int main(bool hardreset)
 			}
 			GameContext.CurrentState->Start();
 		}
-		else
-		{
-			GameContext.CurrentState->Tick();
-		}
+		GameContext.CurrentState->Tick();
+		GameContextTick();
     	SYS_doVBlankProcess();
 	}
 	return (0);

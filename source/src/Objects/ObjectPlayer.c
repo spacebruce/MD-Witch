@@ -6,8 +6,8 @@ void updateObjectPlayer(ObjectPlayer *object)
     object->OnFloor = (fix32ToInt(object->Base.y) > 200);
     if(object->OnFloor)
     {
-        object->VelocityY = FIX16(-5);
-        if(object->changed == BUTTON_A)
+        object->VelocityY = FIX16(0);
+        if((object->changed & BUTTON_A) == BUTTON_A)
             object->VelocityY = FIX16(-5);
     }
     else
