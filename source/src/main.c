@@ -16,6 +16,7 @@ int main(bool hardreset)
     JOY_init();
     SPR_init();
 
+    VDP_setScreenWidth320();
 	GameContextInit();
 
 	GameContext.CurrentStateID = 0xFF;
