@@ -6,7 +6,8 @@
 
 void E1M1_Init()
 {
-    GameContext.PlayerSpawn = (Vect2D_s16){ 300, 0 };
+    GameContext.PlayerSpawn.x = 100;
+    GameContext.PlayerSpawn.y = 50;
 }
 void E1M1_Tick()
 {
