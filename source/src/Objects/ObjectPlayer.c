@@ -1,39 +1,62 @@
 #include "ObjectPlayer.h"
 #include "../GameContext.h"
 
+#define gravity FIX16(0.25)
+#define acceleration FIX16(1.0)
+#define jumpforce FIX16(5)
+#define friction FIX16(0.7)
+
 void updateObjectPlayer(ObjectPlayer *object)
 {
-    object->OnFloor = (fix32ToInt(object->Base.y) > 200);
-    if(object->OnFloor)
-    {
-        object->VelocityY = FIX16(0);
-        if((object->changed & BUTTON_A) == BUTTON_A)
-        {
-            object->VelocityY = FIX16(-5);
-        }
-        
-        object->VelocityX = fix16Div(object->VelocityX, FIX16(1.1));
+    const bool pressed_A = ((object->changed & BUTTON_A) == BUTTON_A);
+    const bool pressed_B = ((object->changed & BUTTON_B) == BUTTON_B);
+    const bool pressed_C = ((object->changed & BUTTON_C) == BUTTON_C);
+    const bool pressed_left = ((object->changed & BUTTON_LEFT) == BUTTON_LEFT);
+    const bool pressed_right = ((object->changed & BUTTON_RIGHT) == BUTTON_RIGHT);
 
-        if((object->state & BUTTON_LEFT) == BUTTON_LEFT)
+    int FLoorY = 200;
+
+    object->OnFloor = (fix32ToInt(object->Base.y) >= FLoorY);
+
+    if(object->OnFloor)
+    {         
+        object->Base.y = intToFix32(FLoorY);
+        // Apply friction
+        if(abs(fix16ToInt(object->VelocityX)) < 1)
         {
-            object->VelocityX = fix16Add(object->VelocityX, FIX16(-1));
+            object->VelocityX = FIX16(0);
+        } 
+        else
+        {
+            object->VelocityX = fix16Mul(object->VelocityX, friction);
         }
-        else if ((object->state & BUTTON_RIGHT) == BUTTON_RIGHT)
+
+        // Gravity 
+        object->VelocityY = FIX16(0);
+        if(pressed_A || pressed_B)  // Jump
         {
-            object->VelocityX = fix16Add(object->VelocityX, FIX16(1));
+            object->VelocityY = FIX16(-5);  // Jump velocity
+            object->OnFloor = false;        // Detatch from floor
+        }
+
+        if(pressed_left)
+        {
+            object->VelocityX = fix16Sub(object->VelocityX, acceleration);
+        }
+        else if (pressed_right)
+        {
+            object->VelocityX = fix16Add(object->VelocityX, acceleration);
         }
     }
     else
     {
-        fix16 Gravity = FIX16(0.1);
-        if(GameContext.Speedup != FIX16(1))
-        {
-            Gravity = fix16Mul(Gravity, GameContext.Speedup);
-        }
-        object->VelocityY = fix16Add(object->VelocityY, Gravity);
+        object->VelocityY = fix16Add(object->VelocityY, gravity);
     }
     object->Base.x = fix32Add(object->Base.x, fix16ToFix32(object->VelocityX));
-    object->Base.y = fix32Add(object->Base.y, fix16ToFix32(object->VelocityY));
+    if(!object->OnFloor)
+    {
+        object->Base.y = fix32Add(object->Base.y, fix16ToFix32(object->VelocityY));
+    }
 }
 
 void createObjectPlayer(ObjectPlayer *object)
