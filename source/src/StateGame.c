@@ -99,6 +99,7 @@ void StateGame_Tick()
             DMA_waitCompletion();
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
+            GameContext.Player = &Player;
             Player.Base.x = intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
             Player.Base.y = intToFix32(GameContext.PlayerSpawn.y);
         }
@@ -123,7 +124,7 @@ void StateGame_Tick()
         if(GameContext.CurrentStage != NULL)
         {
             GameContext.CurrentStage->Tick();
-            ObjectPlayerUpdate(&Player);
+            ObjectPlayerUpdate(&Player.Base);
             ObjectCameraUpdate(GameContext.Camera);
             ++GameContext.StageFrame;
         }
@@ -132,6 +133,7 @@ void StateGame_Tick()
     s16 CameraY = GameContext.Camera->Base.y;
 
     VDP_setHorizontalScroll(BG_A, -GameContext.Camera->Base.x);
+    VDP_setVerticalScroll(BG_A, 0);
 
     // update all sprites
     SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);
