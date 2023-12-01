@@ -11,12 +11,15 @@ void E1M1_Init()
 }
 void E1M1_Tick()
 {
+    
+    if(GameContext.Player->x > 1000)
+        GameContext.NextStateID = STATE_MENU;
 }
 void E1M1_End()
 {
 }
 void E1M1_Draw()
-{   
+{
 }
 
 const StageBase E1M1 = 
