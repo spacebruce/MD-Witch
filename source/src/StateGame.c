@@ -33,7 +33,6 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
                 inputObjectPlayer(&Player, Changed, State);
             }
         }
-        
     }
 }
 
@@ -50,7 +49,7 @@ void StateGame_Reload()
 // State entry points
 void StateGame_Start()
 {
-    GameContext.NextStageID = 1;
+    GameContext.NextStageID = 1;    // Change to 0 once cutscene implemented
 
     JOY_setEventHandler(&StateGame_Joystick);
 
