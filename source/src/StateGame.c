@@ -40,7 +40,8 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
 void StateGame_Reload() 
 {
     SPR_init();
-    SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
+    SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,true));
+    SPR_setPriority(SpritePaused, true);
     SpritePlayer = SPR_addSprite(&sprPlayer, 32,32, TILE_ATTR(PAL_PLAYER, 0,false,false));
     PAL_setPalette(PAL0, sprPlayer.palette->data, DMA);
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);   // Many static objects share player palette
@@ -95,6 +96,7 @@ void StateGame_Tick()
             GameContext.CurrentStage->Init();       // Init incoming stage
             for(int i = 0; i < 32; ++i)
                 VDP_drawText(GameContext.CurrentStage->Name,0,i);
+            DMA_waitCompletion();
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
             Player.Base.x = intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
