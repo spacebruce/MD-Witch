@@ -17,6 +17,6 @@ typedef struct ObjectPlayer
 
 } ObjectPlayer;
 
-void updateObjectPlayer(ObjectPlayer *object);
-void createObjectPlayer(ObjectPlayer *object);
-void inputObjectPlayer(ObjectPlayer *object, uint8_t state, uint8_t changed);
+void ObjectPlayerUpdate(ObjectPlayer *object);
+void ObjectPlayerCreate(ObjectPlayer *object);
+void ObjectPlayerInput(ObjectPlayer *object, uint8_t state, uint8_t changed);

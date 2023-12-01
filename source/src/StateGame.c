@@ -30,7 +30,7 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
         {
             if(!GameContext.Paused)
             {
-                inputObjectPlayer(&Player, Changed, State);
+                ObjectPlayerInput(&Player, Changed, State);
             }
         }
     }
@@ -53,7 +53,7 @@ void StateGame_Start()
 
     JOY_setEventHandler(&StateGame_Joystick);
 
-    createObjectPlayer(&Player);
+    ObjectPlayerCreate(&Player);
 
     GameContext.Paused = false;
     LastPaused = false;
@@ -119,7 +119,7 @@ void StateGame_Tick()
         if(GameContext.CurrentStage != NULL)
         {
             GameContext.CurrentStage->Tick();
-            updateObjectPlayer(&Player);
+            ObjectPlayerUpdate(&Player);
             SPR_setPosition(SpritePlayer, fix32ToInt(Player.Base.x) - 24, fix32ToInt(Player.Base.y) - 48);
             ++GameContext.StageFrame;
         }

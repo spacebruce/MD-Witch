@@ -6,7 +6,7 @@
 #define jumpforce FIX16(5)
 #define friction FIX16(0.7)
 
-void updateObjectPlayer(ObjectPlayer *object)
+void ObjectPlayerUpdate(ObjectPlayer *object)
 {
     const bool pressed_A = ((object->changed & BUTTON_A) == BUTTON_A);
     const bool pressed_B = ((object->changed & BUTTON_B) == BUTTON_B);
@@ -59,7 +59,7 @@ void updateObjectPlayer(ObjectPlayer *object)
     }
 }
 
-void createObjectPlayer(ObjectPlayer *object)
+void ObjectPlayerCreate(ObjectPlayer *object)
 {
     //
     object->VelocityX = FIX16(0);
@@ -67,7 +67,7 @@ void createObjectPlayer(ObjectPlayer *object)
     object->OnFloor = FALSE;
 }
 
-void inputObjectPlayer(ObjectPlayer *object, uint8_t state, uint8_t changed)
+void ObjectPlayerInput(ObjectPlayer *object, uint8_t state, uint8_t changed)
 {
     object->state = state;
     object->changed = changed;
