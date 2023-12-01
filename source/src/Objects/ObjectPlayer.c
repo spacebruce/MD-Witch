@@ -16,11 +16,11 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
     int FLoorY = 200;
 
-    object->OnFloor = (fix32ToInt(object->Base.y) >= FLoorY);
+    object->OnFloor = (fix32ToInt(object->Y) >= FLoorY);
 
     if(object->OnFloor)
     {         
-        object->Base.y = intToFix32(FLoorY);
+        object->Y = intToFix32(FLoorY);
         // Apply friction
         if(abs(fix16ToInt(object->VelocityX)) < 1)
         {
@@ -52,11 +52,14 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     {
         object->VelocityY = fix16Add(object->VelocityY, gravity);
     }
-    object->Base.x = fix32Add(object->Base.x, fix16ToFix32(object->VelocityX));
+    object->X = fix32Add(object->X, fix16ToFix32(object->VelocityX));
     if(!object->OnFloor)
     {
-        object->Base.y = fix32Add(object->Base.y, fix16ToFix32(object->VelocityY));
+        object->Y = fix32Add(object->Y, fix16ToFix32(object->VelocityY));
     }
+
+    object->Base.x = fix32ToInt(object->X);
+    object->Base.y = fix32ToInt(object->Y);
 }
 
 void ObjectPlayerCreate(ObjectPlayer *object)

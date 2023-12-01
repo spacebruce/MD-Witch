@@ -120,10 +120,14 @@ void StateGame_Tick()
         {
             GameContext.CurrentStage->Tick();
             ObjectPlayerUpdate(&Player);
-            SPR_setPosition(SpritePlayer, fix32ToInt(Player.Base.x) - 24, fix32ToInt(Player.Base.y) - 48);
             ++GameContext.StageFrame;
         }
     }
+    s16 CameraX = GameContext.Camera->Base.x;
+    s16 CameraY = GameContext.Camera->Base.y;
+
+    // update all sprites
+    SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
     //char buf[16];

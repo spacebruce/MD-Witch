@@ -6,6 +6,8 @@
 typedef struct ObjectPlayer
 {
     struct ObjectBase Base;
+    fix32 X;
+    fix32 Y;
     // Physics
     fix16 VelocityX;
     fix16 VelocityY;

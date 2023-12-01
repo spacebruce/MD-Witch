@@ -3,7 +3,7 @@
 
 struct ObjectBase
 {
-    fix32 x;
-    fix32 y;
+    s32 x;
+    s32 y;
     //void (*update)(struct ObjectBase *);
 };
