@@ -42,6 +42,7 @@ void StateGame_Reload()
     SPR_init();
     SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
     SpritePlayer = SPR_addSprite(&sprPlayer, 32,32, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    PAL_setPalette(PAL0, sprPlayer.palette->data, DMA);
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);   // Many static objects share player palette
     VDP_setTextPalette(PAL_PLAYER);
 }
@@ -54,6 +55,7 @@ void StateGame_Start()
     JOY_setEventHandler(&StateGame_Joystick);
 
     ObjectPlayerCreate(&Player);
+    ObjectCameraInit(GameContext.Camera, &Player.Base);
 
     GameContext.Paused = false;
     LastPaused = false;
@@ -120,11 +122,14 @@ void StateGame_Tick()
         {
             GameContext.CurrentStage->Tick();
             ObjectPlayerUpdate(&Player);
+            ObjectCameraUpdate(GameContext.Camera);
             ++GameContext.StageFrame;
         }
     }
     s16 CameraX = GameContext.Camera->Base.x;
     s16 CameraY = GameContext.Camera->Base.y;
+
+    VDP_setHorizontalScroll(BG_A, -GameContext.Camera->Base.x);
 
     // update all sprites
     SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);

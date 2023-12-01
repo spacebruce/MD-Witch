@@ -17,4 +17,9 @@ void ObjectCameraInit(ObjectCamera* Camera, struct ObjectBase* Target)
 
 void ObjectCameraUpdate(ObjectCamera* Camera)
 {
+    if(Camera->Target != NULL)
+    {
+        Camera->Base.x = Camera->Target->x - (320 /2);
+        Camera->Base.y = 0;//   Camera->Target->y - (224 * (2/3));
+    }
 }
