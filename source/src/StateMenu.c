@@ -95,11 +95,17 @@ void StateMenu_Joystick(u16 Joy, u16 Changed, u16 State)
 // State entry points
 void StateMenu_Start()
 {
+    SCROLL_Y = FIX16(0);
+
     JOY_setEventHandler(&StateMenu_Joystick);
     Menu_GotoMainMenu();    // Init menu
     
 	VDP_setPlaneSize(64,64, true);
 	VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
+
+    VDP_setHorizontalScroll(BG_A, 0);
+    VDP_setHorizontalScroll(BG_B, 0);
+    VDP_setVerticalScroll(BG_B, 0);
 
 	VDP_fillTileMapRect(BG_B,0x0C,0,0,64,39);
 	DMA_waitCompletion();
