@@ -6,6 +6,8 @@
 #include "Types/StateType.h"
 #include "Types/StageBase.h"
 
+#include "Objects/ObjectCamera.h"
+
 /*
     What is going on and where it's happening.
 */
@@ -30,6 +32,7 @@ struct GameContextType
     //
     u16 Frame;
     //
+    ObjectCamera* Camera;       // Active game camera
     Vect2D_s16 PlayerSpawn;     // Where to place player... Controlled by current level
 };
 

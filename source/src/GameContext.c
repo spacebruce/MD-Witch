@@ -1,6 +1,7 @@
 #include "GameContext.h"
 
 struct GameContextType GameContext;
+ObjectCamera GameCamera;	// Create a camera
 
 void GameContextInit()
 {
@@ -9,6 +10,7 @@ void GameContextInit()
 	#endif
 
 	GameContext.Frame = 0;
+	GameContext.Camera = &GameCamera;
 
 	if(IS_PAL_SYSTEM)
 	{
