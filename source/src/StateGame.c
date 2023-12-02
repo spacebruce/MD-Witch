@@ -94,9 +94,6 @@ void StateGame_Tick()
         if(GameContext.CurrentStage != NULL)        // If stage loaded
         {
             GameContext.CurrentStage->Init();       // Init incoming stage
-            for(int i = 0; i < 32; ++i)
-                VDP_drawText(GameContext.CurrentStage->Name,0,i);
-            DMA_waitCompletion();
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
             GameContext.Player = &Player;
@@ -119,16 +116,16 @@ void StateGame_Tick()
         LastPaused = GameContext.Paused;
     }
 
-    if(!GameContext.Paused)
+    if(!GameContext.Paused && GameContext.StageFrame > 0)
     {
         if(GameContext.CurrentStage != NULL)
         {
             GameContext.CurrentStage->Tick();
             ObjectPlayerUpdate(&Player.Base);
             ObjectCameraUpdate(GameContext.Camera);
-            ++GameContext.StageFrame;
         }
     }
+    ++GameContext.StageFrame;
     s16 CameraX = GameContext.Camera->Base.x;
     s16 CameraY = GameContext.Camera->Base.y;
 

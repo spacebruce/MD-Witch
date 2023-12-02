@@ -19,6 +19,7 @@ int main(bool hardreset)
     VDP_setScreenWidth320();
 	GameContextInit();
 
+	// Boot directly into the menu
 	GameContext.CurrentStateID = 0xFF;
 	GameContext.NextStateID = STATE_MENU;
 	while(1)
@@ -28,7 +29,7 @@ int main(bool hardreset)
 			if(GameContext.CurrentStateID != 0xFF)
 			{
 				GameContext.CurrentState->End();
-			}	
+			}
 			GameContext.CurrentStateID = GameContext.NextStateID;
 			switch(GameContext.CurrentStateID)
 			{

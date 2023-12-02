@@ -8,9 +8,13 @@ void E1M1_Init()
 {
     GameContext.PlayerSpawn.x = 100;
     GameContext.PlayerSpawn.y = 50;
+    
 }
 void E1M1_Tick()
 {
+    for(int i = 0; i < 32; ++i)
+        VDP_drawText(GameContext.CurrentStage->Name,0,i);
+    DMA_waitCompletion();
     
     if(GameContext.Player->x > 1000)
         GameContext.NextStateID = STATE_MENU;
