@@ -134,6 +134,9 @@ void StateGame_Tick()
 
     VDP_setHorizontalScroll(BG_A, -GameContext.Camera->Base.x);
     VDP_setVerticalScroll(BG_A, 0);
+    
+    VDP_setHorizontalScroll(BG_B, -(GameContext.Camera->Base.x >> 2));
+    VDP_setVerticalScroll(BG_B, 0);
 
     // update all sprites
     SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);
