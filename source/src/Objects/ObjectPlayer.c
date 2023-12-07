@@ -6,26 +6,42 @@
 #define jumpforce FIX16(5)
 #define friction FIX16(0.7)
 
+
 void ObjectPlayerUpdate(ObjectPlayer *object)
 {
-    const bool pressed_A = ((object->changed & BUTTON_A) == BUTTON_A);
-    const bool pressed_B = ((object->changed & BUTTON_B) == BUTTON_B);
-    const bool pressed_C = ((object->changed & BUTTON_C) == BUTTON_C);
-    const bool pressed_left = ((object->changed & BUTTON_LEFT) == BUTTON_LEFT);
-    const bool pressed_right = ((object->changed & BUTTON_RIGHT) == BUTTON_RIGHT);
+    bool pressed_A = ((object->changed & BUTTON_A) == BUTTON_A);
+    bool pressed_B = ((object->changed & BUTTON_B) == BUTTON_B);
+    bool pressed_C = ((object->changed & BUTTON_C) == BUTTON_C);
+    bool pressed_left = ((object->changed & BUTTON_LEFT) == BUTTON_LEFT);
+    bool pressed_right = ((object->changed & BUTTON_RIGHT) == BUTTON_RIGHT);
 
-    int FLoorY = 200;
+    const s32 x = object->Base.x;
+    const s32 y = object->Base.y; 
+    const s32 x_left  = x - 16;
+    const s32 x_right = x + 16;
+    const s32 y_top = y - 32;
 
-    object->OnFloor = (fix32ToInt(object->Y) >= FLoorY);
+    StageFunctionCollision col = GameContext.CurrentStage->Collision;
+
+    bool sens_feet_left = col(x_left,y + 1);
+    bool sens_feet_mid = col(x,y + 1);
+    bool sens_feet_right = col(x_right,y + 1);
+    bool sens_left = col(x_left, y - 16);
+    bool sens_right = col(x_right, y - 16);
+
+    if(pressed_left & sens_left)    pressed_left = false;
+    if(pressed_right & sens_right)  pressed_right = false;
+
+    object->OnFloor = (sens_feet_left + sens_feet_mid + sens_feet_right) > 2;
 
     if(object->OnFloor)
     {         
-        object->Y = intToFix32(FLoorY);
+        //object->Y = intToFix32(FLoorY);
         // Apply friction
-        if(abs(fix16ToInt(object->VelocityX)) < 1)
+        if((abs(fix16ToInt(object->VelocityX)) <= 1) && (!pressed_left && !pressed_right))
         {
             object->VelocityX = FIX16(0);
-        } 
+        }
         else
         {
             object->VelocityX = fix16Mul(object->VelocityX, friction);

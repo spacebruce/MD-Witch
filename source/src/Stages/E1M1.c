@@ -15,9 +15,9 @@ uint8_t e1m1_collisions[8][16] =
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
-    { 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, },
+    { 2, 2, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, },
     { 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, },
-    { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, },
+    { 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, },
     { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, },
 };
 
@@ -39,13 +39,30 @@ void E1M1_Init()
     GameContext.PlayerSpawn.x = 0;
     GameContext.PlayerSpawn.y = 50;
 
+    VDP_setTextPlane(BG_A);
     for(int x = 0; x < 16; ++x)
     {
         for(int y = 0; y < 8; ++y)
         {
             if(e1m1_collisions[y][x] == 1)
             {
-                VDP_drawText("X",x * 6, y * 4);
+                for(int sx = 0; sx < 6; ++sx)
+                {
+                    for(int sy = 0; sy < 4; ++ sy)
+                    {
+                        VDP_drawText("X", (x * 6) + sx , (y * 4) + sy);
+                    }
+                }
+            }
+            if(e1m1_collisions[y][x] == 2)
+            {
+                for(int sx = 0; sx < 6; ++sx)
+                {
+                    for(int sy = 0; sy < 2; ++ sy)
+                    {
+                        VDP_drawText("J", (x * 6) + sx , (y * 4) + sy);
+                    }
+                }
             }
         }
     }
@@ -57,7 +74,7 @@ void E1M1_Init()
     {
         for(int i = 0; i < 32; ++i)
         {
-            VDP_drawText(GameContext.CurrentStage->Name,x,i);
+            //VDP_drawText(GameContext.CurrentStage->Name,x,i);
         }
     }
 

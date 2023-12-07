@@ -11,6 +11,7 @@
 
 struct Sprite* SpritePaused;
 struct Sprite* SpritePlayer;
+struct Sprite* SpriteFreecam;
 
 ObjectPlayer Player;
 
@@ -31,7 +32,20 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
         {
             if(!GameContext.Paused)
             {
-                ObjectPlayerInput(&Player, Changed, State);
+                if(GameContext.Freecam)
+                {
+                    ObjectPlayerInput(&Player, 0x00, 0x00);
+                    //ObjectCameraFreecam(GameContext.Camera, Changed, State);
+                }
+                else
+                {
+                    ObjectPlayerInput(&Player, Changed, State);
+                }
+            }
+            else
+            {
+                if(State & BUTTON_C)
+                    GameContext.Freecam = !GameContext.Freecam;
             }
         }
     }
@@ -44,6 +58,7 @@ void StateGame_Reload()
     SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
     SPR_setPriority(SpritePaused, true);
     SpritePlayer = SPR_addSprite(&sprPlayer, 32,32, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    SpriteFreecam = SPR_addSprite(&sprFreecam, 16,16, TILE_ATTR(PAL_PLAYER, 0,false,false));
     PAL_setPalette(PAL0, sprPlayer.palette->data, DMA);
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);   // Many static objects share player palette
     VDP_setTextPalette(PAL_PLAYER);
@@ -107,6 +122,15 @@ void StateGame_Tick()
             Player.Base.y = intToFix32(GameContext.PlayerSpawn.y);
         }
     }
+    
+    if(GameContext.Freecam)
+    {
+        SPR_setVisibility(SpriteFreecam, true);
+    }
+    else
+    {
+        SPR_setVisibility(SpriteFreecam, false);
+    }
 
     // Catch Paused/Unpaused state change
     //if((LastPaused != GameContext.Paused) || (GameContext.StageFrame == 0))
@@ -128,18 +152,22 @@ void StateGame_Tick()
         {
             GameContext.CurrentStage->Tick();
             ObjectPlayerUpdate(&Player);
-            ObjectCameraUpdate(GameContext.Camera);
+            if(!GameContext.Freecam)
+            {
+                ObjectCameraUpdate(GameContext.Camera);
+            }
         }
+
     }
     ++GameContext.StageFrame;
-    s16 CameraX = GameContext.Camera->Base.x;
-    s16 CameraY = GameContext.Camera->Base.y;
+    s16 CameraX = 0;//GameContext.Camera->Base.x;
+    s16 CameraY = 0;//GameContext.Camera->Base.y;
 
-    VDP_setHorizontalScroll(BG_A, -GameContext.Camera->Base.x);
-    VDP_setVerticalScroll(BG_A, 0);
+    VDP_setHorizontalScroll(BG_A, -CameraX);
+    VDP_setVerticalScroll(BG_A, -CameraY);
     
-    VDP_setHorizontalScroll(BG_B, -(GameContext.Camera->Base.x >> 1));
-    VDP_setVerticalScroll(BG_B, 0);
+    //VDP_setHorizontalScroll(BG_B, (-CameraX >> 1));
+    //VDP_setVerticalScroll(BG_B, -CameraY);
 
     // update all sprites
     SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);

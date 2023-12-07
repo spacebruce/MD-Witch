@@ -5,6 +5,8 @@ ObjectCamera GameCamera;	// Create a camera
 
 void GameContextInit()
 {
+	GameContext.Freecam = false;
+	
 	#if (DEBUG_MODE == true)
 		SYS_showFrameLoad(false);
 	#endif

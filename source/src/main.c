@@ -16,8 +16,18 @@ int main(bool hardreset)
     JOY_init();
     SPR_init();
 
-    VDP_setScreenWidth320();
 	GameContextInit();
+
+    VDP_setScreenWidth320();
+	if(IS_PAL_SYSTEM)
+	{
+		VDP_setScreenHeight240();
+	}
+	else
+	{
+		VDP_setScreenHeight224();
+	}
+	
 
 	// Boot directly into the menu
 	GameContext.CurrentStateID = 0xFF;
