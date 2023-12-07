@@ -51,6 +51,7 @@ void StateGame_Reload()
 // State entry points
 void StateGame_Start()
 {
+    GameContext.CurrentStageID = 0xFF;
     GameContext.NextStageID = 1;    // Change to 0 once cutscene implemented
 
     JOY_setEventHandler(&StateGame_Joystick);
@@ -66,7 +67,7 @@ void StateGame_Start()
 	VDP_setPlaneSize(64,64, true);
 	VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
 
-	VDP_fillTileMapRect(BG_B,0x0C,0,0,64,39);
+	//VDP_fillTileMapRect(BG_B,0x0C,0,0,64,39);
 
     VDP_setTextPlane(BG_A);
     VDP_setTextPalette(PAL_PLAYER);
@@ -79,12 +80,14 @@ void StateGame_End()
     VDP_clearPlane(BG_B, TRUE);
     VDP_clearSprites();
     SPR_end();
+    GameContext.CurrentStageID = 0xFF;  // Invalidate the StageID so entry gets refired again on next StateGame start
 }
 void StateGame_Tick()
 {
     // Stage logic
-    if(GameContext.CurrentStageID != GameContext.NextStageID)   // If stage change triggered
+    if((GameContext.CurrentStageID != GameContext.NextStageID))   // If stage change triggered
     {
+        StateBootup = false;
         if(GameContext.CurrentStage != NULL)
         {
             GameContext.CurrentStage->Cleanup();    // Clear out stage memory/vram
@@ -96,7 +99,7 @@ void StateGame_Tick()
             GameContext.CurrentStage->Init();       // Init incoming stage
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
-            GameContext.Player = &Player;
+            GameContext.Player = &Player.Base;
             Player.Base.x = intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
             Player.Base.y = intToFix32(GameContext.PlayerSpawn.y);
         }
@@ -116,12 +119,12 @@ void StateGame_Tick()
         LastPaused = GameContext.Paused;
     }
 
-    if(!GameContext.Paused && GameContext.StageFrame > 0)
+    if(!GameContext.Paused)
     {
         if(GameContext.CurrentStage != NULL)
         {
             GameContext.CurrentStage->Tick();
-            ObjectPlayerUpdate(&Player.Base);
+            ObjectPlayerUpdate(&Player);
             ObjectCameraUpdate(GameContext.Camera);
         }
     }
@@ -131,6 +134,9 @@ void StateGame_Tick()
 
     VDP_setHorizontalScroll(BG_A, -GameContext.Camera->Base.x);
     VDP_setVerticalScroll(BG_A, 0);
+    
+    VDP_setHorizontalScroll(BG_B, -(GameContext.Camera->Base.x >> 2));
+    VDP_setVerticalScroll(BG_B, 0);
 
     // update all sprites
     SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);

@@ -12,6 +12,9 @@ void GameContextInit()
 	GameContext.Frame = 0;
 	GameContext.Camera = &GameCamera;
 
+	//
+	GameContext.CurrentStageID = 0xFF;
+
 	if(IS_PAL_SYSTEM)
 	{
 		GameContext.Framerate = 50;
