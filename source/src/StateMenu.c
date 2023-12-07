@@ -113,6 +113,8 @@ void StateMenu_Start()
 	DMA_waitCompletion();
     VDP_drawImage(BG_B, &image_titlescreen, 0,39);
 
+    PAL_fadeIn(0,63, image_titlescreen.palette->data, GameContext.Framerate * 2, true);
+
     VDP_setTextPlane(BG_A);
 
     SPR_init();

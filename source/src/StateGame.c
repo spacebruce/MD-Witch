@@ -16,6 +16,7 @@ ObjectPlayer Player;
 
 //
 bool LastPaused;
+bool StateBootup;
 
 // Joystick
 void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
@@ -40,7 +41,7 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
 void StateGame_Reload() 
 {
     SPR_init();
-    SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,true));
+    SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
     SPR_setPriority(SpritePaused, true);
     SpritePlayer = SPR_addSprite(&sprPlayer, 32,32, TILE_ATTR(PAL_PLAYER, 0,false,false));
     PAL_setPalette(PAL0, sprPlayer.palette->data, DMA);
@@ -58,6 +59,8 @@ void StateGame_Start()
 
     ObjectPlayerCreate(&Player);
     ObjectCameraInit(GameContext.Camera, &Player.Base);
+
+    StateBootup = true;
 
     GameContext.Paused = false;
     LastPaused = false;
@@ -135,7 +138,7 @@ void StateGame_Tick()
     VDP_setHorizontalScroll(BG_A, -GameContext.Camera->Base.x);
     VDP_setVerticalScroll(BG_A, 0);
     
-    VDP_setHorizontalScroll(BG_B, -(GameContext.Camera->Base.x >> 2));
+    VDP_setHorizontalScroll(BG_B, -(GameContext.Camera->Base.x >> 1));
     VDP_setVerticalScroll(BG_B, 0);
 
     // update all sprites
