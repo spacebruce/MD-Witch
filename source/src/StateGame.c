@@ -59,6 +59,7 @@ void StateGame_Reload()
     SPR_setPriority(SpritePaused, true);
     SpritePlayer = SPR_addSprite(&sprPlayer, 32,32, TILE_ATTR(PAL_PLAYER, 0,false,false));
     SpriteFreecam = SPR_addSprite(&sprFreecam, 16,16, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    SPR_setVisibility(SpriteFreecam, HIDDEN);
     PAL_setPalette(PAL0, sprPlayer.palette->data, DMA);
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);   // Many static objects share player palette
     VDP_setTextPalette(PAL_PLAYER);
@@ -79,6 +80,8 @@ void StateGame_Start()
 
     GameContext.Paused = false;
     LastPaused = false;
+
+    GameContext.Freecam = false;
 
     StateGame_Reload();
 
@@ -125,23 +128,23 @@ void StateGame_Tick()
     
     if(GameContext.Freecam)
     {
-        SPR_setVisibility(SpriteFreecam, true);
+        SPR_setVisibility(SpriteFreecam, VISIBLE);
     }
     else
     {
-        SPR_setVisibility(SpriteFreecam, false);
+        SPR_setVisibility(SpriteFreecam, HIDDEN);
     }
 
     // Catch Paused/Unpaused state change
-    //if((LastPaused != GameContext.Paused) || (GameContext.StageFrame == 0))
+    if((LastPaused != GameContext.Paused) || (GameContext.StageFrame == 0))
     {
         if(GameContext.Paused)
         {
-            SPR_setVisibility(SpritePaused, false);
+            SPR_setVisibility(SpritePaused, VISIBLE);
         }
         else
         {
-            SPR_setVisibility(SpritePaused, true);
+            SPR_setVisibility(SpritePaused, HIDDEN);
         }
         LastPaused = GameContext.Paused;
     }
