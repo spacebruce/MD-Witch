@@ -164,7 +164,7 @@ void StateGame_Tick()
     }
     ++GameContext.StageFrame;
     s16 CameraX = 0;//GameContext.Camera->Base.x;
-    s16 CameraY = 0;//GameContext.Camera->Base.y;
+    s16 CameraY = GameContext.Camera->Base.y;
 
     VDP_setHorizontalScroll(BG_A, -CameraX);
     VDP_setVerticalScroll(BG_A, -CameraY);
@@ -173,7 +173,8 @@ void StateGame_Tick()
     //VDP_setVerticalScroll(BG_B, -CameraY);
 
     // update all sprites
-    SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);
+    SPR_setPosition(SpritePlayer, Player.Base.x - 24, Player.Base.y - 48);
+    //SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
     //char buf[16];

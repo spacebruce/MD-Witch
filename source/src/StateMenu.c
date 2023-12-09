@@ -105,24 +105,24 @@ void StateMenu_Start()
 
     VDP_setHorizontalScroll(BG_A, 0);
     VDP_setHorizontalScroll(BG_B, 0);
+    VDP_setVerticalScroll(BG_A, 0);
     VDP_setVerticalScroll(BG_B, 0);
 
-	VDP_fillTileMapRect(BG_B,0x0C,0,0,64,39);
+	VDP_drawImage(BG_A, &sprLogo,18,29);
 	DMA_waitCompletion();
-	VDP_drawImage(BG_A, &image_logo,10,29);
+	VDP_drawImage(BG_B, &sprWitch,1,32);
 	DMA_waitCompletion();
-    VDP_drawImage(BG_B, &image_titlescreen, 0,39);
 
-    PAL_fadeIn(0,63, image_titlescreen.palette->data, GameContext.Framerate * 2, true);
+    //PAL_fadeIn(0,63, image_titlescreen.palette->data, GameContext.Framerate * 2, true);
 
     VDP_setTextPlane(BG_A);
 
     SPR_init();
     for(int i = 0; i < 3; ++i)
     {
-        cursor[i] = SPR_addSprite(&gfx_cursor, 0, 0, 0);
+        cursor[i] = SPR_addSprite(&gfx_cursor, 0, 0, TILE_ATTR(PAL_STUFF, 1, false, false));
         //Sprite* spr = cursor[i];
-        //SPR_setPalette(spr, STUFF_PALETTE);
+        SPR_setPalette(cursor[i], PAL_STUFF);
     }
     //PAL_setPalette(STUFF_PALETTE, gfx_cursor.palette->data, DMA);
 }
