@@ -12,6 +12,7 @@
 struct Sprite* SpritePaused;
 struct Sprite* SpritePlayer;
 struct Sprite* SpriteFreecam;
+struct Sprite* SpriteTestOBJ;
 
 ObjectPlayer Player;
 
@@ -35,7 +36,7 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
                 if(GameContext.Freecam)
                 {
                     ObjectPlayerInput(&Player, 0x00, 0x00);
-                    //ObjectCameraFreecam(GameContext.Camera, Changed, State);
+                    ObjectCameraFreecam(GameContext.Camera, State, Changed);
                 }
                 else
                 {
@@ -59,6 +60,7 @@ void StateGame_Reload()
     SPR_setPriority(SpritePaused, true);
     SpritePlayer = SPR_addSprite(&sprPlayer, 32,32, TILE_ATTR(PAL_PLAYER, 0,false,false));
     SpriteFreecam = SPR_addSprite(&sprFreecam, 16,16, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    SpriteTestOBJ = SPR_addSprite(&gfx_cursor, 0,0, TILE_ATTR(PAL_STUFF, 0, false, false));
     SPR_setVisibility(SpriteFreecam, HIDDEN);
     PAL_setPalette(PAL0, sprPlayer.palette->data, DMA);
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);   // Many static objects share player palette
@@ -163,18 +165,21 @@ void StateGame_Tick()
 
     }
     ++GameContext.StageFrame;
-    s16 CameraX = 0;//GameContext.Camera->Base.x;
+    s16 CameraX = GameContext.Camera->Base.x;
     s16 CameraY = GameContext.Camera->Base.y;
 
     VDP_setHorizontalScroll(BG_A, -CameraX);
-    VDP_setVerticalScroll(BG_A, -CameraY);
+    VDP_setVerticalScroll(BG_A, CameraY);
     
     //VDP_setHorizontalScroll(BG_B, (-CameraX >> 1));
     //VDP_setVerticalScroll(BG_B, -CameraY);
 
     // update all sprites
-    SPR_setPosition(SpritePlayer, Player.Base.x - 24, Player.Base.y - 48);
-    //SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);
+    //SPR_setPosition(SpritePlayer, Player.Base.x - 24, Player.Base.y - 48);
+    SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);
+
+    
+    SPR_setPosition(SpriteTestOBJ, 0 - CameraX, 256 - CameraY);
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
     //char buf[16];

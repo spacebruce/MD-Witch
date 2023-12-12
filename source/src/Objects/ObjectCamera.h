@@ -13,4 +13,4 @@ typedef struct ObjectCamera
 void ObjectCameraSetTarget(ObjectCamera* Camera, struct ObjectBase* Target);
 void ObjectCameraInit(ObjectCamera* Camera, struct ObjectBase* Target);
 void ObjectCameraUpdate(ObjectCamera* Camera);
-void ObjectCameraFreecam(ObjectCamera* Camera, u16 Changed, u16 State);
+void ObjectCameraFreecam(ObjectCamera* Camera, u16 Previous, u16 Input);
