@@ -10,7 +10,6 @@
 #include "Stages/Stages.h"
 
 struct Sprite* SpritePaused;
-struct Sprite* SpritePlayer;
 struct Sprite* SpriteFreecam;
 struct Sprite* SpriteTestOBJ;
 
@@ -58,11 +57,10 @@ void StateGame_Reload()
     SPR_init();
     SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
     SPR_setPriority(SpritePaused, true);
-    SpritePlayer = SPR_addSprite(&sprPlayer, 32,32, TILE_ATTR(PAL_PLAYER, 0,false,false));
     SpriteFreecam = SPR_addSprite(&sprFreecam, 16,16, TILE_ATTR(PAL_PLAYER, 0,false,false));
     SpriteTestOBJ = SPR_addSprite(&gfx_cursor, 0,0, TILE_ATTR(PAL_STUFF, 0, false, false));
     SPR_setVisibility(SpriteFreecam, HIDDEN);
-    PAL_setPalette(PAL0, sprPlayer.palette->data, DMA);
+    PAL_setPalette(PAL_BACKGROUND, sprPlayer.palette->data, DMA);
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);   // Many static objects share player palette
     VDP_setTextPalette(PAL_PLAYER);
 }
@@ -75,6 +73,8 @@ void StateGame_Start()
 
     JOY_setEventHandler(&StateGame_Joystick);
 
+    StateGame_Reload();
+
     ObjectPlayerCreate(&Player);
     ObjectCameraInit(GameContext.Camera, &Player.Base);
 
@@ -85,7 +85,6 @@ void StateGame_Start()
 
     GameContext.Freecam = false;
 
-    StateGame_Reload();
 
 	VDP_setPlaneSize(64,64, true);
 	VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
@@ -162,9 +161,7 @@ void StateGame_Tick()
                 ObjectCameraUpdate(GameContext.Camera);
             }
         }
-
     }
-    ++GameContext.StageFrame;
     s16 CameraX = GameContext.Camera->Base.x;
     s16 CameraY = GameContext.Camera->Base.y;
 
@@ -176,10 +173,9 @@ void StateGame_Tick()
 
     // update all sprites
     //SPR_setPosition(SpritePlayer, Player.Base.x - 24, Player.Base.y - 48);
-    SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);
-
+    ObjectUpdateSprite(&Player.Base, CameraX, CameraY);
     
-    SPR_setPosition(SpriteTestOBJ, 0 - CameraX, 256 - CameraY);
+    SPR_setPosition(SpriteTestOBJ, 0 - CameraX, 128 - CameraY);
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
     //char buf[16];
@@ -190,6 +186,7 @@ void StateGame_Tick()
     if(GameContext.CurrentStage != NULL)
         GameContext.CurrentStage->Draw();
 
+    ++GameContext.StageFrame;
     SPR_update();
 }
 

@@ -9,7 +9,6 @@ typedef struct ObjectCamera
     struct ObjectBase* Target;  // Ptr to target
 } ObjectCamera;
 
-
 void ObjectCameraSetTarget(ObjectCamera* Camera, struct ObjectBase* Target);
 void ObjectCameraInit(ObjectCamera* Camera, struct ObjectBase* Target);
 void ObjectCameraUpdate(ObjectCamera* Camera);

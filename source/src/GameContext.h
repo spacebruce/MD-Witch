@@ -29,6 +29,7 @@ struct GameContextType
     u16 StageFrame;
     fix32 StageTime;
     bool Paused;
+	u16 palette[64];
     //  Debug switches
     bool Freecam;   // debug
     //

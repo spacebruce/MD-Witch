@@ -23,9 +23,9 @@ uint8_t e1m1_collisions[8][16] =
 
 u8 E1M1_Collide(const s16 x, const s16 y)
 {
-    u16 tx = (((u16)abs(x)) / e1m1_tile_xsize) % 16;
-    u16 ty = (((u16)abs(y)) / e1m1_tile_ysize) % 8;
-    if(e1m1_collisions[ty][tx] == 1)
+    u16 tx = (((u16)(x)) / e1m1_tile_xsize) % 16;
+    u16 ty = (((u16)(y)) / e1m1_tile_ysize) % 8;
+    if(e1m1_collisions[ty][tx] > 0)
     {
         MapCollision.TileX = tx;
         MapCollision.TileY = ty;
