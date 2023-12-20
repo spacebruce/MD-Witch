@@ -1,3 +1,5 @@
+#include <genesis.h>
+#include <resources.h>
 #include "ObjectPlayer.h"
 #include "../GameContext.h"
 
@@ -6,15 +8,48 @@
 #define jumpforce FIX16(5)
 #define friction FIX16(0.7)
 
+const uint16_t ButtonMask[] = 
+{
+    BUTTON_LEFT, BUTTON_RIGHT, BUTTON_UP, BUTTON_DOWN,
+    BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_START,
+};
 
 void ObjectPlayerUpdate(ObjectPlayer *object)
 {
-    bool pressed_A = ((object->changed & BUTTON_A) == BUTTON_A);
-    bool pressed_B = ((object->changed & BUTTON_B) == BUTTON_B);
-    bool pressed_C = ((object->changed & BUTTON_C) == BUTTON_C);
-    bool pressed_left = ((object->changed & BUTTON_LEFT) == BUTTON_LEFT);
-    bool pressed_right = ((object->changed & BUTTON_RIGHT) == BUTTON_RIGHT);
+    //  Check for input holds
+    for(uint8_t i = 0; i < 8; ++i)
+    {
+        bool down = ((object->changed & ButtonMask[i]) == ButtonMask[i]);
+        if(down == false)
+        {
+            if(object->ButtonFrames[i] == 0xFF || object->ButtonFrames[i] == 0x00)
+                object->ButtonFrames[i] = 0;
+            else
+                object->ButtonFrames[i] = 0xFF;
+        }
+        else if(object->ButtonFrames[i] < 100)  // don't overflow, just hold at 100
+        {
+            object->ButtonFrames[i] = object->ButtonFrames[i] + 1;
+        }
+    }
+    
+    const bool released_A = (object->ButtonFrames[4] == 0xFF);
+    const bool released_B = (object->ButtonFrames[5] == 0xFF);
+    const bool released_C = (object->ButtonFrames[6] == 0xFF);
+    const bool released_left = (object->ButtonFrames[0] == 0xFF);
+    const bool released_right = (object->ButtonFrames[1] == 0xFF);
+    const bool released_up = (object->ButtonFrames[2] == 0xFF);
+    const bool released_down = (object->ButtonFrames[3] == 0xFF);
 
+    const bool pressed_A = !released_A && (object->ButtonFrames[4] > 0);
+    const bool pressed_B = !released_B && (object->ButtonFrames[5] > 0);
+    const bool pressed_C = !released_C && (object->ButtonFrames[6] > 0);
+    const bool pressed_left = !released_left && (object->ButtonFrames[0] > 0);
+    const bool pressed_right = !released_right && (object->ButtonFrames[1] > 0);
+    const bool pressed_up = !released_up && (object->ButtonFrames[2] > 0);
+    const bool pressed_down = !released_down && (object->ButtonFrames[3] > 0);
+
+    //
     const s32 x = object->Base.x;
     const s32 y = object->Base.y; 
     const s32 x_left  = x - 16;
@@ -28,9 +63,6 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     bool sens_feet_right = col(x_right,y + 1);
     bool sens_left = col(x_left, y - 16);
     bool sens_right = col(x_right, y - 16);
-
-    if(pressed_left & sens_left)    pressed_left = false;
-    if(pressed_right & sens_right)  pressed_right = false;
 
     object->OnFloor = (sens_feet_left + sens_feet_mid + sens_feet_right) > 2;
 
@@ -49,7 +81,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
         // Gravity 
         object->VelocityY = FIX16(0);
-        if(pressed_A || pressed_B)  // Jump
+        if(pressed_B)  // Jump
         {
             object->VelocityY = FIX16(-5);  // Jump velocity
             object->OnFloor = false;        // Detatch from floor
@@ -83,7 +115,11 @@ void ObjectPlayerCreate(ObjectPlayer *object)
     //
     object->VelocityX = FIX16(0);
     object->VelocityY = FIX16(0);
+    object->Base.spriteOffset.x = -24;
+    object->Base.spriteOffset.y = -48;
     object->OnFloor = FALSE;
+    // sprite
+    object->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
 }
 
 void ObjectPlayerInput(ObjectPlayer *object, uint8_t state, uint8_t changed)

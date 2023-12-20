@@ -8,6 +8,7 @@ typedef struct ObjectPlayer
     struct ObjectBase Base;
     fix32 X;
     fix32 Y;
+    uint8_t ButtonFrames[8];
     // Physics
     fix16 VelocityX;
     fix16 VelocityY;
