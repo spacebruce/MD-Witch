@@ -17,4 +17,6 @@ typedef struct
     StageFunctionCollision Collision;
     StageFunctionVoid Draw;     
     StageFunctionVoid Cleanup;
+    u16 Width;
+    u16 Height;
 } StageBase;

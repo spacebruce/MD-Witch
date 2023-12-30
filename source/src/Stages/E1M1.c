@@ -93,4 +93,5 @@ const StageBase E1M1 =
     E1M1_Collide,
     E1M1_Draw,
     E1M1_End,
+	512,512,
 };
