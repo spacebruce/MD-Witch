@@ -4,9 +4,13 @@
 #include "../GameContext.h"
 
 #define gravity FIX16(0.25)
+#define air_acceleration FIX16(0.75)
 #define acceleration FIX16(1.0)
 #define jumpforce FIX16(5)
 #define friction FIX16(0.7)
+
+// How many frames to stay in air after leaving ledge (*pal_speedup)
+#define coyote_time (5)
 
 const uint16_t ButtonMask[] = 
 {
@@ -48,6 +52,8 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     const bool pressed_right = !released_right && (object->ButtonFrames[1] > 0);
     const bool pressed_up = !released_up && (object->ButtonFrames[2] > 0);
     const bool pressed_down = !released_down && (object->ButtonFrames[3] > 0);
+
+    bool Grounded = false;
 
     //  Very first thing - apply momentum from previous frame
     object->X = fix32Add(object->X, fix16ToFix32(object->VelocityX));
@@ -122,6 +128,11 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
     if(object->OnFloor)
     {         
+        Grounded = true;
+
+        //Set coyote timer. If we leave, it starts tickin down
+        object->CoyoteFrames = fix16ToInt(fix16Mul(intToFix16(coyote_time), GameContext.Speedup));
+           
         //  Just landed
         if(object->OnfloorLast == false)    
         {
@@ -144,7 +155,26 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             };
             object->Y = FIX32(y);
         }
+    }
+    else
+    {
+        // Player is not on floor
+        // Pretend we're in air for a fraction of a second after leaving a ledge to make jumps feel better
+        if(object->CoyoteFrames == 0)
+        {
+            Grounded = false;
+            object->VelocityY = fix16Add(object->VelocityY, gravity);
+        }
+        else
+        {        
+            Grounded = true;
+            (object->CoyoteFrames)--;   // Tick down
+        }
+    }
 
+    // If on floor or in coyote-mode
+    if(Grounded)
+    {
         // Apply friction
         if((abs(fix16ToInt(object->VelocityX)) <= 1) && (!pressed_left && !pressed_right))
         {
@@ -161,6 +191,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
         {
             object->VelocityY = FIX16(-5);  // Jump velocity
             object->OnFloor = false;        // Detatch from floor
+            object->CoyoteFrames = 0;       // negate coyote mode immediately
         }
 
         if(pressed_left)
@@ -172,14 +203,22 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             object->VelocityX = fix16Add(object->VelocityX, acceleration);
         }
     }
-    else
+    else    // In air
     {
-        object->VelocityY = fix16Add(object->VelocityY, gravity);
+        object->VelocityX = fix16Mul(object->VelocityX, friction);
+        if(pressed_left)
+        {
+            object->VelocityX = fix16Sub(object->VelocityX, air_acceleration);
+        }
+        else if (pressed_right)
+        {
+            object->VelocityX = fix16Add(object->VelocityX, air_acceleration);
+        }
     }
 
     object->Base.x = fix32ToInt(object->X); // Sprite position
     object->Base.y = fix32ToInt(object->Y);
-    object->OnfloorLast = object->OnFloor;
+    object->OnfloorLast = Grounded;
 }
 
 void ObjectPlayerCreate(ObjectPlayer *object)
