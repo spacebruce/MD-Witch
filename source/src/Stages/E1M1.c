@@ -67,13 +67,16 @@ void E1M1_Init()
     
 	DMA_setBufferSize(9000);
 
-	memcpy(&GameContext.palette[0], pal_stage_01a.data, 16 * 2);
-	memcpy(&GameContext.palette[16], pal_stage_01b.data, 16 * 2);
-	//memcpy(&GameContext.palette[32], pal_player.data, 16 * 2);
-	memcpy(&GameContext.palette[48], (u16*) palette_black, 16 * 2);
+	PAL_setPalette(PAL_BACKGROUND, pal_stage_01a.data, DMA);
+	PAL_setPalette(PAL_TILES, pal_stage_01b.data, DMA);
 
-	// Fade In
-	PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, 60, FALSE);
+	//memcpy(&GameContext.palette[PAL_BACKGROUND * 16], pal_stage_01a.data, 16 * 2);
+	//memcpy(&GameContext.palette[PAL_TILES * 16], pal_stage_01b.data, 16 * 2);
+	//memcpy(&GameContext.palette[PAL_PLAYER * 16], sprPlayer.palette->data, 16 * 2);
+	//memcpy(&GameContext.palette[PAL_ENEMIES * 16], (u16*) palette_black, 16 * 2);
+//
+	//// Fade In
+	//PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, GameContext.Framerate, FALSE);
 }
 void E1M1_Tick()
 {

@@ -231,6 +231,7 @@ void ObjectPlayerCreate(ObjectPlayer *object)
     object->OnFloor = FALSE;
     // sprite
     object->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);
 }
 
 void ObjectPlayerInput(ObjectPlayer *object, uint8_t state, uint8_t changed)

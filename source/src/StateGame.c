@@ -60,7 +60,7 @@ void StateGame_Reload()
     SPR_setDepth(SpritePaused, 0);
 
     SpriteFreecam = SPR_addSprite(&sprFreecam, 16,16, TILE_ATTR(PAL_PLAYER, 0,false,false));
-    SpriteTestOBJ = SPR_addSprite(&gfx_cursor, 0,0, TILE_ATTR(PAL_STUFF, 0, false, false));
+    SpriteTestOBJ = SPR_addSprite(&gfx_cursor, 0,0, TILE_ATTR(PAL_PLAYER, 0, false, false));
     SPR_setVisibility(SpriteFreecam, HIDDEN);
     
 	PAL_setColors(0, (u16*) palette_black, 64, DMA);
