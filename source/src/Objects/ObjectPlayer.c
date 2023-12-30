@@ -78,59 +78,55 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     int its = 0;
     int vel = fix16ToInt(object->VelocityX);
     bool moved = false;
-    if(vel != 0)
+    do
     {
-        do
+        x = fix32ToInt(object->X); 
+        int budge = 0;
+        if(vel > 0)
         {
-            x = fix32ToInt(object->X); 
-            int budge = 0;
-            if(vel > 0)
-            {
-                x_right = x + width;
-                sens_top = col(x_right, y_top);
-                sens_mid = col(x_right, y_mid);
-                sens_low = col(x_right, y_low);
-                budge = -1;
-            }
-            if(vel < 0)
-            {
-                x_left = x - width;
-                sens_top = col(x_left, y_top);
-                sens_mid = col(x_left, y_mid);
-                sens_low = col(x_left, y_low);
-                budge = 1;
-            }
-            if(sens_top || sens_mid || sens_low)
-            {
-                object->VelocityX = FIX16(0);
-                x += budge;
-                moved = true;
-            }
-            else
-            {
-                stuck = false;
-            }
-            ++its;
+            x_right = x + width;
+            sens_top = col(x_right + 2, y_top);
+            sens_mid = col(x_right + 2, y_mid);
+            sens_low = col(x_right + 2, y_low);
+            budge = -1;
         }
-        while(stuck && (its < 10));
-
-        // If collided, set real coords to rounded
-        if(moved)
-            object->X = FIX32(x);
+        if(vel < 0)
+        {
+            x_left = x - width;
+            sens_top = col(x_left - 2, y_top);
+            sens_mid = col(x_left - 2, y_mid);
+            sens_low = col(x_left - 2, y_low);
+            budge = 1;
+        }
+        if(sens_top || sens_mid || sens_low)
+        {
+            object->VelocityX = FIX16(0);
+            x += budge;
+            moved = true;
+        }
+        else
+        {
+            stuck = false;
+        }
+        ++its;
     }
+    while(stuck && (its < 10));
+
+    // If collided, set real coords to rounded
+    if(moved)
+        object->X = FIX32(x);
 
 
     // Floor sensor
     const bool sens_feet_left = col(x_left + 1,y + 1);
     const bool sens_feet_mid = col(x,y + 1);
     const bool sens_feet_right = col(x_right - 1,y + 1);
-    object->OnFloor = (sens_feet_left + sens_feet_mid + sens_feet_right) > 1;
+    object->OnFloor = ((sens_feet_left + sens_feet_mid + sens_feet_right) > 0);
 
     if(object->OnFloor)
     {         
         Grounded = true;
-
-        //Set coyote timer. If we leave, it starts tickin down
+        //Set coyote timer. If we leave ground, it starts tickin down
         object->CoyoteFrames = fix16ToInt(fix16Mul(intToFix16(coyote_time), GameContext.Speedup));
            
         //  Just landed
@@ -143,10 +139,10 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             int its = 0;
             while(stuck && (its < 10))
             {
-                const bool sens_stuck_left = col(x_left + 2,y);
+                const bool sens_stuck_left = col(x_left,y);
                 const bool sens_stuck_mid = col(x,y);
-                const bool sens_stuck_right = col(x_right - 2,y);
-                stuck = (sens_stuck_left + sens_stuck_mid + sens_stuck_right) > 1;  // Tolerate 1 point getting stuck, evict if >=2
+                const bool sens_stuck_right = col(x_right,y);
+                stuck = (sens_stuck_left + sens_stuck_mid + sens_stuck_right) > 0; 
                 if(stuck)
                 {
                     --y;
@@ -172,8 +168,18 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
         }
     }
 
-    // If on floor or in coyote-mode
     if(Grounded)
+    {
+        if(pressed_B)  // Jump
+        {
+            object->VelocityY = FIX16(-5);  // Jump velocity
+            object->OnFloor = false;        // Detatch from floor
+            object->CoyoteFrames = 0;       // negate coyote mode immediately
+        }
+    }
+
+    // If on floor or in coyote-mode
+    if(object->OnFloor)
     {
         // Apply friction
         if((abs(fix16ToInt(object->VelocityX)) <= 1) && (!pressed_left && !pressed_right))
@@ -187,13 +193,6 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
         // Gravity 
         object->VelocityY = FIX16(0);
-        if(pressed_B)  // Jump
-        {
-            object->VelocityY = FIX16(-5);  // Jump velocity
-            object->OnFloor = false;        // Detatch from floor
-            object->CoyoteFrames = 0;       // negate coyote mode immediately
-        }
-
         if(pressed_left)
         {
             object->VelocityX = fix16Sub(object->VelocityX, acceleration);

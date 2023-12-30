@@ -35,7 +35,7 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
                 if(GameContext.Freecam)
                 {
                     ObjectPlayerInput(&Player, 0x00, 0x00);
-                    ObjectCameraFreecam(GameContext.Camera, State, Changed);
+                    ObjectCameraFreecam(GameContext.Camera, Changed, State);
                 }
                 else
                 {
@@ -124,7 +124,9 @@ void StateGame_Tick()
         GameContext.CurrentStageID = GameContext.NextStageID;
         if(GameContext.CurrentStage != NULL)        // If stage loaded
         {
+            SYS_disableInts();
             GameContext.CurrentStage->Init();       // Init incoming stage
+            SYS_enableInts();
             
             ObjectCameraSetStageSize(GameContext.Camera, GameContext.CurrentStage->Width, GameContext.CurrentStage->Height);
             GameContext.Paused = false;             // Ensure game is unpaused

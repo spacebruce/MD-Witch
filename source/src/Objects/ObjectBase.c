@@ -1,6 +1,5 @@
 #include "ObjectBase.h"
 
-
 void ObjectUpdateSprite(struct ObjectBase* Object, s32 CameraX, s32 CameraY)
 {
     if(Object->spr != NULL)

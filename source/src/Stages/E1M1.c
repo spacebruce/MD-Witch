@@ -11,6 +11,19 @@
 const int e1m1_tile_xsize = 4 * 8;
 const int e1m1_tile_ysize = 4 * 8;
 
+/*
+	hint test 
+*/
+static vu16  lineDisplay   = 0;             // line position on display screen
+void VBlankHandler()
+{
+    lineDisplay = 0;
+}
+HINTERRUPT_CALLBACK HIntHandler()
+{
+    VDP_setHorizontalScroll(BG_B, lineDisplay);
+    lineDisplay++;
+}
 
 // Tile IDs
 u16 tile_id;
@@ -57,6 +70,11 @@ void E1M1_Init()
     GameContext.PlayerSpawn.x = 0;
     GameContext.PlayerSpawn.y = 128;
 
+	//SYS_setHIntCallback(HIntHandler);
+	//SYS_setVBlankCallback(VBlankHandler);
+	//VDP_setHIntCounter(0);
+	//VDP_setHInterrupt(1);
+
 	tile_id = TILE_USER_INDEX;
 	bg_tile_id = tile_id;
 	VDP_loadTileSet(&ts_stage_01, bg_tile_id, DMA);
@@ -64,7 +82,7 @@ void E1M1_Init()
     
 	GameContext.MapA = MAP_create(&map_stage_01, BG_A, bg_tile_id);
 	GameContext.MapB = MAP_create(&map_stage_01_bg, BG_B, bg_tile_id);
-    
+
 	DMA_setBufferSize(9000);
 
 	PAL_setPalette(PAL_BACKGROUND, pal_stage_01a.data, DMA);
@@ -80,9 +98,12 @@ void E1M1_Init()
 }
 void E1M1_Tick()
 {
+
 }
 void E1M1_End()
 {
+	MAP_release(GameContext.MapA);
+	MAP_release(GameContext.MapB);
 }
 void E1M1_Draw()
 {
