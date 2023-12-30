@@ -49,9 +49,13 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     const bool pressed_up = !released_up && (object->ButtonFrames[2] > 0);
     const bool pressed_down = !released_down && (object->ButtonFrames[3] > 0);
 
+    //  Very first thing - apply momentum from previous frame
+    object->X = fix32Add(object->X, fix16ToFix32(object->VelocityX));
+    object->Y = fix32Add(object->Y, fix16ToFix32(object->VelocityY));
+
     //
-    s32 x = object->Base.x;
-    s32 y = object->Base.y; 
+    s32 x = fix32ToInt(object->X);
+    s32 y = fix32ToInt(object->Y);
     const s32 width = 10;
     s32 x_left  = x - width;
     s32 x_right = x + width;
@@ -67,11 +71,12 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     bool stuck = true;  // assume stuck
     int its = 0;
     int vel = fix16ToInt(object->VelocityX);
+    bool moved = false;
     if(vel != 0)
     {
         do
         {
-            x = object->Base.x;
+            x = fix32ToInt(object->X); 
             int budge = 0;
             if(vel > 0)
             {
@@ -93,7 +98,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             {
                 object->VelocityX = FIX16(0);
                 x += budge;
-                object->X = FIX32(x);
+                moved = true;
             }
             else
             {
@@ -102,6 +107,10 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             ++its;
         }
         while(stuck && (its < 10));
+
+        // If collided, set real coords to rounded
+        if(moved)
+            object->X = FIX32(x);
     }
 
 
@@ -126,7 +135,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
                 const bool sens_stuck_left = col(x_left + 2,y);
                 const bool sens_stuck_mid = col(x,y);
                 const bool sens_stuck_right = col(x_right - 2,y);
-                stuck = (sens_stuck_left + sens_stuck_mid + sens_stuck_right) > 0;
+                stuck = (sens_stuck_left + sens_stuck_mid + sens_stuck_right) > 1;  // Tolerate 1 point getting stuck, evict if >=2
                 if(stuck)
                 {
                     --y;
@@ -167,13 +176,8 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     {
         object->VelocityY = fix16Add(object->VelocityY, gravity);
     }
-    object->X = fix32Add(object->X, fix16ToFix32(object->VelocityX));
-    if(!object->OnFloor)
-    {
-        object->Y = fix32Add(object->Y, fix16ToFix32(object->VelocityY));
-    }
 
-    object->Base.x = fix32ToInt(object->X);
+    object->Base.x = fix32ToInt(object->X); // Sprite position
     object->Base.y = fix32ToInt(object->Y);
     object->OnfloorLast = object->OnFloor;
 }
