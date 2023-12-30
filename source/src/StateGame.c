@@ -125,17 +125,20 @@ void StateGame_Tick()
         if(GameContext.CurrentStage != NULL)        // If stage loaded
         {
             GameContext.CurrentStage->Init();       // Init incoming stage
+            
+            ObjectCameraSetStageSize(GameContext.Camera, GameContext.CurrentStage->Width, GameContext.CurrentStage->Height);
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
             GameContext.Player = &Player.Base;
-            Player.X = FIX32(128);   //intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
-            Player.Y = FIX32(128);   //intToFix32(GameContext.PlayerSpawn.y);
+            Player.X = FIX32(64);   //intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
+            Player.Y = FIX32(64);   //intToFix32(GameContext.PlayerSpawn.y);
         }
     }
     
     if(GameContext.Freecam)
     {
         SPR_setVisibility(SpriteFreecam, VISIBLE);
+        SPR_setDepth(SpriteFreecam, 0);
     }
     else
     {

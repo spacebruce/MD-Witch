@@ -14,6 +14,7 @@ typedef struct ObjectPlayer
     fix16 VelocityY;
     bool OnFloor;
     bool OnfloorLast;
+    uint8_t CoyoteFrames;
 
     // steering
     uint8_t state;
