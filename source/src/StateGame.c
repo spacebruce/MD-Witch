@@ -57,12 +57,18 @@ void StateGame_Reload()
     SPR_init();
     SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
     SPR_setPriority(SpritePaused, true);
+    SPR_setDepth(SpritePaused, 0);
+
     SpriteFreecam = SPR_addSprite(&sprFreecam, 16,16, TILE_ATTR(PAL_PLAYER, 0,false,false));
     SpriteTestOBJ = SPR_addSprite(&gfx_cursor, 0,0, TILE_ATTR(PAL_STUFF, 0, false, false));
     SPR_setVisibility(SpriteFreecam, HIDDEN);
-    PAL_setPalette(PAL_BACKGROUND, sprPlayer.palette->data, DMA);
-    PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);   // Many static objects share player palette
-    VDP_setTextPalette(PAL_PLAYER);
+    
+	PAL_setColors(0, (u16*) palette_black, 64, DMA);
+
+    memcpy(&(GameContext.palette)[PAL_BACKGROUND], sprPlayer.palette->data, 16);
+    memcpy(&(GameContext.palette)[PAL_PLAYER], sprPlayer.palette->data, 16);
+    
+	//PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, GameContext.Framerate, true);
 }
 
 // State entry points
@@ -122,8 +128,8 @@ void StateGame_Tick()
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
             GameContext.Player = &Player.Base;
-            Player.Base.x = intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
-            Player.Base.y = intToFix32(GameContext.PlayerSpawn.y);
+            Player.X = FIX32(128);   //intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
+            Player.Y = FIX32(128);   //intToFix32(GameContext.PlayerSpawn.y);
         }
     }
     
@@ -164,9 +170,11 @@ void StateGame_Tick()
     }
     s16 CameraX = GameContext.Camera->Base.x;
     s16 CameraY = GameContext.Camera->Base.y;
-
-    VDP_setHorizontalScroll(BG_A, -CameraX);
-    VDP_setVerticalScroll(BG_A, CameraY);
+    
+    if(GameContext.MapA != NULL)
+        MAP_scrollTo(GameContext.MapA, CameraX, CameraY);
+    if(GameContext.MapB != NULL)
+        MAP_scrollTo(GameContext.MapB, (CameraX >> 2), (CameraY >> 2));
     
     //VDP_setHorizontalScroll(BG_B, (-CameraX >> 1));
     //VDP_setVerticalScroll(BG_B, -CameraY);

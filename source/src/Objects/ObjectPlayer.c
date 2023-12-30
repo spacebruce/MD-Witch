@@ -50,25 +50,92 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     const bool pressed_down = !released_down && (object->ButtonFrames[3] > 0);
 
     //
-    const s32 x = object->Base.x;
-    const s32 y = object->Base.y; 
-    const s32 x_left  = x - 16;
-    const s32 x_right = x + 16;
-    const s32 y_top = y - 32;
+    s32 x = object->Base.x;
+    s32 y = object->Base.y; 
+    const s32 width = 10;
+    s32 x_left  = x - width;
+    s32 x_right = x + width;
+    s32 y_top = y - 32;
+    s32 y_mid = y - 16;
+    s32 y_low = y - 1;
 
     StageFunctionCollision col = GameContext.CurrentStage->Collision;
 
-    bool sens_feet_left = col(x_left,y + 1);
-    bool sens_feet_mid = col(x,y + 1);
-    bool sens_feet_right = col(x_right,y + 1);
-    bool sens_left = col(x_left, y - 16);
-    bool sens_right = col(x_right, y - 16);
+    // Walking into walls sensor
+    bool sens_top, sens_mid, sens_low;
 
-    object->OnFloor = (sens_feet_left + sens_feet_mid + sens_feet_right) > 2;
+    bool stuck = true;  // assume stuck
+    int its = 0;
+    int vel = fix16ToInt(object->VelocityX);
+    if(vel != 0)
+    {
+        do
+        {
+            x = object->Base.x;
+            int budge = 0;
+            if(vel > 0)
+            {
+                x_right = x + width;
+                sens_top = col(x_right, y_top);
+                sens_mid = col(x_right, y_mid);
+                sens_low = col(x_right, y_low);
+                budge = -1;
+            }
+            if(vel < 0)
+            {
+                x_left = x - width;
+                sens_top = col(x_left, y_top);
+                sens_mid = col(x_left, y_mid);
+                sens_low = col(x_left, y_low);
+                budge = 1;
+            }
+            if(sens_top || sens_mid || sens_low)
+            {
+                object->VelocityX = FIX16(0);
+                x += budge;
+                object->X = FIX32(x);
+            }
+            else
+            {
+                stuck = false;
+            }
+            ++its;
+        }
+        while(stuck && (its < 10));
+    }
+
+
+    // Floor sensor
+    const bool sens_feet_left = col(x_left + 1,y + 1);
+    const bool sens_feet_mid = col(x,y + 1);
+    const bool sens_feet_right = col(x_right - 1,y + 1);
+    object->OnFloor = (sens_feet_left + sens_feet_mid + sens_feet_right) > 1;
 
     if(object->OnFloor)
     {         
-        //object->Y = intToFix32(FLoorY);
+        //  Just landed
+        if(object->OnfloorLast == false)    
+        {
+            // Animation trigger?
+            
+            // Check if stuck in floor
+            bool stuck = true;
+            int its = 0;
+            while(stuck && (its < 10))
+            {
+                const bool sens_stuck_left = col(x_left + 2,y);
+                const bool sens_stuck_mid = col(x,y);
+                const bool sens_stuck_right = col(x_right - 2,y);
+                stuck = (sens_stuck_left + sens_stuck_mid + sens_stuck_right) > 0;
+                if(stuck)
+                {
+                    --y;
+                }
+                ++its;
+            };
+            object->Y = FIX32(y);
+        }
+
         // Apply friction
         if((abs(fix16ToInt(object->VelocityX)) <= 1) && (!pressed_left && !pressed_right))
         {
@@ -108,6 +175,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
     object->Base.x = fix32ToInt(object->X);
     object->Base.y = fix32ToInt(object->Y);
+    object->OnfloorLast = object->OnFloor;
 }
 
 void ObjectPlayerCreate(ObjectPlayer *object)

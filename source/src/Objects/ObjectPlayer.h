@@ -13,6 +13,7 @@ typedef struct ObjectPlayer
     fix16 VelocityX;
     fix16 VelocityY;
     bool OnFloor;
+    bool OnfloorLast;
 
     // steering
     uint8_t state;

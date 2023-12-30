@@ -2,29 +2,47 @@
 
 #include "../GameContext.h"
 #include <genesis.h>
+
+#include <maps.h>
 #include <resources.h>
 
 #include "../Types/Collision.h"
 
-const int e1m1_tile_xsize = 6 * 8;
+const int e1m1_tile_xsize = 4 * 8;
 const int e1m1_tile_ysize = 4 * 8;
 
-uint8_t e1m1_collisions[8][16] = 
+
+// Tile IDs
+u16 tile_id;
+u16 bg_tile_id;
+
+const int e1m1_width = 16;
+const int e1m1_height = 16;
+
+uint8_t e1m1_collisions[16][16] = 
 {
-    { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, },
-    { 2, 2, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, },
-    { 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, },
-    { 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, },
-    { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, },
+	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
+	{ 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
+	{ 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
+	{ 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, },
+	{ 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
+	{ 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
+	{ 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
+	{ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
+	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, },
+	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
+	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
+	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
+	{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
+	{ 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
+	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
+	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
 };
 
 u8 E1M1_Collide(const s16 x, const s16 y)
 {
-    u16 tx = (((u16)(x)) / e1m1_tile_xsize) % 16;
-    u16 ty = (((u16)(y)) / e1m1_tile_ysize) % 8;
+    u16 tx = (((u16)(x)) / e1m1_tile_xsize) % e1m1_width;
+    u16 ty = (((u16)(y)) / e1m1_tile_ysize) % e1m1_height;
     if(e1m1_collisions[ty][tx] > 0)
     {
         MapCollision.TileX = tx;
@@ -37,47 +55,25 @@ u8 E1M1_Collide(const s16 x, const s16 y)
 void E1M1_Init()
 {
     GameContext.PlayerSpawn.x = 0;
-    GameContext.PlayerSpawn.y = 50;
+    GameContext.PlayerSpawn.y = 128;
 
-    VDP_setTextPlane(BG_A);
-    for(int x = 0; x < 16; ++x)
-    {
-        for(int y = 0; y < 8; ++y)
-        {
-            if(e1m1_collisions[y][x] == 1)
-            {
-                for(int sx = 0; sx < 6; ++sx)
-                {
-                    for(int sy = 0; sy < 4; ++ sy)
-                    {
-                        VDP_drawText("X", (x * 6) + sx , (y * 4) + sy);
-                    }
-                }
-            }
-            if(e1m1_collisions[y][x] == 2)
-            {
-                for(int sx = 0; sx < 6; ++sx)
-                {
-                    for(int sy = 0; sy < 2; ++ sy)
-                    {
-                        VDP_drawText("J", (x * 6) + sx , (y * 4) + sy);
-                    }
-                }
-            }
-        }
-    }
-    DMA_waitCompletion();
+	tile_id = TILE_USER_INDEX;
+	bg_tile_id = tile_id;
+	VDP_loadTileSet(&ts_stage_01, bg_tile_id, DMA);
+	tile_id += ts_stage_01.numTile;
+    
+	GameContext.MapA = MAP_create(&map_stage_01, BG_A, bg_tile_id);
+	GameContext.MapB = MAP_create(&map_stage_01_bg, BG_B, bg_tile_id);
+    
+	DMA_setBufferSize(9000);
 
-    VDP_setTextPlane(BG_B);
+	memcpy(&GameContext.palette[0], pal_stage_01a.data, 16 * 2);
+	memcpy(&GameContext.palette[16], pal_stage_01b.data, 16 * 2);
+	//memcpy(&GameContext.palette[32], pal_player.data, 16 * 2);
+	memcpy(&GameContext.palette[48], (u16*) palette_black, 16 * 2);
 
-    for(int x = 0; x < 64; x += strlen(GameContext.CurrentStage->Name))
-    {
-        for(int i = 0; i < 32; ++i)
-        {
-            //VDP_drawText(GameContext.CurrentStage->Name,x,i);
-        }
-    }
-
+	// Fade In
+	PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, 60, FALSE);
 }
 void E1M1_Tick()
 {

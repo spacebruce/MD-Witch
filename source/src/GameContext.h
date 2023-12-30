@@ -22,6 +22,9 @@ struct GameContextType
     u8 Framerate;
     fix16 Speedup;
     //
+    Map* MapA;
+    Map* MapB;
+    //
     Map* CurrentMap;
     const StageBase* CurrentStage;
     u8 CurrentStageID;
