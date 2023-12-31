@@ -31,7 +31,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             else
                 object->ButtonFrames[i] = 0xFF;
         }
-        else if(object->ButtonFrames[i] < 100)  // don't overflow, just hold at 100
+        else if(object->ButtonFrames[i] < (GameContext.Framerate * 2))  // don't overflow, just hold at 2 seconds
         {
             object->ButtonFrames[i] = object->ButtonFrames[i] + 1;
         }
@@ -115,7 +115,6 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     // If collided, set real coords to rounded
     if(moved)
         object->X = FIX32(x);
-
 
     // Floor sensor
     const bool sens_feet_left = col(x_left + 1,y + 1);
@@ -233,8 +232,7 @@ void ObjectPlayerCreate(ObjectPlayer *object)
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);
 }
 
-void ObjectPlayerInput(ObjectPlayer *object, uint8_t state, uint8_t changed)
+void ObjectPlayerInput(ObjectPlayer *object, uint8_t changed)
 {
-    object->state = state;
     object->changed = changed;
 }

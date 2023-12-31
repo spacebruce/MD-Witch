@@ -34,12 +34,12 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
             {
                 if(GameContext.Freecam)
                 {
-                    ObjectPlayerInput(&Player, 0x00, 0x00);
+                    ObjectPlayerInput(&Player, 0x00);
                     ObjectCameraFreecam(GameContext.Camera, Changed, State);
                 }
                 else
                 {
-                    ObjectPlayerInput(&Player, Changed, State);
+                    ObjectPlayerInput(&Player, State);
                 }
             }
             else
