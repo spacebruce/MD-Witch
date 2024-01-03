@@ -29,10 +29,10 @@ HINTERRUPT_CALLBACK HIntHandler()
 u16 tile_id;
 u16 bg_tile_id;
 
-const int e1m1_width = 16;
-const int e1m1_height = 16;
+static const int e1m1_width = 16;
+static const int e1m1_height = 16;
 
-uint8_t e1m1_collisions[16][16] = 
+const uint8_t e1m1_collisions[16][16] = 
 {
 	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
 	{ 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, },

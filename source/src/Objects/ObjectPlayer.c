@@ -6,11 +6,15 @@
 #define gravity FIX16(0.25)
 #define air_acceleration FIX16(0.75)
 #define acceleration FIX16(1.0)
-#define jumpforce FIX16(5)
 #define friction FIX16(0.7)
 
 // How many frames to stay in air after leaving ledge (*pal_speedup)
-#define coyote_time (5)
+#define coyote_time (10)
+
+#define JumpForce FIX16(-4)
+#define JumpAdd FIX16(-0.5)
+#define JumpTimeMin (5)
+#define JumpTimeMax (10)
 
 const uint16_t ButtonMask[] = 
 {
@@ -153,12 +157,12 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     }
     else
     {
+        object->VelocityY = fix16Add(object->VelocityY, gravity);
         // Player is not on floor
         // Pretend we're in air for a fraction of a second after leaving a ledge to make jumps feel better
         if(object->CoyoteFrames == 0)
         {
             Grounded = false;
-            object->VelocityY = fix16Add(object->VelocityY, gravity);
         }
         else
         {        
@@ -171,12 +175,33 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     {
         if(pressed_B)  // Jump
         {
-            object->VelocityY = FIX16(-5);  // Jump velocity
+            object->VelocityY = JumpForce;  // Jump velocity
             object->OnFloor = false;        // Detatch from floor
             object->CoyoteFrames = 0;       // negate coyote mode immediately
+            object->JumpHold = 0;
         }
     }
+    else
+    {
+        if(pressed_B && object->JumpHold != 0xFF)
+        {
+            const u8 MinJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMin), GameContext.Speedup));
+            const u8 MaxJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMax), GameContext.Speedup));
+            const int vel = fix16ToInt(object->VelocityY);
 
+            // If velocity pushing player up... Remember small numbers == higher up the screen
+            // If held time is within bounds of effect
+            if(vel < 0 && object->JumpHold >= MinJumpHoldTime && object->JumpHold < MaxJumpHoldTime)
+            {
+                object->VelocityY = fix16Add(object->VelocityY, JumpAdd);
+            }
+            object->JumpHold++;
+        }
+        else    // Let go of jump -> end button hold bonus
+        {
+            object->JumpHold = 0xFF;
+        }
+    }
     // If on floor or in coyote-mode
     if(object->OnFloor)
     {
@@ -213,7 +238,6 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             object->VelocityX = fix16Add(object->VelocityX, air_acceleration);
         }
     }
-
     object->Base.x = fix32ToInt(object->X); // Sprite position
     object->Base.y = fix32ToInt(object->Y);
     object->OnfloorLast = Grounded;
@@ -227,6 +251,7 @@ void ObjectPlayerCreate(ObjectPlayer *object)
     object->Base.spriteOffset.x = -24;
     object->Base.spriteOffset.y = -48;
     object->OnFloor = FALSE;
+    object->CoyoteFrames = 0;
     // sprite
     object->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);

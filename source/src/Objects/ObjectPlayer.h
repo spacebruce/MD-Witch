@@ -15,7 +15,7 @@ typedef struct ObjectPlayer
     bool OnFloor;
     bool OnfloorLast;
     uint8_t CoyoteFrames;
-
+    uint8_t JumpHold;
     // steering
     uint8_t changed;
 
