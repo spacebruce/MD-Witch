@@ -170,6 +170,7 @@ void StateGame_Tick()
         {
             GameContext.CurrentStage->Tick();
             ObjectPlayerUpdate(&Player);
+            ObjectPickupUpdate(&Pickup);
             if(!GameContext.Freecam)
             {
                 ObjectCameraUpdate(GameContext.Camera);
