@@ -6,14 +6,16 @@
 #include "GameContext.h"
 #include "defines.h"
 
-#include "Objects/ObjectPlayer.h"
 #include "Stages/Stages.h"
+
+#include "Objects/ObjectPlayer.h"
+#include "Objects/ObjectPickup.h"
 
 struct Sprite* SpritePaused;
 struct Sprite* SpriteFreecam;
-struct Sprite* SpriteTestOBJ;
 
 ObjectPlayer Player;
+ObjectPickup Pickup;
 
 //
 bool LastPaused;
@@ -60,7 +62,6 @@ void StateGame_Reload()
     SPR_setDepth(SpritePaused, 0);
 
     SpriteFreecam = SPR_addSprite(&sprFreecam, 16,16, TILE_ATTR(PAL_PLAYER, 0,false,false));
-    SpriteTestOBJ = SPR_addSprite(&gfx_cursor, 0,0, TILE_ATTR(PAL_PLAYER, 0, false, false));
     SPR_setVisibility(SpriteFreecam, HIDDEN);
     
 	PAL_setColors(0, (u16*) palette_black, 64, DMA);
@@ -83,6 +84,8 @@ void StateGame_Start()
 
     ObjectPlayerCreate(&Player);
     ObjectCameraInit(GameContext.Camera, &Player.Base);
+
+    ObjectPickupInit(&Pickup);
 
     StateBootup = true;
 
@@ -187,8 +190,7 @@ void StateGame_Tick()
     // update all sprites
     //SPR_setPosition(SpritePlayer, Player.Base.x - 24, Player.Base.y - 48);
     ObjectUpdateSprite(&Player.Base, CameraX, CameraY);
-    
-    SPR_setPosition(SpriteTestOBJ, 0 - CameraX, 128 - CameraY);
+    ObjectUpdateSprite(&Pickup.Base, CameraX, CameraY);
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
     //char buf[16];
