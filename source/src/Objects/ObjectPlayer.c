@@ -63,14 +63,17 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     object->X = fix32Add(object->X, fix16ToFix32(object->VelocityX));
     object->Y = fix32Add(object->Y, fix16ToFix32(object->VelocityY));
 
+    const s32 width = 20;
+    const s32 halfwidth = width / 2;
+    const s32 height = 40;
+
     //
     s32 x = fix32ToInt(object->X);
     s32 y = fix32ToInt(object->Y);
-    const s32 width = 10;
-    s32 x_left  = x - width;
-    s32 x_right = x + width;
-    s32 y_top = y - 32;
-    s32 y_mid = y - 16;
+    s32 x_left  = x - halfwidth;
+    s32 x_right = x + halfwidth;
+    s32 y_top = y - height;
+    s32 y_mid = y - (height / 2);
     s32 y_low = y - 1;
 
     StageFunctionCollision col = GameContext.CurrentStage->Collision;
@@ -80,23 +83,25 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
     bool stuck = true;  // assume stuck
     int its = 0;
-    int vel = fix16ToInt(object->VelocityX);
+    int velX = fix16ToInt(object->VelocityX);
+    int velY = fix16ToInt(object->VelocityY);
+
     bool moved = false;
     do
     {
         x = fix32ToInt(object->X); 
         int budge = 0;
-        if(vel > 0)
+        if(velX > 0)
         {
-            x_right = x + width;
+            x_right = x + halfwidth;
             sens_top = col(x_right + 2, y_top);
             sens_mid = col(x_right + 2, y_mid);
             sens_low = col(x_right + 2, y_low);
             budge = -1;
         }
-        if(vel < 0)
+        if(velX < 0)
         {
-            x_left = x - width;
+            x_left = x - halfwidth;
             sens_top = col(x_left - 2, y_top);
             sens_mid = col(x_left - 2, y_mid);
             sens_low = col(x_left - 2, y_low);
@@ -120,11 +125,42 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     if(moved)
         object->X = FIX32(x);
 
-    // Floor sensor
-    const bool sens_feet_left = col(x_left + 1,y + 1);
-    const bool sens_feet_mid = col(x,y + 1);
-    const bool sens_feet_right = col(x_right - 1,y + 1);
-    object->OnFloor = ((sens_feet_left + sens_feet_mid + sens_feet_right) > 0);
+    
+    // Floor/Ceiling sensors
+    if(velY >= 0)   
+    {
+        // If not moving or falling downwards - switch on feet sensors for standing on floor
+        const bool sens_feet_left  = col(x_left + 1,y + 1);
+        const bool sens_feet_mid   = col(x,y + 1);
+        const bool sens_feet_right = col(x_right - 1,y + 1);
+        object->OnFloor = (sens_feet_left | sens_feet_mid | sens_feet_right);
+    }
+    else
+    {
+        // Head sensor. If Ascending, check head isn't getting bonked
+        bool bonk_left  = col(x_left + 1,y - height);
+        bool bonk_mid   = col(x,y - height);
+        bool bonk_right = col(x_right - 1,y - height);
+        bool bonking = (bonk_left | bonk_mid | bonk_right);
+        const bool bonked = bonking;
+        u16 its = 0;
+        while(bonking && (its < 10))  // Push out of ceiling
+        {
+            ++y;
+            ++its;
+            bonk_left  = col(x_left + 1,y - height);
+            bonk_mid   = col(x,y - height);
+            bonk_right = col(x_right - 1,y - height);
+            bonking = (bonk_left | bonk_mid | bonk_right);
+        }
+        // move actual player coords if bonked
+        if(bonked)
+        {
+            // Might want to play a thonk sound effect here. 
+            object->VelocityY = FIX16(0);
+            object->Y = FIX32(y);
+        }
+    }
 
     if(object->OnFloor)
     {         
