@@ -1,0 +1,209 @@
+#include "StateGame.h"
+
+#include <resources.h>
+#include <genesis.h>
+
+#include "GameContext.h"
+#include "defines.h"
+
+#include "Objects/ObjectPlayer.h"
+#include "Stages/Stages.h"
+
+struct Sprite* SpritePaused;
+struct Sprite* SpriteFreecam;
+struct Sprite* SpriteTestOBJ;
+
+ObjectPlayer Player;
+
+//
+bool LastPaused;
+bool StateBootup;
+
+// Joystick
+void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
+{
+    if(Joy == JOY_1)
+    {
+        if(State & BUTTON_START)
+        {
+            GameContext.Paused = !GameContext.Paused;
+        }
+        else
+        {
+            if(!GameContext.Paused)
+            {
+                if(GameContext.Freecam)
+                {
+                    ObjectPlayerInput(&Player, 0x00);
+                    ObjectCameraFreecam(GameContext.Camera, Changed, State);
+                }
+                else
+                {
+                    ObjectPlayerInput(&Player, State);
+                }
+            }
+            else
+            {
+                if(State & BUTTON_C)
+                    GameContext.Freecam = !GameContext.Freecam;
+            }
+        }
+    }
+}
+
+// Reloads graphics we always want in memory
+void StateGame_Reload() 
+{
+    SPR_init();
+    SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
+    SPR_setPriority(SpritePaused, true);
+    SPR_setDepth(SpritePaused, 0);
+
+    SpriteFreecam = SPR_addSprite(&sprFreecam, 16,16, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    SpriteTestOBJ = SPR_addSprite(&gfx_cursor, 0,0, TILE_ATTR(PAL_PLAYER, 0, false, false));
+    SPR_setVisibility(SpriteFreecam, HIDDEN);
+    
+	PAL_setColors(0, (u16*) palette_black, 64, DMA);
+
+    memcpy(&(GameContext.palette)[PAL_BACKGROUND], sprPlayer.palette->data, 16);
+    memcpy(&(GameContext.palette)[PAL_PLAYER], sprPlayer.palette->data, 16);
+    
+	//PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, GameContext.Framerate, true);
+}
+
+// State entry points
+void StateGame_Start()
+{
+    GameContext.CurrentStageID = 0xFF;
+    GameContext.NextStageID = 1;    // Change to 0 once cutscene implemented
+
+    JOY_setEventHandler(&StateGame_Joystick);
+
+    StateGame_Reload();
+
+    ObjectPlayerCreate(&Player);
+    ObjectCameraInit(GameContext.Camera, &Player.Base);
+
+    StateBootup = true;
+
+    GameContext.Paused = false;
+    LastPaused = false;
+
+    GameContext.Freecam = false;
+
+
+	VDP_setPlaneSize(64,64, true);
+	VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
+
+	//VDP_fillTileMapRect(BG_B,0x0C,0,0,64,39);
+
+    VDP_setTextPlane(BG_A);
+    VDP_setTextPalette(PAL_PLAYER);
+
+}
+void StateGame_End()
+{
+    //PAL_fadeOutAll(GameContext.Framerate, false);
+    VDP_clearPlane(BG_A, TRUE);
+    VDP_clearPlane(BG_B, TRUE);
+    VDP_clearSprites();
+    SPR_end();
+    GameContext.CurrentStageID = 0xFF;  // Invalidate the StageID so entry gets refired again on next StateGame start
+}
+void StateGame_Tick()
+{
+    // Stage logic
+    if((GameContext.CurrentStageID != GameContext.NextStageID))   // If stage change triggered
+    {
+        StateBootup = false;
+        if(GameContext.CurrentStage != NULL)
+        {
+            GameContext.CurrentStage->Cleanup();    // Clear out stage memory/vram
+        }
+        GameContext.CurrentStage = GetStageData(GameContext.NextStageID);
+        GameContext.CurrentStageID = GameContext.NextStageID;
+        if(GameContext.CurrentStage != NULL)        // If stage loaded
+        {
+            SYS_disableInts();
+            GameContext.CurrentStage->Init();       // Init incoming stage
+            SYS_enableInts();
+            
+            ObjectCameraSetStageSize(GameContext.Camera, GameContext.CurrentStage->Width, GameContext.CurrentStage->Height);
+            GameContext.Paused = false;             // Ensure game is unpaused
+            GameContext.StageFrame = 0;             // Reset stage timer    
+            GameContext.Player = &Player.Base;
+            Player.X = FIX32(64);   //intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
+            Player.Y = FIX32(64);   //intToFix32(GameContext.PlayerSpawn.y);
+        }
+    }
+    
+    if(GameContext.Freecam)
+    {
+        SPR_setVisibility(SpriteFreecam, VISIBLE);
+        SPR_setDepth(SpriteFreecam, 0);
+    }
+    else
+    {
+        SPR_setVisibility(SpriteFreecam, HIDDEN);
+    }
+
+    // Catch Paused/Unpaused state change
+    if((LastPaused != GameContext.Paused) || (GameContext.StageFrame == 0))
+    {
+        if(GameContext.Paused)
+        {
+            SPR_setVisibility(SpritePaused, VISIBLE);
+        }
+        else
+        {
+            SPR_setVisibility(SpritePaused, HIDDEN);
+        }
+        LastPaused = GameContext.Paused;
+    }
+
+    if(!GameContext.Paused)
+    {
+        if(GameContext.CurrentStage != NULL)
+        {
+            GameContext.CurrentStage->Tick();
+            ObjectPlayerUpdate(&Player);
+            if(!GameContext.Freecam)
+            {
+                ObjectCameraUpdate(GameContext.Camera);
+            }
+        }
+    }
+    s16 CameraX = GameContext.Camera->Base.x;
+    s16 CameraY = GameContext.Camera->Base.y;
+    
+    if(GameContext.MapA != NULL)
+        MAP_scrollTo(GameContext.MapA, CameraX, CameraY);
+    if(GameContext.MapB != NULL)
+        MAP_scrollTo(GameContext.MapB, (CameraX >> 2), (CameraY >> 2));
+    
+    //VDP_setHorizontalScroll(BG_B, (-CameraX >> 1));
+    //VDP_setVerticalScroll(BG_B, -CameraY);
+
+    // update all sprites
+    //SPR_setPosition(SpritePlayer, Player.Base.x - 24, Player.Base.y - 48);
+    ObjectUpdateSprite(&Player.Base, CameraX, CameraY);
+    
+    SPR_setPosition(SpriteTestOBJ, 0 - CameraX, 128 - CameraY);
+
+    //int time = GameContext.StageFrame / GameContext.Framerate;
+    //char buf[16];
+    //sprintf(buf, "frame:%i\ntime:%i", GameContext.StageFrame, time);
+    //VDP_drawText(buf, 1,32);
+        
+    // Paused or not, run map drawing logic
+    if(GameContext.CurrentStage != NULL)
+        GameContext.CurrentStage->Draw();
+
+    ++GameContext.StageFrame;
+    SPR_update();
+}
+
+const StateType StateGame = 
+{
+    StateGame_Start, StateGame_End, StateGame_Tick, 
+};

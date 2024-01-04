@@ -9,9 +9,9 @@ const ROMHeader rom_header = {
 #else
     "SEGA MEGA DRIVE ",
 #endif
-    "(C)SPACEBRUCE'23",
-    "cute witch game                                 ",
-    "cute witch game                                 ",
+    "(C)SGDK 2023    ",
+    "Cute Witch Game                                 ",
+    "Cute Witch Game                                 ",
     "GM 00000000-00",
     0x000,
     "JD              ",
