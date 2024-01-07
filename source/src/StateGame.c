@@ -6,14 +6,16 @@
 #include "GameContext.h"
 #include "defines.h"
 
-#include "Objects/ObjectPlayer.h"
 #include "Stages/Stages.h"
 
+#include "Objects/ObjectPlayer.h"
+#include "Objects/ObjectPickup.h"
+
 struct Sprite* SpritePaused;
-struct Sprite* SpritePlayer;
 struct Sprite* SpriteFreecam;
 
 ObjectPlayer Player;
+ObjectPickup Pickup;
 
 //
 bool LastPaused;
@@ -34,12 +36,12 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
             {
                 if(GameContext.Freecam)
                 {
-                    ObjectPlayerInput(&Player, 0x00, 0x00);
-                    //ObjectCameraFreecam(GameContext.Camera, Changed, State);
+                    ObjectPlayerInput(&Player, 0x00);
+                    ObjectCameraFreecam(GameContext.Camera, Changed, State);
                 }
                 else
                 {
-                    ObjectPlayerInput(&Player, Changed, State);
+                    ObjectPlayerInput(&Player, State);
                 }
             }
             else
@@ -57,12 +59,17 @@ void StateGame_Reload()
     SPR_init();
     SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
     SPR_setPriority(SpritePaused, true);
-    SpritePlayer = SPR_addSprite(&sprPlayer, 32,32, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    SPR_setDepth(SpritePaused, 0);
+
     SpriteFreecam = SPR_addSprite(&sprFreecam, 16,16, TILE_ATTR(PAL_PLAYER, 0,false,false));
     SPR_setVisibility(SpriteFreecam, HIDDEN);
-    PAL_setPalette(PAL0, sprPlayer.palette->data, DMA);
-    PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);   // Many static objects share player palette
-    VDP_setTextPalette(PAL_PLAYER);
+    
+	PAL_setColors(0, (u16*) palette_black, 64, DMA);
+
+    memcpy(&(GameContext.palette)[PAL_BACKGROUND], sprPlayer.palette->data, 16);
+    memcpy(&(GameContext.palette)[PAL_PLAYER], sprPlayer.palette->data, 16);
+    
+	//PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, GameContext.Framerate, true);
 }
 
 // State entry points
@@ -73,8 +80,12 @@ void StateGame_Start()
 
     JOY_setEventHandler(&StateGame_Joystick);
 
+    StateGame_Reload();
+
     ObjectPlayerCreate(&Player);
     ObjectCameraInit(GameContext.Camera, &Player.Base);
+
+    ObjectPickupInit(&Pickup);
 
     StateBootup = true;
 
@@ -83,7 +94,6 @@ void StateGame_Start()
 
     GameContext.Freecam = false;
 
-    StateGame_Reload();
 
 	VDP_setPlaneSize(64,64, true);
 	VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
@@ -117,18 +127,23 @@ void StateGame_Tick()
         GameContext.CurrentStageID = GameContext.NextStageID;
         if(GameContext.CurrentStage != NULL)        // If stage loaded
         {
+            SYS_disableInts();
             GameContext.CurrentStage->Init();       // Init incoming stage
+            SYS_enableInts();
+            
+            ObjectCameraSetStageSize(GameContext.Camera, GameContext.CurrentStage->Width, GameContext.CurrentStage->Height);
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
             GameContext.Player = &Player.Base;
-            Player.Base.x = intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
-            Player.Base.y = intToFix32(GameContext.PlayerSpawn.y);
+            Player.X = FIX32(64);   //intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
+            Player.Y = FIX32(64);   //intToFix32(GameContext.PlayerSpawn.y);
         }
     }
     
     if(GameContext.Freecam)
     {
         SPR_setVisibility(SpriteFreecam, VISIBLE);
+        SPR_setDepth(SpriteFreecam, 0);
     }
     else
     {
@@ -155,26 +170,28 @@ void StateGame_Tick()
         {
             GameContext.CurrentStage->Tick();
             ObjectPlayerUpdate(&Player);
+            ObjectPickupUpdate(&Pickup);
             if(!GameContext.Freecam)
             {
                 ObjectCameraUpdate(GameContext.Camera);
             }
         }
-
     }
-    ++GameContext.StageFrame;
-    s16 CameraX = 0;//GameContext.Camera->Base.x;
+    s16 CameraX = GameContext.Camera->Base.x;
     s16 CameraY = GameContext.Camera->Base.y;
-
-    VDP_setHorizontalScroll(BG_A, -CameraX);
-    VDP_setVerticalScroll(BG_A, -CameraY);
+    
+    if(GameContext.MapA != NULL)
+        MAP_scrollTo(GameContext.MapA, CameraX, CameraY);
+    if(GameContext.MapB != NULL)
+        MAP_scrollTo(GameContext.MapB, (CameraX >> 2), (CameraY >> 2));
     
     //VDP_setHorizontalScroll(BG_B, (-CameraX >> 1));
     //VDP_setVerticalScroll(BG_B, -CameraY);
 
     // update all sprites
-    SPR_setPosition(SpritePlayer, Player.Base.x - 24, Player.Base.y - 48);
-    //SPR_setPosition(SpritePlayer, (Player.Base.x - 24) - CameraX, (Player.Base.y - 48) - CameraY);
+    //SPR_setPosition(SpritePlayer, Player.Base.x - 24, Player.Base.y - 48);
+    ObjectUpdateSprite(&Player.Base, CameraX, CameraY);
+    ObjectUpdateSprite(&Pickup.Base, CameraX, CameraY);
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
     //char buf[16];
@@ -185,6 +202,7 @@ void StateGame_Tick()
     if(GameContext.CurrentStage != NULL)
         GameContext.CurrentStage->Draw();
 
+    ++GameContext.StageFrame;
     SPR_update();
 }
 

@@ -6,7 +6,8 @@ extern const Image bgtile;
 extern const SpriteDefinition sprPlayer;
 extern const SpriteDefinition sprPaused;
 extern const SpriteDefinition sprFreecam;
-extern const Image image_logo;
+extern const Image sprWitch;
+extern const Image sprLogo;
 extern const Image image_titlescreen;
 extern const Image image_titlescreen_sky;
 

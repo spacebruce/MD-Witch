@@ -120,9 +120,9 @@ void StateMenu_Start()
     SPR_init();
     for(int i = 0; i < 3; ++i)
     {
-        cursor[i] = SPR_addSprite(&gfx_cursor, 0, 0, TILE_ATTR(PAL_STUFF, 1, false, false));
+        cursor[i] = SPR_addSprite(&gfx_cursor, 0, 0, TILE_ATTR(PAL_PLAYER, 1, false, false));
         //Sprite* spr = cursor[i];
-        SPR_setPalette(cursor[i], PAL_STUFF);
+        SPR_setPalette(cursor[i], PAL_PLAYER);
     }
     //PAL_setPalette(STUFF_PALETTE, gfx_cursor.palette->data, DMA);
 }
@@ -134,6 +134,8 @@ void StateMenu_End()
     VDP_clearSprites();
     SPR_end();
 }
+
+char buffer[32];
 void StateMenu_Tick()
 {
     int ScrollInt = fix16ToInt(SCROLL_Y);
@@ -143,7 +145,6 @@ void StateMenu_Tick()
     {
         SCROLL_Y = fix16Add(SCROLL_Y, FIX16(1.2));
     }
-    char buffer[20];
     sprintf(buffer, "%i", ScrollInt);
     VDP_drawText(buffer,5,38);
 
@@ -155,13 +156,12 @@ void StateMenu_Tick()
     for(i=0; i < CurrentMenu->Size; ++i)
     {
         struct MenuItem* Item = &CurrentMenu->Items[i];
-        X = 6 + (i * 10);
-        CX = (X - 1) * 8;
-        CY = (23 + (CurrentMenu != &MenuTop)) * 8;
+        Y = 47 + (i * 3);
+        CX = 24;
         SPR_setAnim(cursor[i], (CurrentMenu->Selected == i));
 
-        SPR_setPosition(cursor[i],CX,CY);
-        VDP_drawText(Item->Label, X,Y);
+        SPR_setPosition(cursor[i],CX * 8,Y);
+        VDP_drawText(Item->Label, CX + 2,Y);
     }
     
     char mode[5];
@@ -173,7 +173,7 @@ void StateMenu_Tick()
         strncpy(mode,"NTSC\0",5);
     }
     sprintf(buffer, "VIDEO : %s (%ihz)", mode, GameContext.Framerate);
-    VDP_drawText(buffer,1,54);
+    VDP_drawText(buffer,2,54);
 
     SPR_update();
 }

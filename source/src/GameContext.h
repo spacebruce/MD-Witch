@@ -22,6 +22,9 @@ struct GameContextType
     u8 Framerate;
     fix16 Speedup;
     //
+    Map* MapA;
+    Map* MapB;
+    //
     Map* CurrentMap;
     const StageBase* CurrentStage;
     u8 CurrentStageID;
@@ -29,6 +32,7 @@ struct GameContextType
     u16 StageFrame;
     fix32 StageTime;
     bool Paused;
+	u16 palette[64];
     //  Debug switches
     bool Freecam;   // debug
     //

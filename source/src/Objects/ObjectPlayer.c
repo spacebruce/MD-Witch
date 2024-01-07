@@ -1,42 +1,246 @@
+#include <genesis.h>
+#include <resources.h>
 #include "ObjectPlayer.h"
 #include "../GameContext.h"
 
 #define gravity FIX16(0.25)
+#define air_acceleration FIX16(0.75)
 #define acceleration FIX16(1.0)
-#define jumpforce FIX16(5)
 #define friction FIX16(0.7)
 
+// How many frames to stay in air after leaving ledge (*pal_speedup)
+#define coyote_time (10)
+
+#define JumpForce FIX16(-4)
+#define JumpAdd FIX16(-0.5)
+#define JumpTimeMin (5)
+#define JumpTimeMax (10)
+
+const uint16_t ButtonMask[] = 
+{
+    BUTTON_LEFT, BUTTON_RIGHT, BUTTON_UP, BUTTON_DOWN,
+    BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_START,
+};
 
 void ObjectPlayerUpdate(ObjectPlayer *object)
 {
-    bool pressed_A = ((object->changed & BUTTON_A) == BUTTON_A);
-    bool pressed_B = ((object->changed & BUTTON_B) == BUTTON_B);
-    bool pressed_C = ((object->changed & BUTTON_C) == BUTTON_C);
-    bool pressed_left = ((object->changed & BUTTON_LEFT) == BUTTON_LEFT);
-    bool pressed_right = ((object->changed & BUTTON_RIGHT) == BUTTON_RIGHT);
+    //  Check for input holds
+    for(uint8_t i = 0; i < 8; ++i)
+    {
+        bool down = ((object->changed & ButtonMask[i]) == ButtonMask[i]);
+        if(down == false)
+        {
+            if(object->ButtonFrames[i] == 0xFF || object->ButtonFrames[i] == 0x00)
+                object->ButtonFrames[i] = 0;
+            else
+                object->ButtonFrames[i] = 0xFF;
+        }
+        else if(object->ButtonFrames[i] < (GameContext.Framerate * 2))  // don't overflow, just hold at 2 seconds
+        {
+            object->ButtonFrames[i] = object->ButtonFrames[i] + 1;
+        }
+    }
+    
+    const bool released_A = (object->ButtonFrames[4] == 0xFF);
+    const bool released_B = (object->ButtonFrames[5] == 0xFF);
+    const bool released_C = (object->ButtonFrames[6] == 0xFF);
+    const bool released_left = (object->ButtonFrames[0] == 0xFF);
+    const bool released_right = (object->ButtonFrames[1] == 0xFF);
+    const bool released_up = (object->ButtonFrames[2] == 0xFF);
+    const bool released_down = (object->ButtonFrames[3] == 0xFF);
 
-    const s32 x = object->Base.x;
-    const s32 y = object->Base.y; 
-    const s32 x_left  = x - 16;
-    const s32 x_right = x + 16;
-    const s32 y_top = y - 32;
+    const bool pressed_A = !released_A && (object->ButtonFrames[4] > 0);
+    const bool pressed_B = !released_B && (object->ButtonFrames[5] > 0);
+    const bool pressed_C = !released_C && (object->ButtonFrames[6] > 0);
+    const bool pressed_left = !released_left && (object->ButtonFrames[0] > 0);
+    const bool pressed_right = !released_right && (object->ButtonFrames[1] > 0);
+    const bool pressed_up = !released_up && (object->ButtonFrames[2] > 0);
+    const bool pressed_down = !released_down && (object->ButtonFrames[3] > 0);
+
+    bool Grounded = false;
+
+    //  Very first thing - apply momentum from previous frame
+    object->X = fix32Add(object->X, fix16ToFix32(object->VelocityX));
+    object->Y = fix32Add(object->Y, fix16ToFix32(object->VelocityY));
+
+    const s32 width = 20;
+    const s32 halfwidth = width / 2;
+    const s32 height = 40;
+
+    //
+    s32 x = fix32ToInt(object->X);
+    s32 y = fix32ToInt(object->Y);
+    s32 x_left  = x - halfwidth;
+    s32 x_right = x + halfwidth;
+    s32 y_top = y - height;
+    s32 y_mid = y - (height / 2);
+    s32 y_low = y - 1;
 
     StageFunctionCollision col = GameContext.CurrentStage->Collision;
 
-    bool sens_feet_left = col(x_left,y + 1);
-    bool sens_feet_mid = col(x,y + 1);
-    bool sens_feet_right = col(x_right,y + 1);
-    bool sens_left = col(x_left, y - 16);
-    bool sens_right = col(x_right, y - 16);
+    // Walking into walls sensor
+    bool sens_top, sens_mid, sens_low;
 
-    if(pressed_left & sens_left)    pressed_left = false;
-    if(pressed_right & sens_right)  pressed_right = false;
+    bool stuck = true;  // assume stuck
+    int its = 0;
+    int velX = fix16ToInt(object->VelocityX);
+    int velY = fix16ToInt(object->VelocityY);
 
-    object->OnFloor = (sens_feet_left + sens_feet_mid + sens_feet_right) > 2;
+    bool moved = false;
+    do
+    {
+        x = fix32ToInt(object->X); 
+        int budge = 0;
+        if(velX > 0)
+        {
+            x_right = x + halfwidth;
+            sens_top = col(x_right + 2, y_top);
+            sens_mid = col(x_right + 2, y_mid);
+            sens_low = col(x_right + 2, y_low);
+            budge = -1;
+        }
+        if(velX < 0)
+        {
+            x_left = x - halfwidth;
+            sens_top = col(x_left - 2, y_top);
+            sens_mid = col(x_left - 2, y_mid);
+            sens_low = col(x_left - 2, y_low);
+            budge = 1;
+        }
+        if(sens_top || sens_mid || sens_low)
+        {
+            object->VelocityX = FIX16(0);
+            x += budge;
+            moved = true;
+        }
+        else
+        {
+            stuck = false;
+        }
+        ++its;
+    }
+    while(stuck && (its < 10));
+
+    // If collided, set real coords to rounded
+    if(moved)
+        object->X = FIX32(x);
+
+    
+    // Floor/Ceiling sensors
+    if(velY >= 0)   
+    {
+        // If not moving or falling downwards - switch on feet sensors for standing on floor
+        const bool sens_feet_left  = col(x_left + 1,y + 1);
+        const bool sens_feet_mid   = col(x,y + 1);
+        const bool sens_feet_right = col(x_right - 1,y + 1);
+        object->OnFloor = (sens_feet_left | sens_feet_mid | sens_feet_right);
+    }
+    else
+    {
+        // Head sensor. If Ascending, check head isn't getting bonked
+        bool bonk_left  = col(x_left + 1,y - height);
+        bool bonk_mid   = col(x,y - height);
+        bool bonk_right = col(x_right - 1,y - height);
+        bool bonking = (bonk_left | bonk_mid | bonk_right);
+        const bool bonked = bonking;
+        u16 its = 0;
+        while(bonking && (its < 10))  // Push out of ceiling
+        {
+            ++y;
+            ++its;
+            bonk_left  = col(x_left + 1,y - height);
+            bonk_mid   = col(x,y - height);
+            bonk_right = col(x_right - 1,y - height);
+            bonking = (bonk_left | bonk_mid | bonk_right);
+        }
+        // move actual player coords if bonked
+        if(bonked)
+        {
+            // Might want to play a thonk sound effect here. 
+            object->VelocityY = FIX16(0);
+            object->Y = FIX32(y);
+        }
+    }
 
     if(object->OnFloor)
     {         
-        //object->Y = intToFix32(FLoorY);
+        Grounded = true;
+        //Set coyote timer. If we leave ground, it starts tickin down
+        object->CoyoteFrames = fix16ToInt(fix16Mul(intToFix16(coyote_time), GameContext.Speedup));
+           
+        //  Just landed
+        if(object->OnfloorLast == false)    
+        {
+            // Animation trigger?
+            
+            // Check if stuck in floor
+            bool stuck = true;
+            int its = 0;
+            while(stuck && (its < 10))
+            {
+                const bool sens_stuck_left = col(x_left,y);
+                const bool sens_stuck_mid = col(x,y);
+                const bool sens_stuck_right = col(x_right,y);
+                stuck = (sens_stuck_left + sens_stuck_mid + sens_stuck_right) > 0; 
+                if(stuck)
+                {
+                    --y;
+                }
+                ++its;
+            };
+            object->Y = FIX32(y);
+        }
+    }
+    else
+    {
+        object->VelocityY = fix16Add(object->VelocityY, gravity);
+        // Player is not on floor
+        // Pretend we're in air for a fraction of a second after leaving a ledge to make jumps feel better
+        if(object->CoyoteFrames == 0)
+        {
+            Grounded = false;
+        }
+        else
+        {        
+            Grounded = true;
+            (object->CoyoteFrames)--;   // Tick down
+        }
+    }
+
+    if(Grounded)
+    {
+        if(pressed_B)  // Jump
+        {
+            object->VelocityY = JumpForce;  // Jump velocity
+            object->OnFloor = false;        // Detatch from floor
+            object->CoyoteFrames = 0;       // negate coyote mode immediately
+            object->JumpHold = 0;
+        }
+    }
+    else
+    {
+        if(pressed_B && object->JumpHold != 0xFF)
+        {
+            const u8 MinJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMin), GameContext.Speedup));
+            const u8 MaxJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMax), GameContext.Speedup));
+            const int vel = fix16ToInt(object->VelocityY);
+
+            // If velocity pushing player up... Remember small numbers == higher up the screen
+            // If held time is within bounds of effect
+            if(vel < 0 && object->JumpHold >= MinJumpHoldTime && object->JumpHold < MaxJumpHoldTime)
+            {
+                object->VelocityY = fix16Add(object->VelocityY, JumpAdd);
+            }
+            object->JumpHold++;
+        }
+        else    // Let go of jump -> end button hold bonus
+        {
+            object->JumpHold = 0xFF;
+        }
+    }
+    // If on floor or in coyote-mode
+    if(object->OnFloor)
+    {
         // Apply friction
         if((abs(fix16ToInt(object->VelocityX)) <= 1) && (!pressed_left && !pressed_right))
         {
@@ -49,12 +253,6 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
         // Gravity 
         object->VelocityY = FIX16(0);
-        if(pressed_A || pressed_B)  // Jump
-        {
-            object->VelocityY = FIX16(-5);  // Jump velocity
-            object->OnFloor = false;        // Detatch from floor
-        }
-
         if(pressed_left)
         {
             object->VelocityX = fix16Sub(object->VelocityX, acceleration);
@@ -64,18 +262,21 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             object->VelocityX = fix16Add(object->VelocityX, acceleration);
         }
     }
-    else
+    else    // In air
     {
-        object->VelocityY = fix16Add(object->VelocityY, gravity);
+        object->VelocityX = fix16Mul(object->VelocityX, friction);
+        if(pressed_left)
+        {
+            object->VelocityX = fix16Sub(object->VelocityX, air_acceleration);
+        }
+        else if (pressed_right)
+        {
+            object->VelocityX = fix16Add(object->VelocityX, air_acceleration);
+        }
     }
-    object->X = fix32Add(object->X, fix16ToFix32(object->VelocityX));
-    if(!object->OnFloor)
-    {
-        object->Y = fix32Add(object->Y, fix16ToFix32(object->VelocityY));
-    }
-
-    object->Base.x = fix32ToInt(object->X);
+    object->Base.x = fix32ToInt(object->X); // Sprite position
     object->Base.y = fix32ToInt(object->Y);
+    object->OnfloorLast = Grounded;
 }
 
 void ObjectPlayerCreate(ObjectPlayer *object)
@@ -83,11 +284,16 @@ void ObjectPlayerCreate(ObjectPlayer *object)
     //
     object->VelocityX = FIX16(0);
     object->VelocityY = FIX16(0);
+    object->Base.spriteOffset.x = -24;
+    object->Base.spriteOffset.y = -48;
     object->OnFloor = FALSE;
+    object->CoyoteFrames = 0;
+    // sprite
+    object->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);
 }
 
-void ObjectPlayerInput(ObjectPlayer *object, uint8_t state, uint8_t changed)
+void ObjectPlayerInput(ObjectPlayer *object, uint8_t changed)
 {
-    object->state = state;
     object->changed = changed;
 }

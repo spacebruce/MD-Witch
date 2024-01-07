@@ -13,6 +13,9 @@ int main(bool hardreset)
 {
     if(!hardreset)
         SYS_hardReset();
+	
+	SYS_disableInts();
+
     JOY_init();
     SPR_init();
 
@@ -32,6 +35,8 @@ int main(bool hardreset)
 	// Boot directly into the menu
 	GameContext.CurrentStateID = 0xFF;
 	GameContext.NextStateID = STATE_MENU;
+
+	SYS_enableInts();
 	while(1)
 	{
 		if(GameContext.CurrentStateID != GameContext.NextStateID)
