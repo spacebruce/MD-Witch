@@ -59,13 +59,13 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
     bool Grounded = false;
 
-    //  Very first thing - apply momentum from previous frame
-    object->X = fix32Add(object->X, fix16ToFix32(object->VelocityX));
-    object->Y = fix32Add(object->Y, fix16ToFix32(object->VelocityY));
-
     const s32 width = 20;
     const s32 halfwidth = width / 2;
     const s32 height = 40;
+
+    // Cache current velocity for later
+    const fix16 OldVelocityX = object->VelocityX;
+    const fix16 OldVelocityY = object->VelocityY;
 
     //
     s32 x = fix32ToInt(object->X);
@@ -100,7 +100,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             sens_low = col(x_right + 2, y_low);
             budge = -1;
         }
-        else if(velX < 0 || velXFrac < 0)
+        if(velX < 0 || velXFrac < 0)
         {
             x_left = x - halfwidth;
             sens_top = col(x_left - 2, y_top);
@@ -143,20 +143,20 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
         bool bonk_mid   = col(x,y - height);
         bool bonk_right = col(x_right - 1,y - height);
         bool bonking = (bonk_left | bonk_mid | bonk_right);
-        const bool bonked = bonking;
-        u16 its = 0;
-        while(bonking && (its < 10))  // Push out of ceiling
+        
+        if(bonking)
         {
-            ++y;
-            ++its;
-            bonk_left  = col(x_left + 1,y - height);
-            bonk_mid   = col(x,y - height);
-            bonk_right = col(x_right - 1,y - height);
-            bonking = (bonk_left | bonk_mid | bonk_right);
-        }
-        // move actual player coords if bonked
-        if(bonked)
-        {
+            u16 its = 0;
+            while(bonking && (its < 10))  // Push out of ceiling
+            {
+                ++y;        // Shift temp coordinate down
+                ++its;
+                bonk_left  = col(x_left + 1,y - height);
+                bonk_mid   = col(x,y - height);
+                bonk_right = col(x_right - 1,y - height);
+                bonking = (bonk_left | bonk_mid | bonk_right);
+            }
+            // move actual player coords if bonked
             // Might want to play a thonk sound effect here. 
             object->VelocityY = FIX16(0);
             object->Y = FIX32(y);
@@ -275,9 +275,27 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             object->VelocityX = fix16Add(object->VelocityX, air_acceleration);
         }
     }
+    
     object->Base.x = fix32ToInt(object->X); // Sprite position
     object->Base.y = fix32ToInt(object->Y);
     object->OnfloorLast = Grounded;
+    
+    // Apply momentum from frame
+    if(GameContext.Speedup == FIX16(1.0)) // NTSC mode
+    {
+        object->X = fix32Add(object->X, fix16ToFix32(object->VelocityX));
+        object->Y = fix32Add(object->Y, fix16ToFix32(object->VelocityY));
+    }
+    else    // PAL Mode
+    {
+        // implementing :-
+        /*
+            velocityOld = velocityX
+            ...
+            posX += (velocityX + velocityOld)/2 * delta;
+        */
+    }
+
 }
 
 void ObjectPlayerCreate(ObjectPlayer *object)

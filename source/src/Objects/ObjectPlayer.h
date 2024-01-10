@@ -18,7 +18,6 @@ typedef struct ObjectPlayer
     uint8_t JumpHold;
     // steering
     uint8_t changed;
-
 } ObjectPlayer;
 
 void ObjectPlayerUpdate(ObjectPlayer *object);
