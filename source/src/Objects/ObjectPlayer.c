@@ -84,14 +84,15 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     bool stuck = true;  // assume stuck
     int its = 0;
     int velX = fix16ToInt(object->VelocityX);
+    int velXFrac = fix16ToRoundedInt(object->VelocityX);
     int velY = fix16ToInt(object->VelocityY);
 
     bool moved = false;
     do
     {
-        x = fix32ToInt(object->X); 
+        x = fix32ToInt(object->X);
         int budge = 0;
-        if(velX > 0)
+        if(velX > 0 || velXFrac > 0)
         {
             x_right = x + halfwidth;
             sens_top = col(x_right + 2, y_top);
@@ -99,7 +100,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             sens_low = col(x_right + 2, y_low);
             budge = -1;
         }
-        if(velX < 0)
+        else if(velX < 0 || velXFrac < 0)
         {
             x_left = x - halfwidth;
             sens_top = col(x_left - 2, y_top);
