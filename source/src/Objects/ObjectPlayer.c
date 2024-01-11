@@ -276,8 +276,8 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
         }
     }
     
-    object->Base.x = fix32ToInt(object->X); // Sprite position
-    object->Base.y = fix32ToInt(object->Y);
+    object->Base.x = object->X; // Sprite position
+    object->Base.y = object->Y;
     object->OnfloorLast = Grounded;
     
     // Apply momentum from frame

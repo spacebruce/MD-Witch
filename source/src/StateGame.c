@@ -177,8 +177,8 @@ void StateGame_Tick()
             }
         }
     }
-    s16 CameraX = GameContext.Camera->Base.x;
-    s16 CameraY = GameContext.Camera->Base.y;
+    s16 CameraX = fix32ToInt(GameContext.Camera->Base.x);
+    s16 CameraY = fix32ToInt(GameContext.Camera->Base.y);
     
     if(GameContext.MapA != NULL)
         MAP_scrollTo(GameContext.MapA, CameraX, CameraY);
@@ -190,14 +190,14 @@ void StateGame_Tick()
 
     // update all sprites
     //SPR_setPosition(SpritePlayer, Player.Base.x - 24, Player.Base.y - 48);
-    ObjectUpdateSprite(&Player.Base, CameraX, CameraY);
-    ObjectUpdateSprite(&Pickup.Base, CameraX, CameraY);
+    ObjectUpdateSprite(&Player.Base, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
+    ObjectUpdateSprite(&Pickup.Base, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
     //char buf[16];
     //sprintf(buf, "frame:%i\ntime:%i", GameContext.StageFrame, time);
     //VDP_drawText(buf, 1,32);
-        
+    
     // Paused or not, run map drawing logic
     if(GameContext.CurrentStage != NULL)
         GameContext.CurrentStage->Draw();

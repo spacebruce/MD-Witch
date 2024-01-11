@@ -9,5 +9,7 @@ void ObjectPickupInit(ObjectPickup* object)
 }
 void ObjectPickupUpdate(ObjectPickup *object)
 {
-    object->Base.x = ((object->Base.x + 2) % 256);
+    object->Base.x = fix32Add(object->Base.x, FIX32(2));
+    if(fix32ToInt(object->Base.x) > 256)
+        object->Base.x = FIX32(-8);
 }
