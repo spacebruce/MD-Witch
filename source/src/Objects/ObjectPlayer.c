@@ -68,8 +68,8 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     const fix16 OldVelocityY = object->VelocityY;
 
     //
-    s32 x = fix32ToInt(object->X);
-    s32 y = fix32ToInt(object->Y);
+    s32 x = fix32ToInt(object->Base.x);
+    s32 y = fix32ToInt(object->Base.y);
     s32 x_left  = x - halfwidth;
     s32 x_right = x + halfwidth;
     s32 y_top = y - height;
@@ -90,7 +90,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     bool moved = false;
     do
     {
-        x = fix32ToInt(object->X);
+        x = fix32ToInt(object->Base.x);
         int budge = 0;
         if(velX > 0 || velXFrac > 0)
         {
@@ -124,7 +124,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
     // If collided, set real coords to rounded
     if(moved)
-        object->X = FIX32(x);
+        object->Base.x = FIX32(x);
 
     
     // Floor/Ceiling sensors
@@ -159,7 +159,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             // move actual player coords if bonked
             // Might want to play a thonk sound effect here. 
             object->VelocityY = FIX16(0);
-            object->Y = FIX32(y);
+            object->Base.y = FIX32(y);
         }
     }
 
@@ -189,7 +189,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
                 }
                 ++its;
             };
-            object->Y = FIX32(y);
+            object->Base.y = FIX32(y);
         }
     }
     else
@@ -275,16 +275,14 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             object->VelocityX = fix16Add(object->VelocityX, air_acceleration);
         }
     }
-    
-    object->Base.x = object->X; // Sprite position
-    object->Base.y = object->Y;
+
     object->OnfloorLast = Grounded;
     
     // Apply momentum from frame
     if(GameContext.Speedup == FIX16(1.0)) // NTSC mode
     {
-        object->X = fix32Add(object->X, fix16ToFix32(object->VelocityX));
-        object->Y = fix32Add(object->Y, fix16ToFix32(object->VelocityY));
+        object->Base.x = fix32Add(object->Base.x, fix16ToFix32(object->VelocityX));
+        object->Base.y = fix32Add(object->Base.y, fix16ToFix32(object->VelocityY));
     }
     else    // PAL Mode
     {

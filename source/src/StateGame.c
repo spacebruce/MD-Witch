@@ -135,8 +135,8 @@ void StateGame_Tick()
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
             GameContext.Player = &Player.Base;
-            Player.X = FIX32(64);   //intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
-            Player.Y = FIX32(64);   //intToFix32(GameContext.PlayerSpawn.y);
+            Player.Base.x = FIX32(64);  //intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
+            Player.Base.y = FIX32(64);  //intToFix32(GameContext.PlayerSpawn.y);
         }
     }
     
