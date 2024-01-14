@@ -86,6 +86,7 @@ void StateGame_Start()
     ObjectCameraInit(GameContext.Camera, &Player.Base);
 
     ObjectPickupInit(&Pickup);
+    ObjectSetPositionS32(&Pickup.Base, 96,96);
 
     StateBootup = true;
 
@@ -135,8 +136,7 @@ void StateGame_Tick()
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
             GameContext.Player = &Player.Base;
-            Player.Base.x = FIX32(64);  //intToFix32(GameContext.PlayerSpawn.x);  // Move player to spawn location
-            Player.Base.y = FIX32(64);  //intToFix32(GameContext.PlayerSpawn.y);
+            ObjectSetPositionS32(&Player.Base, GameContext.PlayerSpawn.x, GameContext.PlayerSpawn.y); 
         }
     }
     
@@ -179,12 +179,16 @@ void StateGame_Tick()
     }
     s16 CameraX = fix32ToInt(GameContext.Camera->Base.x);
     s16 CameraY = fix32ToInt(GameContext.Camera->Base.y);
+
+    // char buffer[20];
+    // sprintf(buffer, "X:%i\nY:%i", fix32ToInt(GameContext.Player->x), fix32ToInt(GameContext.Player->y));
+    // VDP_drawText(buffer, 10,10);
     
     if(GameContext.MapA != NULL)
         MAP_scrollTo(GameContext.MapA, CameraX, CameraY);
     if(GameContext.MapB != NULL)
         MAP_scrollTo(GameContext.MapB, (CameraX >> 2), (CameraY >> 2));
-    
+
     //VDP_setHorizontalScroll(BG_B, (-CameraX >> 1));
     //VDP_setVerticalScroll(BG_B, -CameraY);
 

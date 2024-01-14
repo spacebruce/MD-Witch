@@ -67,8 +67,8 @@ u8 E1M1_Collide(const s16 x, const s16 y)
 
 void E1M1_Init()
 {
-    GameContext.PlayerSpawn.x = 0;
-    GameContext.PlayerSpawn.y = 128;
+    GameContext.PlayerSpawn.x = 128;
+    GameContext.PlayerSpawn.y = 90;
 
 	//SYS_setHIntCallback(HIntHandler);
 	//SYS_setVBlankCallback(VBlankHandler);

@@ -1,5 +1,16 @@
 #include "ObjectBase.h"
 
+void ObjectSetPositionFix32(struct ObjectBase* Object, const fix32 X, const fix32 Y)
+{
+    Object->x = X;
+    Object->y = Y;
+}
+void ObjectSetPositionS32(struct ObjectBase* Object, const s32 X, const s32 Y)
+{
+    Object->x = FIX32(X);
+    Object->y = FIX32(Y);
+}
+
 void ObjectUpdateSprite(struct ObjectBase* Object, const fix32 CameraX, const fix32 CameraY)
 {
     if(Object->spr != NULL)

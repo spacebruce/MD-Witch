@@ -125,7 +125,6 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     // If collided, set real coords to rounded
     if(moved)
         object->Base.x = FIX32(x);
-
     
     // Floor/Ceiling sensors
     if(velY >= 0)   
@@ -242,7 +241,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     // If on floor or in coyote-mode
     if(object->OnFloor)
     {
-        // Apply friction
+        // Apply friction. If < 0, stop.
         if((abs(fix16ToInt(object->VelocityX)) <= 1) && (!pressed_left && !pressed_right))
         {
             object->VelocityX = FIX16(0);
