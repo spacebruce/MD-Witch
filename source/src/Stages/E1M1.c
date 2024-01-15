@@ -6,7 +6,7 @@
 #include <maps.h>
 #include <resources.h>
 
-#include "../Types/Collision.h"
+#include "../Types/MapCollision.h"
 
 const int e1m1_tile_xsize = 4 * 8;
 const int e1m1_tile_ysize = 4 * 8;
