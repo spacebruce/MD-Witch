@@ -9,7 +9,7 @@ struct ObjectBase
     fix32 y;
     Sprite* spr;
     Vect2D_s16 spriteOffset;
-    CollisionObject Collision;
+    struct CollisionObject Collision;
 };
 
 void ObjectSetPositionFix32(struct ObjectBase* Object, fix32 X, fix32 Y);
