@@ -40,7 +40,7 @@ struct GameContextType
     //
     ObjectCamera* Camera;       // Active game camera
     struct ObjectBase* Player;         // Make it easier to track player
-    Vect2D_s16 PlayerSpawn;     // Where to place player... Controlled by current level
+    Vect2D_s32 PlayerSpawn;     // Where to place player... Controlled by current level
 };
 
 extern struct GameContextType GameContext;
