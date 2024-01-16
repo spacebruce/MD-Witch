@@ -1,6 +1,13 @@
 #include "Collision.h"
 
 
+/*
+    These functions are built with the utmost confidence they will be used correctly as there is no incoming type checking for speed reasons
+    Note the functions have the name scheme and arguments in bit order
+        CollisionPoint (0001) < CollisionLine (1000) 
+    This is to aid the lookup process later
+*/
+
 bool CheckCollisionPointPoint(struct CollisionObject* C1, struct CollisionObject* C2)
 {
     return ((C1->Collision.Point.X == C2->Collision.Point.X) && (C1->Collision.Point.Y == C2->Collision.Point.Y));
@@ -15,7 +22,12 @@ bool CheckCollisionPointCircle(struct CollisionObject* C1, struct CollisionObjec
 {
     struct CollisionPoint* P1 = &C1->Collision.Point;
     struct CollisionCircle* S2 = &C2->Collision.Circle;
-    return FALSE;
+
+    // Basic distance check for circle-circle collision
+    s16 distanceSquared = (P1->X - S2->X) * (P1->X - S2->X) + (P1->Y - S2->Y) * (P1->Y - S2->Y);
+    s16 radiusSumSquared = (S2->Radius) * (S2->Radius);
+
+    return distanceSquared <= radiusSumSquared;
 }
 bool CheckCollisionPointLine(struct CollisionObject* C1, struct CollisionObject* C2)
 {
@@ -52,16 +64,71 @@ bool CheckCollisionCircleCircle(struct CollisionObject* C1, struct CollisionObje
 }
 bool CheckCollisionCircleLine(struct CollisionObject* C1, struct CollisionObject* C2)
 {
-    struct CollisionCircle* S1 = &C1->Collision.Circle;
-    struct CollisionLine* L2 = &C2->Collision.Line;
-    return FALSE;
+    struct CollisionLine* L = &C1->Collision.Line;
+    struct CollisionCircle* S = &C2->Collision.Circle;
+
+    int x1 = L->X1, y1 = L->Y1, x2 = L->X2, y2 = L->Y2;
+    int cx = S->X, cy = S->Y, radius = S->Radius;
+
+    // Calculate the direction vector of the line
+    int dx = x2 - x1, dy = y2 - y1;
+
+    // Calculate the vector from the line start to the sphere center
+    int x_diff = cx - x1, y_diff = cy - y1;
+
+    // Calculate the projection of x_diff, y_diff onto the line direction vector
+    float t = ((float)x_diff * dx + (float)y_diff * dy) / (dx * dx + dy * dy);
+
+    // Find the closest point on the line to the sphere center
+    int closest_x = x1 + t * dx;
+    int closest_y = y1 + t * dy;
+
+    // Check if the closest point is within the line segment
+    if (t >= 0 && t <= 1)
+    {
+        // Check if the closest point is within the sphere
+        //if (sqrt((closest_x - cx) * (closest_x - cx) + (closest_y - cy) * (closest_y - cy)) <= radius)
+        if (((closest_x - cx) * (closest_x - cx) + (closest_y - cy) * (closest_y - cy)) <= (radius^radius))
+        {
+            return TRUE; // Line intersects sphere
+        }
+    }
+
+    return FALSE; // Line does not intersect sphere
 }
 //
 bool CheckCollisionLineLine(struct CollisionObject* C1, struct CollisionObject* C2)
 {
-    struct CollisionLine* S1 = &C1->Collision.Line;
-    struct CollisionLine* S2 = &C2->Collision.Line;
-    return FALSE;
+    struct CollisionLine* L1 = &C1->Collision.Line;
+    struct CollisionLine* L2 = &C2->Collision.Line;
+
+    int x1 = L1->X1, y1 = L1->Y1, x2 = L1->X2, y2 = L1->Y2;
+    int x3 = L2->X1, y3 = L2->Y1, x4 = L2->X2, y4 = L2->Y2;
+
+    // Calculate the direction vectors
+    int dx1 = x2 - x1, dy1 = y2 - y1;
+    int dx2 = x4 - x3, dy2 = y4 - y3;
+
+    // Calculate the determinants
+    int det = dx1 * dy2 - dy1 * dx2;
+    int det1 = (x3 - x1) * dy2 - (y3 - y1) * dx2;
+    int det2 = dx1 * (y3 - y1) - dy1 * (x3 - x1);
+
+    // Check if the lines are not parallel
+    if (det != 0)
+    {
+        // Calculate the intersection point
+        float t1 = (float)det1 / det;
+        float t2 = (float)det2 / det;
+
+        // Check if the intersection point is within the line segments
+        if (t1 >= 0 && t1 <= 1 && t2 >= 0 && t2 <= 1)
+        {
+            return TRUE; // Lines intersect
+        }
+    }
+
+    return FALSE;   // No intersect
 }
 
 /*
@@ -69,9 +136,9 @@ bool CheckCollisionLineLine(struct CollisionObject* C1, struct CollisionObject* 
     only 1 or 2 active bit combinations allowed, 3 or more is a fail
 */
 
-typedef bool (*CollisionLookupFunction)(void* C1, void* C2);
+typedef bool (*CollisionLookupFunction)(struct CollisionObject* C1, struct CollisionObject* C2);
 
-bool (*CollisionLookup[16]) (void* C1, void* C2) = 
+bool (*CollisionLookup[16]) (struct CollisionObject* C1, struct CollisionObject* C2) = 
 {
     NULL,                                   // 0000 nope
     CheckCollisionPointPoint,               // 0001
@@ -90,7 +157,6 @@ bool (*CollisionLookup[16]) (void* C1, void* C2) =
     NULL,                                // 1110 nope
     NULL,                                // 1111 nope
 };
-
 
 /*
 

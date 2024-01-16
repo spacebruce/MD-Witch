@@ -43,10 +43,3 @@ struct CollisionObject
     } Collision;
     CollisionType Type;
 };
-
-/*
-    The functions are built with the utmost confidence they will be used correctly as there is no incoming type checking for speed reasons
-    Note the functions have the name scheme and arguments in bit order
-        CollisionPoint (0001) < CollisionLine (1000) 
-    This is to aid the lookup process later
-*/
