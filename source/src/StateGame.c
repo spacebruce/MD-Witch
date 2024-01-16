@@ -197,6 +197,12 @@ void StateGame_Tick()
     ObjectUpdateSprite(&Player.Base, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
     ObjectUpdateSprite(&Pickup.Base, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
 
+    // Collision test
+    if(CheckCollision(&Player.Base.Collision, &Pickup.Base.Collision))
+    {
+        Player.VelocityY = FIX16(-4);
+    }
+
     //int time = GameContext.StageFrame / GameContext.Framerate;
     //char buf[16];
     //sprintf(buf, "frame:%i\ntime:%i", GameContext.StageFrame, time);

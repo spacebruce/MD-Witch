@@ -1,5 +1,21 @@
 #include "Collision.h"
 
+void SetCollisionRectangle(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Width, const s16 Height)
+{
+    Object->Type = CT_Rectangle;
+    Object->Collision.Rectangle.X1 = X - (Width / 2);
+    Object->Collision.Rectangle.X2 = X + (Width / 2);
+    Object->Collision.Rectangle.Y1 = Y - (Height / 2);
+    Object->Collision.Rectangle.Y2 = Y + (Height / 2);
+}
+
+void SetCollisionCircle(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Radius)
+{
+    Object->Type = CT_Circle;
+    Object->Collision.Circle.X = X;
+    Object->Collision.Circle.Y = Y;
+    Object->Collision.Circle.Radius = Radius;
+}
 
 /*
     These functions are built with the utmost confidence they will be used correctly as there is no incoming type checking for speed reasons
@@ -41,7 +57,13 @@ bool CheckCollisionRectangleRectangle(struct CollisionObject* C1, struct Collisi
 {
     struct CollisionRectangle* R1 = &C1->Collision.Rectangle;
     struct CollisionRectangle* R2 = &C2->Collision.Rectangle;
-    return FALSE;
+
+    const bool l1 = ((R1->X1) <= (R2->X2));
+    const bool l2 = ((R1->X2) >= (R2->X1));
+    const bool l3 = ((R1->Y1) <= (R2->Y2));
+    const bool l4 = ((R1->Y2) >= (R2->Y1));
+
+    return (l1 && l2 && l3 && l4);
 }
 bool CheckCollisionRectangleCircle(struct CollisionObject* C1, struct CollisionObject* C2)
 {

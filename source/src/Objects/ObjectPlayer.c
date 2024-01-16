@@ -292,7 +292,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             posX += (velocityX + velocityOld)/2 * delta;
         */
     }
-
+    SetCollisionRectangle(&object->Base.Collision, fix32ToInt(object->Base.x) - 20, fix32ToInt(object->Base.y), 20, 40);
 }
 
 void ObjectPlayerCreate(ObjectPlayer *object)
@@ -306,6 +306,11 @@ void ObjectPlayerCreate(ObjectPlayer *object)
     object->CoyoteFrames = 0;
     // sprite
     object->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
+
+    struct CollisionRectangle R = { 0, 0, 20, 40 };
+    object->Base.Collision.Collision.Rectangle = R;
+    object->Base.Collision.Type = CT_Rectangle;
+
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);
 }
 

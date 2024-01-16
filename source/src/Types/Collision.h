@@ -10,7 +10,7 @@ struct CollisionPoint
 };
 struct CollisionRectangle
 {
-    s16 X1,Y1,X2,Y2;
+    s16 X1,Y1, X2,Y2;
 };
 struct CollisionCircle
 {
@@ -44,6 +44,10 @@ struct CollisionObject
     } Collision;
     CollisionType Type;
 };
+
+// Move shapes
+void SetCollisionRectangle(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Width, const  s16 Height);
+void SetCollisionCircle(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Radius);
 
 // Takes in a generic collision struct, intended argument order is described in function name
 bool CheckCollisionPointPoint(struct CollisionObject* C1, struct CollisionObject* C2);
