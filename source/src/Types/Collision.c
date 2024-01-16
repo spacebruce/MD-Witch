@@ -167,6 +167,11 @@ bool CheckCollision(struct CollisionObject* Col1, struct CollisionObject* Col2)
     // Native 16-bit integers so should save a mask op hopefully
     const uint16_t MaskLeft = Col1->Type;               // 0010 0100 <- left type
     const uint16_t MaskRight = Col2->Type;              // 0001 0100 <- right type
+
+    // At least one object is missing a collider
+    if(MaskLeft == 0 || MaskRight == 0)
+	    return FALSE;
+        
     const uint16_t MaskIndex = (MaskLeft | MaskRight);  // 0011 0100 <- combined makes a lookup index
 
     // grab ptr to collision function

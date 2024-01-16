@@ -7,20 +7,23 @@
 #include "StateGame.h"
 #include "StateMenu.h"
 
-Map *map;
-
 int main(bool hardreset)
 {
-    if(!hardreset)
-        SYS_hardReset();
-	
+	// Game engine stuff
+	if(!hardreset)
+	{
+		SYS_hardReset();
+	}
+
 	SYS_disableInts();
 
     JOY_init();
     SPR_init();
 
+	// Settings
 	GameContextInit();
 
+	// Video
     VDP_setScreenWidth320();
 	if(IS_PAL_SYSTEM)
 	{
@@ -30,7 +33,6 @@ int main(bool hardreset)
 	{
 		VDP_setScreenHeight224();
 	}
-	
 
 	// Boot directly into the menu
 	GameContext.CurrentStateID = 0xFF;

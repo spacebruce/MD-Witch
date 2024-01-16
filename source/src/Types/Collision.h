@@ -26,6 +26,7 @@ struct CollisionLine
 */
 typedef enum
 {
+    CT_Zero = 0B0000,
     CT_Point = 0B0001,
     CT_Rectangle = 0B0010,
     CT_Circle = 0B0100,
@@ -43,3 +44,17 @@ struct CollisionObject
     } Collision;
     CollisionType Type;
 };
+
+// Takes in a generic collision struct, intended argument order is described in function name
+bool CheckCollisionPointPoint(struct CollisionObject* C1, struct CollisionObject* C2);
+bool CheckCollisionPointRectangle(struct CollisionObject* C1, struct CollisionObject* C2);
+bool CheckCollisionPointCircle(struct CollisionObject* C1, struct CollisionObject* C2);
+bool CheckCollisionPointLine(struct CollisionObject* C1, struct CollisionObject* C2);
+bool CheckCollisionRectangleRectangle(struct CollisionObject* C1, struct CollisionObject* C2);
+bool CheckCollisionRectangleCircle(struct CollisionObject* C1, struct CollisionObject* C2);
+bool CheckCollisionRectangleLine(struct CollisionObject* C1, struct CollisionObject* C2);
+bool CheckCollisionCircleCircle(struct CollisionObject* C1, struct CollisionObject* C2);
+bool CheckCollisionCircleLine(struct CollisionObject* C1, struct CollisionObject* C2);
+bool CheckCollisionLineLine(struct CollisionObject* C1, struct CollisionObject* C2);
+
+bool CheckCollision(struct CollisionObject* Col1, struct CollisionObject* Col2);
