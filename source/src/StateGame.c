@@ -14,7 +14,8 @@
 struct Sprite* SpritePaused;
 struct Sprite* SpriteFreecam;
 
-ObjectPlayer Player;
+ObjectPlayer Player1;
+ObjectPlayer Player2;
 ObjectPickup Pickup;
 
 //
@@ -36,12 +37,12 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
             {
                 if(GameContext.Freecam)
                 {
-                    ObjectPlayerInput(&Player, 0x00);
+                    ObjectPlayerInput(&Player1, 0x00);
                     ObjectCameraFreecam(GameContext.Camera, Changed, State);
                 }
                 else
                 {
-                    ObjectPlayerInput(&Player, State);
+                    ObjectPlayerInput(&Player1, State);
                 }
             }
             else
@@ -82,8 +83,9 @@ void StateGame_Start()
 
     StateGame_Reload();
 
-    ObjectPlayerCreate(&Player);
-    ObjectCameraInit(GameContext.Camera, &Player.Base);
+    ObjectPlayerCreate(&Player1);
+    ObjectPlayerCreate(&Player2);
+    ObjectCameraInit(GameContext.Camera, &Player1.Base);
 
     ObjectPickupInit(&Pickup);
     ObjectSetPositionS32(&Pickup.Base, 96,96);
@@ -135,8 +137,9 @@ void StateGame_Tick()
             ObjectCameraSetStageSize(GameContext.Camera, GameContext.CurrentStage->Width, GameContext.CurrentStage->Height);
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
-            GameContext.Player = &Player.Base;
-            ObjectSetPositionS32(&Player.Base, GameContext.PlayerSpawn.x, GameContext.PlayerSpawn.y); 
+            GameContext.Player = &Player1.Base;
+            ObjectSetPositionS32(&Player1.Base, GameContext.PlayerSpawn.x, GameContext.PlayerSpawn.y); 
+            ObjectSetPositionS32(&Player2.Base, GameContext.PlayerSpawn.x, GameContext.PlayerSpawn.y); 
         }
     }
     
@@ -169,7 +172,8 @@ void StateGame_Tick()
         if(GameContext.CurrentStage != NULL)
         {
             GameContext.CurrentStage->Tick();
-            ObjectPlayerUpdate(&Player);
+            ObjectPlayerUpdate(&Player1);
+            ObjectPlayerUpdate(&Player2);
             ObjectPickupUpdate(&Pickup);
             if(!GameContext.Freecam)
             {
@@ -194,13 +198,15 @@ void StateGame_Tick()
 
     // update all sprites
     //SPR_setPosition(SpritePlayer, Player.Base.x - 24, Player.Base.y - 48);
-    ObjectUpdateSprite(&Player.Base, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
+    ObjectUpdateSprite(&Player1.Base, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
+    ObjectUpdateSprite(&Player2.Base, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
     ObjectUpdateSprite(&Pickup.Base, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
 
     // Collision test
-    if(CheckCollision(&Player.Base.Collision, &Pickup.Base.Collision))
+    if(CheckCollision(&Player1.Base.Collision, &Pickup.Base.Collision))
     {
-        Player.VelocityY = FIX16(-4);
+        Player1.OnFloor = false;
+        Player2.VelocityY = FIX16(-4);
     }
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
