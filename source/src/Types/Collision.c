@@ -17,6 +17,15 @@ void SetCollisionCircle(struct CollisionObject* Object, const s16 X, const s16 Y
     Object->Collision.Circle.Radius = Radius;
 }
 
+void SetCollisionLine(struct CollisionObject* Object, const s16 X1, const s16 Y1, const s16 X2, const s16 Y2)
+{
+    Object->Type = CT_Line;
+    Object->Collision.Line.X1 = X1;
+    Object->Collision.Line.Y1 = Y1;
+    Object->Collision.Line.X2 = X2;
+    Object->Collision.Line.Y2 = Y2;
+}
+
 /*
     These functions are built with the utmost confidence they will be used correctly as there is no incoming type checking for speed reasons
     Note the functions have the name scheme and arguments in bit order
