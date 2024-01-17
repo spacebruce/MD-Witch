@@ -297,20 +297,17 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
 void ObjectPlayerCreate(ObjectPlayer *object)
 {
-    //
+    object->Health = 100;
+    object->MaxHealth = 100;
+    // Physics
     object->VelocityX = FIX16(0);
     object->VelocityY = FIX16(0);
-    object->Base.spriteOffset.x = -24;
-    object->Base.spriteOffset.y = -48;
     object->OnFloor = FALSE;
     object->CoyoteFrames = 0;
     // sprite
     object->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
-
-    struct CollisionRectangle R = { 0, 0, 20, 40 };
-    object->Base.Collision.Collision.Rectangle = R;
-    object->Base.Collision.Type = CT_Rectangle;
-
+    object->Base.spriteOffset.x = -24;
+    object->Base.spriteOffset.y = -48;
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);
 }
 
