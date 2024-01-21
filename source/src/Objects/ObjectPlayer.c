@@ -292,7 +292,8 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             posX += (velocityX + velocityOld)/2 * delta;
         */
     }
-    SetCollisionRectangle(&object->Base.Collision, fix32ToInt(object->Base.x) - 20, fix32ToInt(object->Base.y), 20, 40);
+    SetCollisionRectangleAligned(&object->Base.Collision, fix32ToInt(object->Base.x), fix32ToInt(object->Base.y), 20, 40, BottomMiddle);
+    //SetCollisionRectangle(&object->Base.Collision, fix32ToInt(object->Base.x) - 20, fix32ToInt(object->Base.y) + 24, 20, 40);
 }
 
 void ObjectPlayerCreate(ObjectPlayer *object)

@@ -8,6 +8,67 @@ void SetCollisionRectangle(struct CollisionObject* Object, const s16 X, const s1
     Object->Collision.Rectangle.Y1 = Y - (Height / 2);
     Object->Collision.Rectangle.Y2 = Y + (Height / 2);
 }
+void SetCollisionRectangleAligned(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Width, const s16 Height, CT_ALIGN Align)
+{
+    Object->Type = CT_Rectangle;
+    switch(Align)
+    {
+        case TopLeft:
+            Object->Collision.Rectangle.X1 = X;
+            Object->Collision.Rectangle.X2 = X + Width;
+            Object->Collision.Rectangle.Y1 = Y;
+            Object->Collision.Rectangle.Y2 = Y + Height;
+        break;
+        case TopMiddle:
+            Object->Collision.Rectangle.X1 = X - (Width / 2);
+            Object->Collision.Rectangle.X2 = X + (Width / 2);
+            Object->Collision.Rectangle.Y1 = Y;
+            Object->Collision.Rectangle.Y2 = Y + Height;
+        break;
+        case TopRight:
+            Object->Collision.Rectangle.X1 = X - Width;
+            Object->Collision.Rectangle.X2 = X;
+            Object->Collision.Rectangle.Y1 = Y;
+            Object->Collision.Rectangle.Y2 = Y + Height;
+        break;
+        case MiddleLeft:
+            Object->Collision.Rectangle.X1 = X;
+            Object->Collision.Rectangle.X2 = X + Width;
+            Object->Collision.Rectangle.Y1 = Y - (Height / 2);
+            Object->Collision.Rectangle.Y2 = Y + (Height / 2);
+        break;
+        case Middle:
+            Object->Collision.Rectangle.X1 = X - (Width / 2);
+            Object->Collision.Rectangle.X2 = X + (Width / 2);
+            Object->Collision.Rectangle.Y1 = Y - (Height / 2);
+            Object->Collision.Rectangle.Y2 = Y + (Height / 2);
+        break;
+        case MiddleRight:
+            Object->Collision.Rectangle.X1 = X - Width;
+            Object->Collision.Rectangle.X2 = X;
+            Object->Collision.Rectangle.Y1 = Y - (Height / 2);
+            Object->Collision.Rectangle.Y2 = Y + (Height / 2);
+        break;
+        case BottomLeft:
+            Object->Collision.Rectangle.X1 = X;
+            Object->Collision.Rectangle.X2 = X + Width;
+            Object->Collision.Rectangle.Y1 = Y - Height;
+            Object->Collision.Rectangle.Y2 = Y;
+        break;
+        case BottomMiddle:
+            Object->Collision.Rectangle.X1 = X - (Width / 2);
+            Object->Collision.Rectangle.X2 = X + (Width / 2);
+            Object->Collision.Rectangle.Y1 = Y - Height;
+            Object->Collision.Rectangle.Y2 = Y;
+        break;
+        case BottomRight:
+            Object->Collision.Rectangle.X1 = X - Width;
+            Object->Collision.Rectangle.X2 = X;
+            Object->Collision.Rectangle.Y1 = Y - Height;
+            Object->Collision.Rectangle.Y2 = Y;
+        break;
+    }
+}
 
 void SetCollisionCircle(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Radius)
 {
@@ -61,6 +122,7 @@ bool CheckCollisionPointLine(struct CollisionObject* C1, struct CollisionObject*
     // bresenhams...?
     return FALSE;
 }
+
 //
 bool CheckCollisionRectangleRectangle(struct CollisionObject* C1, struct CollisionObject* C2)
 {

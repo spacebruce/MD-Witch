@@ -63,8 +63,11 @@ void ObjectCameraSetStageSize(ObjectCamera* Camera, const u16 W, const u16 H)
     Camera->StageHeight = H;
 }
 
-void ObjectCameraFreecam(ObjectCamera* Camera, u16 Changed, u16 State)
+
+
+void ObjectCameraFreecam(ObjectCamera* Camera, u16 State)
 {
+
     if((State & BUTTON_LEFT) == BUTTON_LEFT)    
         Camera->Base.x = fix32Sub(Camera->Base.x, FIX32(1));
     if((State & BUTTON_RIGHT) == BUTTON_RIGHT) 

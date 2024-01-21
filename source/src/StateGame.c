@@ -8,11 +8,14 @@
 
 #include "Stages/Stages.h"
 
+#include "ObjectPool.h"
 #include "Objects/ObjectPlayer.h"
 #include "Objects/ObjectPickup.h"
 
 struct Sprite* SpritePaused;
 struct Sprite* SpriteFreecam;
+
+struct MemoryPool ObjectMemory;
 
 ObjectPlayer Player1;
 ObjectPlayer Player2;
@@ -38,7 +41,8 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
                 if(GameContext.Freecam)
                 {
                     ObjectPlayerInput(&Player1, 0x00);
-                    ObjectCameraFreecam(GameContext.Camera, Changed, State);
+                    //ObjectPlayerInput(&Player2, State);
+                    ObjectCameraFreecam(GameContext.Camera, State);
                 }
                 else
                 {
@@ -205,14 +209,15 @@ void StateGame_Tick()
     // Collision test
     if(CheckCollision(&Player1.Base.Collision, &Pickup.Base.Collision))
     {
-        Player1.OnFloor = false;
-        Player2.VelocityY = FIX16(-4);
+        Player1.Health -= 2;
     }
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
-    //char buf[16];
-    //sprintf(buf, "frame:%i\ntime:%i", GameContext.StageFrame, time);
-    //VDP_drawText(buf, 1,32);
+    char buf[16];
+    sprintf(buf, "%i/%i", Player1.Health,Player1.MaxHealth);
+    VDP_drawText(buf, 4,4);
+    VDP_drawText(buf, 8,8);
+    VDP_drawText(buf, 16,16);
     
     // Paused or not, run map drawing logic
     if(GameContext.CurrentStage != NULL)

@@ -1,6 +1,13 @@
 #pragma once
 #include <genesis.h>
 
+typedef enum
+{
+    TopLeft, TopMiddle, TopRight,
+    MiddleLeft, Middle, MiddleRight,
+    BottomLeft, BottomMiddle, BottomRight,
+} CT_ALIGN;
+
 /*
     Data for every type of collision obj
 */
@@ -47,6 +54,7 @@ struct CollisionObject
 
 // Move shapes
 void SetCollisionRectangle(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Width, const  s16 Height);
+void SetCollisionRectangleAligned(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Width, const s16 Height, CT_ALIGN Align);
 void SetCollisionCircle(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Radius);
 
 // Takes in a generic collision struct, intended argument order is described in function name
