@@ -15,7 +15,7 @@
 struct Sprite* SpritePaused;
 struct Sprite* SpriteFreecam;
 
-struct MemoryPool ObjectMemory;
+//struct MemoryPool ObjectMemory;
 
 ObjectPlayer Player1;
 ObjectPlayer Player2;

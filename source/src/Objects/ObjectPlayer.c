@@ -307,6 +307,7 @@ void ObjectPlayerCreate(ObjectPlayer *object)
     object->CoyoteFrames = 0;
     // sprite
     object->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    SPR_setVisibility(object->Base.spr, AUTO_FAST);
     object->Base.spriteOffset.x = -24;
     object->Base.spriteOffset.y = -48;
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);
