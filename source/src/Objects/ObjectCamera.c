@@ -5,18 +5,15 @@ void ObjectCameraSetTarget(ObjectCamera* Camera, struct ObjectBase* Target)
     Camera->Target = Target;
 }
 
-void ObjectCameraInit(ObjectCamera* Camera, struct ObjectBase* Target)
+void ObjectCameraInit(void* object)
 {
-    if(Target != NULL)  // If target, snap to it
-    {
-        Camera->Base.x = Target->x;
-        Camera->Base.y = Target->y;
-        ObjectCameraSetTarget(Camera, Target);
-    }
+    ObjectCamera* Camera = (ObjectCamera*)object;
+    Camera->Target = NULL;
 }
 
-void ObjectCameraUpdate(ObjectCamera* Camera)
+void ObjectCameraUpdate(void* object)
 {
+    ObjectCamera* Camera = (ObjectCamera*)object;
     if(Camera->Target != NULL)
     {
         Camera->Base.x = fix32Sub(Camera->Target->x, FIX32(320 /2));
@@ -62,8 +59,6 @@ void ObjectCameraSetStageSize(ObjectCamera* Camera, const u16 W, const u16 H)
     Camera->StageWidth = W;
     Camera->StageHeight = H;
 }
-
-
 
 void ObjectCameraFreecam(ObjectCamera* Camera, u16 State)
 {

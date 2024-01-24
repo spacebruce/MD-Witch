@@ -8,11 +8,14 @@
 
 #include "Stages/Stages.h"
 
+#include "ObjectList.h"
+
+#include "Objects/ObjectCamera.h"
 #include "Objects/ObjectPlayer.h"
 #include "Objects/ObjectPickup.h"
 
-struct Sprite* SpritePaused;
 struct Sprite* SpriteFreecam;
+struct Sprite* SpritePaused;
 
 //struct MemoryPool ObjectMemory;
 
@@ -86,9 +89,10 @@ void StateGame_Start()
 
     StateGame_Reload();
 
-    ObjectPlayerCreate(&Player1);
-    ObjectPlayerCreate(&Player2);
-    ObjectCameraInit(GameContext.Camera, &Player1.Base);
+    ObjectPlayerInit(&Player1);
+    ObjectPlayerInit(&Player2);
+    ObjectCameraInit(GameContext.Camera);
+    ObjectCameraSetTarget(GameContext.Camera, &Player1.Base);
 
     ObjectPickupInit(&Pickup);
     ObjectSetPositionS32(&Pickup.Base, 96,96);

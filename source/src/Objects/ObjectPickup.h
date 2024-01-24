@@ -10,5 +10,5 @@ typedef struct ObjectPickup
 
 } ObjectPickup;
 
-void ObjectPickupInit(ObjectPickup* object);
-void ObjectPickupUpdate(ObjectPickup *object);
+void ObjectPickupInit(void* object);
+void ObjectPickupUpdate(void* object);

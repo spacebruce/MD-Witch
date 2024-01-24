@@ -22,54 +22,55 @@ const uint16_t ButtonMask[] =
     BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_START,
 };
 
-inline void ObjectPlayerUpdateSprite(ObjectPlayer* object)
+inline void ObjectPlayerUpdateSprite(ObjectPlayer* Player)
 {
     // Countdown even if offscreen
-    --(object->AnimationTick);
-    if(SPR_isVisible(object->Base.spr, false))
+    --(Player->AnimationTick);
+    if(SPR_isVisible(Player->Base.spr, false))
     {
-        if(object->AnimationTick <= 0)
+        if(Player->AnimationTick <= 0)
         {
-            SPR_nextFrame(object->Base.spr);
-            object->AnimationTick = 3;
+            SPR_nextFrame(Player->Base.spr);
+            Player->AnimationTick = 3;
         }
     }
 }
 
-void ObjectPlayerUpdate(ObjectPlayer *object)
+void ObjectPlayerUpdate(void* object)
 {
+    ObjectPlayer* Player = (ObjectPlayer*)object;
     //  Check for input holds
     for(uint8_t i = 0; i < 8; ++i)
     {
-        bool down = ((object->changed & ButtonMask[i]) == ButtonMask[i]);
+        bool down = ((Player->changed & ButtonMask[i]) == ButtonMask[i]);
         if(down == false)
         {
-            if(object->ButtonFrames[i] == 0xFF || object->ButtonFrames[i] == 0x00)
-                object->ButtonFrames[i] = 0;
+            if(Player->ButtonFrames[i] == 0xFF || Player->ButtonFrames[i] == 0x00)
+                Player->ButtonFrames[i] = 0;
             else
-                object->ButtonFrames[i] = 0xFF;
+                Player->ButtonFrames[i] = 0xFF;
         }
-        else if(object->ButtonFrames[i] < (GameContext.Framerate * 2))  // don't overflow, just hold at 2 seconds
+        else if(Player->ButtonFrames[i] < (GameContext.Framerate * 2))  // don't overflow, just hold at 2 seconds
         {
-            object->ButtonFrames[i] = object->ButtonFrames[i] + 1;
+            Player->ButtonFrames[i] = Player->ButtonFrames[i] + 1;
         }
     }
     
-    const bool released_A = (object->ButtonFrames[4] == 0xFF);
-    const bool released_B = (object->ButtonFrames[5] == 0xFF);
-    const bool released_C = (object->ButtonFrames[6] == 0xFF);
-    const bool released_left = (object->ButtonFrames[0] == 0xFF);
-    const bool released_right = (object->ButtonFrames[1] == 0xFF);
-    const bool released_up = (object->ButtonFrames[2] == 0xFF);
-    const bool released_down = (object->ButtonFrames[3] == 0xFF);
+    const bool released_A = (Player->ButtonFrames[4] == 0xFF);
+    const bool released_B = (Player->ButtonFrames[5] == 0xFF);
+    const bool released_C = (Player->ButtonFrames[6] == 0xFF);
+    const bool released_left = (Player->ButtonFrames[0] == 0xFF);
+    const bool released_right = (Player->ButtonFrames[1] == 0xFF);
+    const bool released_up = (Player->ButtonFrames[2] == 0xFF);
+    const bool released_down = (Player->ButtonFrames[3] == 0xFF);
 
-    const bool pressed_A = !released_A && (object->ButtonFrames[4] > 0);
-    const bool pressed_B = !released_B && (object->ButtonFrames[5] > 0);
-    const bool pressed_C = !released_C && (object->ButtonFrames[6] > 0);
-    const bool pressed_left = !released_left && (object->ButtonFrames[0] > 0);
-    const bool pressed_right = !released_right && (object->ButtonFrames[1] > 0);
-    const bool pressed_up = !released_up && (object->ButtonFrames[2] > 0);
-    const bool pressed_down = !released_down && (object->ButtonFrames[3] > 0);
+    const bool pressed_A = !released_A && (Player->ButtonFrames[4] > 0);
+    const bool pressed_B = !released_B && (Player->ButtonFrames[5] > 0);
+    const bool pressed_C = !released_C && (Player->ButtonFrames[6] > 0);
+    const bool pressed_left = !released_left && (Player->ButtonFrames[0] > 0);
+    const bool pressed_right = !released_right && (Player->ButtonFrames[1] > 0);
+    const bool pressed_up = !released_up && (Player->ButtonFrames[2] > 0);
+    const bool pressed_down = !released_down && (Player->ButtonFrames[3] > 0);
 
     bool Grounded = false;
 
@@ -78,25 +79,25 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     const s32 height = 40;
 
     // Cache current velocity for later
-    const fix16 OldVelocityX = object->VelocityX;
-    const fix16 OldVelocityY = object->VelocityY;
+    const fix16 OldVelocityX = Player->VelocityX;
+    const fix16 OldVelocityY = Player->VelocityY;
 
     // Apply momentum from frame
     if(GameContext.Speedup == FIX16(1.0)) // NTSC mode
     {
-        object->Base.x = fix32Add(object->Base.x, fix16ToFix32(object->VelocityX));
-        object->Base.y = fix32Add(object->Base.y, fix16ToFix32(object->VelocityY));
+        Player->Base.x = fix32Add(Player->Base.x, fix16ToFix32(Player->VelocityX));
+        Player->Base.y = fix32Add(Player->Base.y, fix16ToFix32(Player->VelocityY));
     }
     else    // PAL Mode
     {
         // implement speed correction here... 
-        object->Base.x = fix32Add(object->Base.x, fix16ToFix32(object->VelocityX));
-        object->Base.y = fix32Add(object->Base.y, fix16ToFix32(object->VelocityY));
+        Player->Base.x = fix32Add(Player->Base.x, fix16ToFix32(Player->VelocityX));
+        Player->Base.y = fix32Add(Player->Base.y, fix16ToFix32(Player->VelocityY));
     }
 
     //
-    s32 x = fix32ToInt(object->Base.x);
-    s32 y = fix32ToInt(object->Base.y);
+    s32 x = fix32ToInt(Player->Base.x);
+    s32 y = fix32ToInt(Player->Base.y);
     s32 x_left  = x - halfwidth;
     s32 x_right = x + halfwidth;
     s32 y_top = y - height;
@@ -110,14 +111,14 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
     bool stuck = true;  // assume stuck
     int its = 0;
-    int velX = fix16ToInt(object->VelocityX);
-    int velXFrac = fix16ToRoundedInt(object->VelocityX);
-    int velY = fix16ToInt(object->VelocityY);
+    int velX = fix16ToInt(Player->VelocityX);
+    int velXFrac = fix16ToRoundedInt(Player->VelocityX);
+    int velY = fix16ToInt(Player->VelocityY);
 
     bool moved = false;
     do
     {
-        x = fix32ToInt(object->Base.x);
+        x = fix32ToInt(Player->Base.x);
         int budge = 0;
         if(velX > 0 || velXFrac > 0)
         {
@@ -137,7 +138,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
         }
         if(sens_top || sens_mid || sens_low)
         {
-            object->VelocityX = FIX16(0);
+            Player->VelocityX = FIX16(0);
             x += budge;
             moved = true;
         }
@@ -151,7 +152,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
 
     // If collided, set real coords to rounded
     if(moved)
-        object->Base.x = FIX32(x);
+        Player->Base.x = FIX32(x);
     
     // Floor/Ceiling sensors
     if(velY >= 0)   
@@ -160,7 +161,7 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
         const bool sens_feet_left  = col(x_left + 1,y + 1);
         const bool sens_feet_mid   = col(x,y + 1);
         const bool sens_feet_right = col(x_right - 1,y + 1);
-        object->OnFloor = (sens_feet_left | sens_feet_mid | sens_feet_right);
+        Player->OnFloor = (sens_feet_left | sens_feet_mid | sens_feet_right);
     }
     else
     {
@@ -184,19 +185,19 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
             }
             // move actual player coords if bonked
             // Might want to play a thonk sound effect here. 
-            object->VelocityY = FIX16(0);
-            object->Base.y = FIX32(y);
+            Player->VelocityY = FIX16(0);
+            Player->Base.y = FIX32(y);
         }
     }
 
-    if(object->OnFloor)
+    if(Player->OnFloor)
     {         
         Grounded = true;
         //Set coyote timer. If we leave ground, it starts tickin down
-        object->CoyoteFrames = fix16ToInt(fix16Mul(intToFix16(coyote_time), GameContext.Speedup));
+        Player->CoyoteFrames = fix16ToInt(fix16Mul(intToFix16(coyote_time), GameContext.Speedup));
            
         //  Just landed
-        if(object->OnfloorLast == false)    
+        if(Player->OnfloorLast == false)    
         {
             // Animation trigger?
             
@@ -215,22 +216,22 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
                 }
                 ++its;
             };
-            object->Base.y = FIX32(y);
+            Player->Base.y = FIX32(y);
         }
     }
     else
     {
-        object->VelocityY = fix16Add(object->VelocityY, gravity);
+        Player->VelocityY = fix16Add(Player->VelocityY, gravity);
         // Player is not on floor
         // Pretend we're in air for a fraction of a second after leaving a ledge to make jumps feel better
-        if(object->CoyoteFrames == 0)
+        if(Player->CoyoteFrames == 0)
         {
             Grounded = false;
         }
         else
         {        
             Grounded = true;
-            (object->CoyoteFrames)--;   // Tick down
+            (Player->CoyoteFrames)--;   // Tick down
         }
     }
 
@@ -238,100 +239,102 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     {
         if(pressed_B)  // Jump
         {
-            object->VelocityY = JumpForce;  // Jump velocity
-            object->OnFloor = false;        // Detatch from floor
-            object->CoyoteFrames = 0;       // negate coyote mode immediately
-            object->JumpHold = 0;
+            Player->VelocityY = JumpForce;  // Jump velocity
+            Player->OnFloor = false;        // Detatch from floor
+            Player->CoyoteFrames = 0;       // negate coyote mode immediately
+            Player->JumpHold = 0;
         }
     }
     else
     {
-        if(pressed_B && object->JumpHold != 0xFF)
+        if(pressed_B && Player->JumpHold != 0xFF)
         {
             const u8 MinJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMin), GameContext.Speedup));
             const u8 MaxJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMax), GameContext.Speedup));
-            const int vel = fix16ToInt(object->VelocityY);
+            const int vel = fix16ToInt(Player->VelocityY);
 
             // If velocity pushing player up... Remember small numbers == higher up the screen
             // If held time is within bounds of effect
-            if(vel < 0 && object->JumpHold >= MinJumpHoldTime && object->JumpHold < MaxJumpHoldTime)
+            if(vel < 0 && Player->JumpHold >= MinJumpHoldTime && Player->JumpHold < MaxJumpHoldTime)
             {
-                object->VelocityY = fix16Add(object->VelocityY, JumpAdd);
+                Player->VelocityY = fix16Add(Player->VelocityY, JumpAdd);
             }
-            object->JumpHold++;
+            Player->JumpHold++;
         }
         else    // Let go of jump -> end button hold bonus
         {
-            object->JumpHold = 0xFF;
+            Player->JumpHold = 0xFF;
         }
     }
     // If on floor or in coyote-mode
-    if(object->OnFloor)
+    if(Player->OnFloor)
     {
         // Apply friction. If < 0, stop.
-        if((abs(fix16ToInt(object->VelocityX)) <= 1) && (!pressed_left && !pressed_right))
+        if((abs(fix16ToInt(Player->VelocityX)) <= 1) && (!pressed_left && !pressed_right))
         {
-            object->VelocityX = FIX16(0);
+            Player->VelocityX = FIX16(0);
         }
         else
         {
-            object->VelocityX = fix16Mul(object->VelocityX, friction);
+            Player->VelocityX = fix16Mul(Player->VelocityX, friction);
         }
 
         // Gravity 
-        object->VelocityY = FIX16(0);
+        Player->VelocityY = FIX16(0);
         if(pressed_left)
         {
-            object->VelocityX = fix16Sub(object->VelocityX, acceleration);
+            Player->VelocityX = fix16Sub(Player->VelocityX, acceleration);
         }
         else if (pressed_right)
         {
-            object->VelocityX = fix16Add(object->VelocityX, acceleration);
+            Player->VelocityX = fix16Add(Player->VelocityX, acceleration);
         }
     }
     else    // In air
     {
-        object->VelocityX = fix16Mul(object->VelocityX, friction);
+        Player->VelocityX = fix16Mul(Player->VelocityX, friction);
         if(pressed_left)
         {
-            object->VelocityX = fix16Sub(object->VelocityX, air_acceleration);
+            Player->VelocityX = fix16Sub(Player->VelocityX, air_acceleration);
         }
         else if (pressed_right)
         {
-            object->VelocityX = fix16Add(object->VelocityX, air_acceleration);
+            Player->VelocityX = fix16Add(Player->VelocityX, air_acceleration);
         }
     }
 
     ObjectPlayerUpdateSprite(object);
 
-    object->OnfloorLast = Grounded;
+    Player->OnfloorLast = Grounded;
     
-    SetCollisionRectangleAligned(&object->Base.Collision, fix32ToInt(object->Base.x), fix32ToInt(object->Base.y), 20, 40, BottomMiddle);
-    //SetCollisionRectangle(&object->Base.Collision, fix32ToInt(object->Base.x) - 20, fix32ToInt(object->Base.y) + 24, 20, 40);
+    SetCollisionRectangleAligned(&Player->Base.Collision, fix32ToInt(Player->Base.x), fix32ToInt(Player->Base.y), 20, 40, BottomMiddle);
+    //SetCollisionRectangle(&Player->Base.Collision, fix32ToInt(Player->Base.x) - 20, fix32ToInt(Player->Base.y) + 24, 20, 40);
 }
 
-void ObjectPlayerCreate(ObjectPlayer *object)
+void ObjectPlayerInit(void* object)
 {
-    object->Health = 100;
-    object->MaxHealth = 100;
+    ObjectPlayer* Player = (ObjectPlayer*)object;
+
+    Player->Health = 100;
+    Player->MaxHealth = 100;
     //
-    object->AnimationState = PlayerStateStanding;
-    object->AnimationTick = 0;
+    Player->AnimationState = PlayerStateStanding;
+    Player->AnimationTick = 0;
     // Physics
-    object->VelocityX = FIX16(0);
-    object->VelocityY = FIX16(0);
-    object->OnFloor = FALSE;
-    object->CoyoteFrames = 0;
+    Player->VelocityX = FIX16(0);
+    Player->VelocityY = FIX16(0);
+    Player->OnFloor = FALSE;
+    Player->CoyoteFrames = 0;
     // sprite
-    object->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    Player->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
     
-    SPR_setVisibility(object->Base.spr, AUTO_FAST);
-    object->Base.spriteOffset.x = -24;
-    object->Base.spriteOffset.y = -48;
+    SPR_setVisibility(Player->Base.spr, AUTO_FAST);
+    Player->Base.spriteOffset.x = -24;
+    Player->Base.spriteOffset.y = -48;
     PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);
 }
 
-void ObjectPlayerInput(ObjectPlayer *object, uint8_t changed)
+void ObjectPlayerInput(ObjectPlayer *Player, uint8_t changed)
 {
-    object->changed = changed;
+    Player->changed = changed;
 }
