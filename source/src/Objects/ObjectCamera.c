@@ -1,5 +1,7 @@
 #include "ObjectCamera.h"
 
+#include "../Types/FixedPointHelpers.h"
+
 void ObjectCameraSetTarget(ObjectCamera* Camera, struct ObjectBase* Target)
 {
     Camera->Target = Target;
@@ -16,15 +18,16 @@ void ObjectCameraUpdate(void* object)
     ObjectCamera* Camera = (ObjectCamera*)object;
     if(Camera->Target != NULL)
     {
-        Camera->Base.x = fix32Sub(Camera->Target->x, FIX32(320 /2));
-        int cx = fix32ToInt(Camera->Base.x);
+        fix32 x = Camera->Base.x, y = Camera->Base.y;
+        x = fix32Sub(Camera->Target->x, FIX32(320 /2));
+        int cx = fix32ToInt(x);
         if(cx < 0)
         {
-            Camera->Base.x = FIX32(0);
+            x = FIX32(0);
         }
         else if (cx > (Camera->StageWidth - 320))
         {
-            Camera->Base.x = FIX32(Camera->StageWidth - 320);
+            x = FIX32(Camera->StageWidth - 320);
         }
 
         fix32 minus;
@@ -41,16 +44,20 @@ void ObjectCameraUpdate(void* object)
             border = 224;
         }
         
-        Camera->Base.y = fix32Sub(Camera->Target->y, minus);
-        int cy = fix32ToInt(Camera->Base.y);
+        y = fix32Sub(Camera->Target->y, minus);
+        int cy = fix32ToInt(y);
         if(cy < 0)
         {
-            Camera->Base.y = FIX32(0);
+            y = FIX32(0);
         }
         else if (cy > (Camera->StageHeight - border))
         {
-            Camera->Base.y = FIX32(Camera->StageWidth - border);
+            y = FIX32(Camera->StageWidth - border);
         }
+
+        //
+        Camera->Base.x = fix32Lerp(Camera->Base.x, x, FIX32(0.15));
+        Camera->Base.y = fix32Lerp(Camera->Base.y, y, FIX32(0.15));
     }
 }
 
