@@ -2,7 +2,7 @@
 SPRITE gfx_cursor "sprites/cursor.png" 1 1 BEST 10
 IMAGE bgtile "tilesets/bgtile.png" -1
 
-SPRITE sprPlayer "sprites/player.png" 6 6 FAST 8
+SPRITE sprPlayer "sprites/player.png" 6 6 NONE 0
 # SPRITE sprPlayer "sprites/player.png" 6 6 FAST 8
 
 SPRITE sprPaused "sprites/sprPaused.png" 12 4 FAST 1

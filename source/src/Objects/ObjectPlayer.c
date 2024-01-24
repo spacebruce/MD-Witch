@@ -22,6 +22,20 @@ const uint16_t ButtonMask[] =
     BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_START,
 };
 
+inline void ObjectPlayerUpdateSprite(ObjectPlayer* object)
+{
+    // Countdown even if offscreen
+    --(object->AnimationTick);
+    if(SPR_isVisible(object->Base.spr, false))
+    {
+        if(object->AnimationTick <= 0)
+        {
+            SPR_nextFrame(object->Base.spr);
+            object->AnimationTick = 3;
+        }
+    }
+}
+
 void ObjectPlayerUpdate(ObjectPlayer *object)
 {
     //  Check for input holds
@@ -66,6 +80,19 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
     // Cache current velocity for later
     const fix16 OldVelocityX = object->VelocityX;
     const fix16 OldVelocityY = object->VelocityY;
+
+    // Apply momentum from frame
+    if(GameContext.Speedup == FIX16(1.0)) // NTSC mode
+    {
+        object->Base.x = fix32Add(object->Base.x, fix16ToFix32(object->VelocityX));
+        object->Base.y = fix32Add(object->Base.y, fix16ToFix32(object->VelocityY));
+    }
+    else    // PAL Mode
+    {
+        // implement speed correction here... 
+        object->Base.x = fix32Add(object->Base.x, fix16ToFix32(object->VelocityX));
+        object->Base.y = fix32Add(object->Base.y, fix16ToFix32(object->VelocityY));
+    }
 
     //
     s32 x = fix32ToInt(object->Base.x);
@@ -275,23 +302,10 @@ void ObjectPlayerUpdate(ObjectPlayer *object)
         }
     }
 
+    ObjectPlayerUpdateSprite(object);
+
     object->OnfloorLast = Grounded;
     
-    // Apply momentum from frame
-    if(GameContext.Speedup == FIX16(1.0)) // NTSC mode
-    {
-        object->Base.x = fix32Add(object->Base.x, fix16ToFix32(object->VelocityX));
-        object->Base.y = fix32Add(object->Base.y, fix16ToFix32(object->VelocityY));
-    }
-    else    // PAL Mode
-    {
-        // implementing :-
-        /*
-            velocityOld = velocityX
-            ...
-            posX += (velocityX + velocityOld)/2 * delta;
-        */
-    }
     SetCollisionRectangleAligned(&object->Base.Collision, fix32ToInt(object->Base.x), fix32ToInt(object->Base.y), 20, 40, BottomMiddle);
     //SetCollisionRectangle(&object->Base.Collision, fix32ToInt(object->Base.x) - 20, fix32ToInt(object->Base.y) + 24, 20, 40);
 }
@@ -300,6 +314,9 @@ void ObjectPlayerCreate(ObjectPlayer *object)
 {
     object->Health = 100;
     object->MaxHealth = 100;
+    //
+    object->AnimationState = PlayerStateStanding;
+    object->AnimationTick = 0;
     // Physics
     object->VelocityX = FIX16(0);
     object->VelocityY = FIX16(0);
@@ -307,6 +324,7 @@ void ObjectPlayerCreate(ObjectPlayer *object)
     object->CoyoteFrames = 0;
     // sprite
     object->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    
     SPR_setVisibility(object->Base.spr, AUTO_FAST);
     object->Base.spriteOffset.x = -24;
     object->Base.spriteOffset.y = -48;

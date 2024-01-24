@@ -3,10 +3,18 @@
 
 #include <genesis.h>
 
+typedef enum 
+{
+    PlayerStateStanding, PlayerStateWalking, 
+} PlayerAnimationState;
+
 typedef struct ObjectPlayer
 {
     struct ObjectBase Base;
     uint8_t ButtonFrames[8];
+    //
+    PlayerAnimationState AnimationState;
+    int16_t AnimationTick;
     // 
     s16 MaxHealth;
     s16 Health;
