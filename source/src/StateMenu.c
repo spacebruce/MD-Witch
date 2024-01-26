@@ -78,11 +78,11 @@ void Menu_GotoMainMenu()
 // Joystick
 void StateMenu_Joystick(u16 Joy, u16 Changed, u16 State)
 {
-    if (Changed & State & BUTTON_LEFT)
+    if (Changed & State & BUTTON_UP)
     {
         CurrentMenu->Selected = max(CurrentMenu->Selected - 1, 0);
     }
-    else if (Changed & State & BUTTON_RIGHT)
+    else if (Changed & State & BUTTON_DOWN)
     {
         CurrentMenu->Selected = min(CurrentMenu->Selected + 1, CurrentMenu->Size - 1);
     }
@@ -108,10 +108,10 @@ void StateMenu_Start()
     VDP_setVerticalScroll(BG_A, 0);
     VDP_setVerticalScroll(BG_B, 0);
 
-	VDP_drawImage(BG_A, &sprLogo,18,29);
-	DMA_waitCompletion();
-	VDP_drawImage(BG_B, &sprWitch,1,32);
-	DMA_waitCompletion();
+    uint16_t index = 0;
+	VDP_drawImageEx(BG_A, &sprLogo, TILE_ATTR_FULL(0,false,false,false,index), 18,29, true, false);
+    index += sprLogo.tileset->numTile;
+	VDP_drawImageEx(BG_B, &sprWitch, TILE_ATTR_FULL(0,false,false,false,index), 1,32, true, false);
 
     //PAL_fadeIn(0,63, image_titlescreen.palette->data, GameContext.Framerate * 2, true);
 
@@ -129,6 +129,7 @@ void StateMenu_Start()
 void StateMenu_End()
 {
     //PAL_fadeOutAll(GameContext.Framerate, false);
+    
     VDP_clearPlane(BG_A, TRUE);
     VDP_clearPlane(BG_B, TRUE);
     VDP_clearSprites();
@@ -160,7 +161,9 @@ void StateMenu_Tick()
         CX = 24;
         SPR_setAnim(cursor[i], (CurrentMenu->Selected == i));
 
-        SPR_setPosition(cursor[i],CX * 8,Y);
+        uint16_t SY = max((47*8) - ScrollInt, 160) + (i * 24);
+
+        SPR_setPosition(cursor[i],CX * 8,SY);
         VDP_drawText(Item->Label, CX + 2,Y);
     }
     

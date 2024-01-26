@@ -53,6 +53,8 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
             }
             else
             {
+                if(State & BUTTON_B)
+                    GameContext.NextStateID = STATE_MENU;
                 if(State & BUTTON_C)
                     GameContext.Freecam = !GameContext.Freecam;
             }

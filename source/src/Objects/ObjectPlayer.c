@@ -31,7 +31,7 @@ inline void ObjectPlayerUpdateSprite(ObjectPlayer* Player)
         if(Player->AnimationTick <= 0)
         {
             SPR_nextFrame(Player->Base.spr);
-            Player->AnimationTick = 3;
+            Player->AnimationTick = 8;
         }
     }
 }
