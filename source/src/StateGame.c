@@ -218,11 +218,13 @@ void StateGame_Tick()
     }
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
-    char buf[16];
-    sprintf(buf, "%i/%i", Player1.Health,Player1.MaxHealth);
-    VDP_drawText(buf, 4,4);
-    VDP_drawText(buf, 8,8);
-    VDP_drawText(buf, 16,16);
+    const char* buf;
+    const int len = sizeof(ObjectList) / sizeof(ObjectList[0]); 
+    for(int i = 0; i < len; ++i)
+    {
+        buf = ObjectList[i].name;
+        VDP_drawText(buf, 8, 8 + i);
+    }
     
     // Paused or not, run map drawing logic
     if(GameContext.CurrentStage != NULL)

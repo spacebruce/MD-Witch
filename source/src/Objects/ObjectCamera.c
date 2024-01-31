@@ -16,9 +16,11 @@ void ObjectCameraInit(void* object)
 void ObjectCameraUpdate(void* object)
 {
     ObjectCamera* Camera = (ObjectCamera*)object;
+    
+    fix32 x = Camera->Base.x, y = Camera->Base.y;
+
     if(Camera->Target != NULL)
     {
-        fix32 x = Camera->Base.x, y = Camera->Base.y;
         x = fix32Sub(Camera->Target->x, FIX32(320 /2));
         int cx = fix32ToInt(x);
         if(cx < 0)
@@ -32,8 +34,8 @@ void ObjectCameraUpdate(void* object)
 
         fix32 minus;
         s16 border;
-        // Give PAL players a little more screen space... they've earned it
-        if(IS_PAL_SYSTEM)   
+        
+        if(IS_PAL_SYSTEM)   // Give PAL players a little more screen space... they've earned it
         {
             minus = FIX32(188);
             border = 240;
@@ -56,9 +58,9 @@ void ObjectCameraUpdate(void* object)
         }
 
         //
-        Camera->Base.x = fix32Lerp(Camera->Base.x, x, FIX32(0.15));
-        Camera->Base.y = fix32Lerp(Camera->Base.y, y, FIX32(0.15));
     }
+    Camera->Base.x = fix32Lerp(Camera->Base.x, x, FIX32(0.15));
+    Camera->Base.y = fix32Lerp(Camera->Base.y, y, FIX32(0.15));
 }
 
 void ObjectCameraSetStageSize(ObjectCamera* Camera, const u16 W, const u16 H)
@@ -69,7 +71,6 @@ void ObjectCameraSetStageSize(ObjectCamera* Camera, const u16 W, const u16 H)
 
 void ObjectCameraFreecam(ObjectCamera* Camera, u16 State)
 {
-
     if((State & BUTTON_LEFT) == BUTTON_LEFT)    
         Camera->Base.x = fix32Sub(Camera->Base.x, FIX32(1));
     if((State & BUTTON_RIGHT) == BUTTON_RIGHT) 

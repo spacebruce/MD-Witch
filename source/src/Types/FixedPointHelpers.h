@@ -1,8 +1,21 @@
 #include <genesis.h>
 #include <maths.h>
 
-// Clamp function for fixed-point numbers
-fix16 fix16Clamp(fix16 value, fix16 min, fix16 max) {
+// My kingdom for C++ templates, I miss them. 
+
+//
+fix16 fix16DistInt(fix16 val1, fix16 val2)
+{
+    return val1;
+}
+fix32 fix32DistInt(fix32 val1, fix32 val2)
+{
+    return val1;
+}
+
+// Clamp function
+fix16 fix16Clamp(fix16 value, fix16 min, fix16 max)
+{
     if (value < min) {
         return min;
     } else if (value > max) {
