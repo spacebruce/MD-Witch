@@ -10,6 +10,9 @@ typedef enum
     TypeObjectCamera = 0,
     TypeObjectPlayer = 1,
     TypeObjectPickup = 2,
+
+//
+    TypeEnemyBloober = 100,
 } ObjectID;
 
 struct ObjectManifest
@@ -25,10 +28,15 @@ struct ObjectManifest
 #include "Objects/ObjectCamera.h"
 #include "Objects/ObjectPlayer.h"
 #include "Objects/ObjectPickup.h"
+#include "Objects/Enemies/EnemyBloober.h"
 
 static const struct ObjectManifest ObjectList[] = 
 {
+    // Important stuff
     { TypeObjectCamera, "CAMERA", sizeof(ObjectCamera), ObjectCameraInit, ObjectCameraUpdate, NULL },
     { TypeObjectPlayer, "PLAYER", sizeof(ObjectPlayer), ObjectPlayerInit, ObjectPlayerUpdate, NULL },
     { TypeObjectPickup, "PICKUP", sizeof(ObjectPickup), ObjectPickupInit, ObjectPickupUpdate, NULL },
+    // 
+    //  Enemies
+    { TypeEnemyBloober, "BLOOBER", sizeof(EnemyBloober), EnemyBlooberInit, EnemyBlooberUpdate, EnemyBlooberFree },
 };

@@ -3,13 +3,16 @@
 
 #include "../Types/Collision.h"
 
+// Needs optimising
 struct ObjectBase
 {
+    struct CollisionObject Collision;
     fix32 x;
     fix32 y;
     Sprite* spr;
     Vect2D_s16 spriteOffset;
-    struct CollisionObject Collision;
+    // Bookkeeping
+    uint8_t ActiveObjectID;
 };
 
 void ObjectSetPositionFix32(struct ObjectBase* Object, fix32 X, fix32 Y);

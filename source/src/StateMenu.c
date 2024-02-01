@@ -100,6 +100,9 @@ void StateMenu_Start()
     JOY_setEventHandler(&StateMenu_Joystick);
     Menu_GotoMainMenu();    // Init menu
     
+    VDP_clearPlane(BG_A, true);
+    VDP_clearPlane(BG_B, true);
+
 	VDP_setPlaneSize(64,64, true);
 	VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
 

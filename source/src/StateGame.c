@@ -8,8 +8,9 @@
 
 #include "Stages/Stages.h"
 
-#include "ObjectList.h"
+#include "ObjectManager.h"
 
+#include "ObjectList.h"
 #include "Objects/ObjectCamera.h"
 #include "Objects/ObjectPlayer.h"
 #include "Objects/ObjectPickup.h"
@@ -84,6 +85,8 @@ void StateGame_Reload()
 // State entry points
 void StateGame_Start()
 {
+    InitObjectManager();
+
     GameContext.CurrentStageID = 0xFF;
     GameContext.NextStageID = 1;    // Change to 0 once cutscene implemented
 
@@ -117,12 +120,12 @@ void StateGame_Start()
 
 }
 void StateGame_End()
-{
-    //PAL_fadeOutAll(GameContext.Framerate, false);
-    VDP_clearPlane(BG_A, TRUE);
-    VDP_clearPlane(BG_B, TRUE);
-    VDP_clearSprites();
-    SPR_end();
+{    
+    PAL_fadeOutAll(GameContext.Framerate, false);   // Fadeout animation
+
+    SPR_end();          // Kill sprite engine
+    EndObjectManager(); // Dump all game objects from memory
+
     GameContext.CurrentStageID = 0xFF;  // Invalidate the StageID so entry gets refired again on next StateGame start
 }
 void StateGame_Tick()
@@ -218,14 +221,17 @@ void StateGame_Tick()
     }
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
-    const char* buf;
-    const int len = sizeof(ObjectList) / sizeof(ObjectList[0]); 
-    for(int i = 0; i < len; ++i)
-    {
-        buf = ObjectList[i].name;
-        VDP_drawText(buf, 8, 8 + i);
-    }
-    
+    //const char* buf;
+    //const int len = sizeof(ObjectList) / sizeof(ObjectList[0]); 
+    //for(int i = 0; i < len; ++i)
+    //{
+    //    buf = ObjectList[i].name;
+    //    VDP_drawText(buf, 8, 8 + i);
+    //}
+    char buf[20];
+    sprintf(buf, "MEM:%i", MEM_getFree());
+    VDP_drawText(buf, 8,8);
+
     // Paused or not, run map drawing logic
     if(GameContext.CurrentStage != NULL)
         GameContext.CurrentStage->Draw();
