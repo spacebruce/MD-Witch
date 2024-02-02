@@ -55,8 +55,8 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
             {
                 if(State & BUTTON_A)
                 {
-                    fix32 x = GameContext.Camera->Base.x + (320 / 2);
-                    fix32 y = GameContext.Camera->Base.y + (224 / 2);
+                    fix32 x = GameContext.Camera->Base.x + FIX32(320 / 2);
+                    fix32 y = GameContext.Camera->Base.y + FIX32(224 / 2);
                     ObjectPlayer* P = CreateObject(TypeObjectPlayer);
                     ObjectSetPositionFix32(&P->Base, x,y);
                 }
@@ -129,9 +129,21 @@ void StateGame_End()
 }
 void StateGame_Tick()
 {
+    s16 CameraX = fix32ToInt(GameContext.Camera->Base.x);
+    s16 CameraY = fix32ToInt(GameContext.Camera->Base.y);
+    
+    if(GameContext.MapA != NULL)
+        MAP_scrollTo(GameContext.MapA, CameraX, CameraY);
+    if(GameContext.MapB != NULL)
+        MAP_scrollTo(GameContext.MapB, (CameraX >> 2), (CameraY >> 2));
+
     // Stage logic
     if((GameContext.CurrentStageID != GameContext.NextStageID))   // If stage change triggered
     {
+        SYS_disableInts();
+        SPR_defragVRAM();
+        SYS_enableInts();
+
         StateBootup = false;
 
         // Shut down last stage
@@ -148,7 +160,7 @@ void StateGame_Tick()
         if(GameContext.CurrentStage != NULL)        // If stage loaded
         {
             SYS_disableInts();
-            
+
             GameContext.CurrentStage->Init();       // Init incoming stage
             
             ObjectCameraSetStageSize(GameContext.Camera, GameContext.CurrentStage->Width, GameContext.CurrentStage->Height);
@@ -195,19 +207,12 @@ void StateGame_Tick()
         {
             GameContext.CurrentStage->Tick();
             TickObjects();
-            if(!GameContext.Freecam)
+            //if(!GameContext.Freecam)
             {
                 ObjectCameraUpdate(GameContext.Camera);
             }
         }
     }
-    s16 CameraX = fix32ToInt(GameContext.Camera->Base.x);
-    s16 CameraY = fix32ToInt(GameContext.Camera->Base.y);
-
-    if(GameContext.MapA != NULL)
-        MAP_scrollTo(GameContext.MapA, CameraX, CameraY);
-    if(GameContext.MapB != NULL)
-        MAP_scrollTo(GameContext.MapB, (CameraX >> 2), (CameraY >> 2));
 
     // Collision test
     //if(CheckCollision(&Player1.Base.Collision, &Pickup.Base.Collision))
