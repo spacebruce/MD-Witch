@@ -10,6 +10,9 @@ SPRITE sprFreecam "sprites/sprFreecam.png" 4 4 FAST 1
 
 SPRITE sprHudMeter "sprites/sprHudMeter.png" 4 2 FAST 1
 
+## ENEMIES
+SPRITE sprFrogman "sprites/Frogman.png" 6 6 NONE 0
+
 IMAGE sprWitch "sprites/witch_2.png" FAST
 IMAGE sprLogo "sprites/logo.png" BEST
 IMAGE image_titlescreen "sprites/titlescreen.png" BEST
