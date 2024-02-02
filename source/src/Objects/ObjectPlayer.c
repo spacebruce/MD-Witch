@@ -314,7 +314,9 @@ void ObjectPlayerUpdate(void* object)
 void ObjectPlayerInit(void* object)
 {
     ObjectPlayer* Player = (ObjectPlayer*)object;
-
+    //
+    memset(Player->ButtonFrames,0,8); 
+    //
     Player->Health = 100;
     Player->MaxHealth = 100;
     //

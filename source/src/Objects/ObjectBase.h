@@ -13,6 +13,7 @@ struct ObjectBase
     Vect2D_s16 spriteOffset;
     // Bookkeeping
     uint8_t ActiveObjectID;
+    int ObjectType;
 };
 
 void ObjectSetPositionFix32(struct ObjectBase* Object, fix32 X, fix32 Y);

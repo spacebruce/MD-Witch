@@ -11,6 +11,7 @@
 #include "ObjectManager.h"
 
 #include "ObjectList.h"
+#include "Objects/ObjectBase.h"
 #include "Objects/ObjectCamera.h"
 #include "Objects/ObjectPlayer.h"
 #include "Objects/ObjectPickup.h"
@@ -18,11 +19,9 @@
 struct Sprite* SpriteFreecam;
 struct Sprite* SpritePaused;
 
-//struct MemoryPool ObjectMemory;
+struct ObjectPlayer* Player;
 
-ObjectPlayer Player1;
-ObjectPlayer Player2;
-ObjectPickup Pickup;
+//struct MemoryPool ObjectMemory;
 
 //
 bool LastPaused;
@@ -43,17 +42,24 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
             {
                 if(GameContext.Freecam)
                 {
-                    ObjectPlayerInput(&Player1, 0x00);
+                    //ObjectPlayerInput(&Player1, 0x00);
                     //ObjectPlayerInput(&Player2, State);
                     ObjectCameraFreecam(GameContext.Camera, State);
                 }
                 else
                 {
-                    ObjectPlayerInput(&Player1, State);
+                    ObjectPlayerInput((struct ObjectPlayer*)(GameContext.Player), State);
                 }
             }
             else
             {
+                if(State & BUTTON_A)
+                {
+                    fix32 x = GameContext.Camera->Base.x + (320 / 2);
+                    fix32 y = GameContext.Camera->Base.y + (224 / 2);
+                    ObjectPlayer* P = CreateObject(TypeObjectPlayer);
+                    ObjectSetPositionFix32(&P->Base, x,y);
+                }
                 if(State & BUTTON_B)
                     GameContext.NextStateID = STATE_MENU;
                 if(State & BUTTON_C)
@@ -78,8 +84,6 @@ void StateGame_Reload()
 
     memcpy(&(GameContext.palette)[PAL_BACKGROUND], sprPlayer.palette->data, 16);
     memcpy(&(GameContext.palette)[PAL_PLAYER], sprPlayer.palette->data, 16);
-    
-	//PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, GameContext.Framerate, true);
 }
 
 // State entry points
@@ -94,13 +98,8 @@ void StateGame_Start()
 
     StateGame_Reload();
 
-    ObjectPlayerInit(&Player1);
-    ObjectPlayerInit(&Player2);
     ObjectCameraInit(GameContext.Camera);
-    ObjectCameraSetTarget(GameContext.Camera, &Player1.Base);
-
-    ObjectPickupInit(&Pickup);
-    ObjectSetPositionS32(&Pickup.Base, 96,96);
+    //ObjectCameraSetTarget(GameContext.Camera, &Player1.Base);
 
     StateBootup = true;
 
@@ -134,24 +133,35 @@ void StateGame_Tick()
     if((GameContext.CurrentStageID != GameContext.NextStageID))   // If stage change triggered
     {
         StateBootup = false;
+
+        // Shut down last stage
         if(GameContext.CurrentStage != NULL)
         {
+            PAL_fadeOutAll(GameContext.Framerate, false);
             GameContext.CurrentStage->Cleanup();    // Clear out stage memory/vram
+            EndObjectManager();
+            InitObjectManager();
         }
+        // Find next
         GameContext.CurrentStage = GetStageData(GameContext.NextStageID);
         GameContext.CurrentStageID = GameContext.NextStageID;
         if(GameContext.CurrentStage != NULL)        // If stage loaded
         {
             SYS_disableInts();
+            
             GameContext.CurrentStage->Init();       // Init incoming stage
-            SYS_enableInts();
             
             ObjectCameraSetStageSize(GameContext.Camera, GameContext.CurrentStage->Width, GameContext.CurrentStage->Height);
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
-            GameContext.Player = &Player1.Base;
-            ObjectSetPositionS32(&Player1.Base, GameContext.PlayerSpawn.x, GameContext.PlayerSpawn.y); 
-            ObjectSetPositionS32(&Player2.Base, GameContext.PlayerSpawn.x, GameContext.PlayerSpawn.y); 
+
+            Player = CreateObject(TypeObjectPlayer);
+            ObjectCameraSetTarget(GameContext.Camera, &Player->Base);
+            ObjectSetPositionS32(&Player->Base, GameContext.PlayerSpawn.x, GameContext.PlayerSpawn.y); 
+            GameContext.Player = &Player->Base;
+
+            //
+            SYS_enableInts();
         }
     }
     
@@ -184,9 +194,7 @@ void StateGame_Tick()
         if(GameContext.CurrentStage != NULL)
         {
             GameContext.CurrentStage->Tick();
-            ObjectPlayerUpdate(&Player1);
-            ObjectPlayerUpdate(&Player2);
-            ObjectPickupUpdate(&Pickup);
+            TickObjects();
             if(!GameContext.Freecam)
             {
                 ObjectCameraUpdate(GameContext.Camera);
@@ -196,29 +204,16 @@ void StateGame_Tick()
     s16 CameraX = fix32ToInt(GameContext.Camera->Base.x);
     s16 CameraY = fix32ToInt(GameContext.Camera->Base.y);
 
-    // char buffer[20];
-    // sprintf(buffer, "X:%i\nY:%i", fix32ToInt(GameContext.Player->x), fix32ToInt(GameContext.Player->y));
-    // VDP_drawText(buffer, 10,10);
-    
     if(GameContext.MapA != NULL)
         MAP_scrollTo(GameContext.MapA, CameraX, CameraY);
     if(GameContext.MapB != NULL)
         MAP_scrollTo(GameContext.MapB, (CameraX >> 2), (CameraY >> 2));
 
-    //VDP_setHorizontalScroll(BG_B, (-CameraX >> 1));
-    //VDP_setVerticalScroll(BG_B, -CameraY);
-
-    // update all sprites
-    //SPR_setPosition(SpritePlayer, Player.Base.x - 24, Player.Base.y - 48);
-    ObjectUpdateSprite(&Player1.Base, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
-    ObjectUpdateSprite(&Player2.Base, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
-    ObjectUpdateSprite(&Pickup.Base, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
-
     // Collision test
-    if(CheckCollision(&Player1.Base.Collision, &Pickup.Base.Collision))
-    {
-        Player1.Health -= 2;
-    }
+    //if(CheckCollision(&Player1.Base.Collision, &Pickup.Base.Collision))
+    //{
+    //    Player1.Health -= 2;
+    //}
 
     //int time = GameContext.StageFrame / GameContext.Framerate;
     //const char* buf;
@@ -231,6 +226,16 @@ void StateGame_Tick()
     char buf[20];
     sprintf(buf, "MEM:%i", MEM_getFree());
     VDP_drawText(buf, 8,8);
+    for(int i = 0; i < 10; ++i)
+    {
+        struct ObjectBase* obj = GetObjectFromID(i);
+        if(obj != NULL)
+        {
+            //strncpy(buf, ObjectList->name[obj->ActiveObjectID], 20);
+            sprintf(buf, "%i", obj->ObjectType);
+            VDP_drawText(buf, 8,9+i);
+        }
+    }
 
     // Paused or not, run map drawing logic
     if(GameContext.CurrentStage != NULL)

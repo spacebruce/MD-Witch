@@ -1,9 +1,11 @@
 #include "ObjectManager.h"
 
+#include "GameContext.h"
+
 /*
     Improvements sorely needed
     [ ] Ditch malloc/free for custom solution
-    [ ] Bind functions to objects rather than use a (slower?) look-up table
+    [ ] Bind functions to objects rather than use the (slower?) look-up table method
 */
 
 // 8KB
@@ -76,6 +78,7 @@ void* CreateObject(const ObjectID Type)
         meta->Init((void*)thing);
     }
     thing->ActiveObjectID = ActiveObjectID;
+    thing->ObjectType = Type;
 
     // Keep track of it
     Objects[ActiveObjectID].Start = thing;
@@ -113,12 +116,25 @@ void TickObjects()
     uint8_t processed = 0, index = 0;
     while(processed < ActiveObjectCount)
     {
+        // Skip gaps
         while(Objects[index].Start == NULL)
         {
             ++index;
         }
+        // grab object properties from type
         const struct ObjectManifest* meta = &ObjectList[Objects[index].Type];
+        // update
         meta->Tick(Objects[index].Start);
+        ObjectUpdateSprite(Objects[index].Start, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
+        // next
         ++processed;
+        ++index;
     }
+}
+
+void* GetObjectFromID(const uint8_t ID)
+{
+    if(ID >= ObjectPoolSlots)
+        return NULL;
+    return Objects[ID].Start;
 }
