@@ -1,5 +1,12 @@
 #include "ObjectBase.h"
 
+
+void ObjectBaseInit(struct ObjectBase* Object, fix32 x, fix32 y, int ObjectType)
+{
+    ObjectSetPositionFix32(Object, x, y);
+    Object->ObjectType = ObjectType;
+}
+
 void ObjectSetPositionFix32(struct ObjectBase* Object, const fix32 X, const fix32 Y)
 {
     Object->x = X;

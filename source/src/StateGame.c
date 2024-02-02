@@ -57,8 +57,7 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
                 {
                     fix32 x = GameContext.Camera->Base.x + FIX32(320 / 2);
                     fix32 y = GameContext.Camera->Base.y + FIX32(224 / 2);
-                    ObjectPlayer* P = CreateObject(TypeObjectPlayer);
-                    ObjectSetPositionFix32(&P->Base, x,y);
+                    ObjectPlayer* P = CreateObject(TypeObjectPickup, x, y);
                 }
                 if(State & BUTTON_B)
                     GameContext.NextStateID = STATE_MENU;
@@ -167,9 +166,8 @@ void StateGame_Tick()
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
 
-            Player = CreateObject(TypeObjectPlayer);
+            Player = CreateObject(TypeObjectPlayer, FIX32(GameContext.PlayerSpawn.x), FIX32(GameContext.PlayerSpawn.y));
             ObjectCameraSetTarget(GameContext.Camera, &Player->Base);
-            ObjectSetPositionS32(&Player->Base, GameContext.PlayerSpawn.x, GameContext.PlayerSpawn.y); 
             GameContext.Player = &Player->Base;
 
             //
@@ -207,7 +205,7 @@ void StateGame_Tick()
         {
             GameContext.CurrentStage->Tick();
             TickObjects();
-            //if(!GameContext.Freecam)
+            if(!GameContext.Freecam)
             {
                 ObjectCameraUpdate(GameContext.Camera);
             }
@@ -228,20 +226,20 @@ void StateGame_Tick()
     //    buf = ObjectList[i].name;
     //    VDP_drawText(buf, 8, 8 + i);
     //}
-    char buf[20];
-    sprintf(buf, "MEM:%i", MEM_getFree());
-    VDP_drawText(buf, 8,8);
-    for(int i = 0; i < 10; ++i)
-    {
-        struct ObjectBase* obj = GetObjectFromID(i);
-        if(obj != NULL)
-        {
-            //strncpy(buf, ObjectList->name[obj->ActiveObjectID], 20);
-            sprintf(buf, "%i", obj->ObjectType);
-            VDP_drawText(buf, 8,9+i);
-        }
-    }
-
+    //char buf[20];
+    //sprintf(buf, "MEM:%i", MEM_getFree());
+    //VDP_drawText(buf, 8,8);
+    //for(int i = 0; i < 10; ++i)
+    //{
+    //    struct ObjectBase* obj = GetObjectFromID(i);
+    //    if(obj != NULL)
+    //    {
+    //        //strncpy(buf, ObjectList->name[obj->ActiveObjectID], 20);
+    //        sprintf(buf, "%i:X:%li,Y:%li", obj->ObjectType, fix32ToInt(obj->x),fix32ToInt(obj->y));
+    //        VDP_drawText(buf, 8,9+i);
+    //    }
+    //}
+//
     // Paused or not, run map drawing logic
     if(GameContext.CurrentStage != NULL)
         GameContext.CurrentStage->Draw();

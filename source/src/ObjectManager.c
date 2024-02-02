@@ -2,12 +2,6 @@
 
 #include "GameContext.h"
 
-/*
-    Improvements sorely needed
-    [ ] Ditch malloc/free for custom solution
-    [ ] Bind functions to objects rather than use the (slower?) look-up table method
-*/
-
 // 8KB
 //#define ObjectPoolSize (6 * 1024)
 #define ObjectPoolSlots (80)
@@ -44,7 +38,7 @@ void EndObjectManager()
         DestroyObject(i);
 }
 
-void* CreateObject(const ObjectID Type)
+void* CreateObject(const ObjectID Type, fix32 X, fix32 Y)
 {
     if(ActiveObjectCount == ObjectPoolSlots)
     {
@@ -73,6 +67,7 @@ void* CreateObject(const ObjectID Type)
     }
 
     // Construct object in place
+    ObjectBaseInit((void*)thing, X,Y,Type);
     if(meta->Init != NULL)
     {
         meta->Init((void*)thing);
