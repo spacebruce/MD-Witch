@@ -118,9 +118,17 @@ void TickObjects()
         }
         // grab object properties from type
         const struct ObjectManifest* meta = &ObjectList[Objects[index].Type];
+
         // update
-        meta->Tick(Objects[index].Start);
-        ObjectUpdateSprite(Objects[index].Start, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
+        if(meta->Tick != NULL)
+        {
+            meta->Tick(Objects[index].Start);
+            ObjectUpdateSprite(Objects[index].Start, GameContext.Camera->Base.x, GameContext.Camera->Base.y);
+        }
+
+        if((((struct ObjectBase*)Objects[index].Start)->Flags & OBJECT_DESTROY) == OBJECT_DESTROY)
+            DestroyObject(index);
+        
         // next
         ++processed;
         ++index;

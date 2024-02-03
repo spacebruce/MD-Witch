@@ -7,8 +7,8 @@
 typedef struct ObjectPickup
 {
     struct ObjectBase Base;
-
 } ObjectPickup;
 
 void ObjectPickupInit(void* object);
 void ObjectPickupUpdate(void* object);
+void ObjectPickupKill(void* object);

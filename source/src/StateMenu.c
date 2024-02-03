@@ -123,11 +123,10 @@ void StateMenu_Start()
     SPR_init();
     for(int i = 0; i < 3; ++i)
     {
-        cursor[i] = SPR_addSprite(&gfx_cursor, 0, 0, TILE_ATTR(PAL_PLAYER, 1, false, false));
+        cursor[i] = SPR_addSprite(&sprCursor, 0, 0, TILE_ATTR(0, 1, false, false));
         //Sprite* spr = cursor[i];
-        SPR_setPalette(cursor[i], PAL_PLAYER);
     }
-    //PAL_setPalette(STUFF_PALETTE, gfx_cursor.palette->data, DMA);
+    //PAL_setPalette(STUFF_PALETTE, sprCursor.palette->data, DMA);
 }
 void StateMenu_End()
 {

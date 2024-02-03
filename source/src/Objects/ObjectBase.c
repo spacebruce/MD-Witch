@@ -3,6 +3,9 @@
 
 void ObjectBaseInit(struct ObjectBase* Object, fix32 x, fix32 y, int ObjectType)
 {
+    Object->Flags = 0x0000;
+    Object->StartX = fix32ToInt(x);
+    Object->StartY = fix32ToInt(y);
     ObjectSetPositionFix32(Object, x, y);
     Object->ObjectType = ObjectType;
 }
