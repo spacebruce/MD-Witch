@@ -21,4 +21,5 @@ out/src/StateMenu.o: src/StateMenu.c src/StateMenu.h \
  C:/dev/sgdk190/inc/task_cst.h C:/dev/sgdk190/inc/ext/flash-save/flash.h \
  C:/dev/sgdk190/inc/types.h C:/dev/sgdk190/inc/ext/flash-save/saveman.h \
  src/Types/StateType.h res/resources.h src/Types/Menu.h src/GameContext.h \
- src/defines.h src/Types/StageBase.h
+ src/defines.h src/Types/StageBase.h src/Objects/ObjectCamera.h \
+ src/Objects/ObjectBase.h src/Objects/../Types/Collision.h

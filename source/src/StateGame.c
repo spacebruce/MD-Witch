@@ -1,6 +1,7 @@
 #include "StateGame.h"
 
 #include <resources.h>
+
 #include <genesis.h>
 
 #include "GameContext.h"
@@ -58,15 +59,15 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
                     fix32 x = GameContext.Camera->Base.x + FIX32(320 / 2);
                     fix32 y = GameContext.Camera->Base.y + FIX32(224 / 2);
                     
-                    static int i = 0;
-                    switch(i)
+                    static int thing = 0;
+                    switch(thing)
                     {
                         case 0: CreateObject(TypeObjectPlayer, x, y); break;
                         case 1: CreateObject(TypeObjectPickup, x, y); break;
                         case 2: CreateObject(TypeEnemyBloober, x, y); break;
                         //case 3: CreateObject(TypeEnemyFrogman, x, y); break;
                     }
-                    i = (i + 1) % 3;
+                    thing = (thing + 1) % 3;
                 }
                 if(State & BUTTON_B)
                     GameContext.NextStateID = STATE_MENU;

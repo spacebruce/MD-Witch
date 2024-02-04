@@ -21,4 +21,6 @@ out/src/main.o: src/main.c C:/dev/sgdk190/inc/genesis.h \
  C:/dev/sgdk190/inc/ext/flash-save/flash.h C:/dev/sgdk190/inc/types.h \
  C:/dev/sgdk190/inc/ext/flash-save/saveman.h src/defines.h \
  src/GameContext.h src/Types/StateType.h src/Types/StageBase.h \
- res/resources.h src/StateGame.h src/StateMenu.h
+ src/Objects/ObjectCamera.h src/Objects/ObjectBase.h \
+ src/Objects/../Types/Collision.h res/resources.h src/StateGame.h \
+ src/StateMenu.h

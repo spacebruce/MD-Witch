@@ -20,4 +20,6 @@ out/src/GameContext.o: src/GameContext.c src/GameContext.h \
  C:/dev/sgdk190/inc/timer.h C:/dev/sgdk190/inc/task.h \
  C:/dev/sgdk190/inc/task_cst.h C:/dev/sgdk190/inc/ext/flash-save/flash.h \
  C:/dev/sgdk190/inc/types.h C:/dev/sgdk190/inc/ext/flash-save/saveman.h \
- src/defines.h src/Types/StateType.h src/Types/StageBase.h
+ src/defines.h src/Types/StateType.h src/Types/StageBase.h \
+ src/Objects/ObjectCamera.h src/Objects/ObjectBase.h \
+ src/Objects/../Types/Collision.h

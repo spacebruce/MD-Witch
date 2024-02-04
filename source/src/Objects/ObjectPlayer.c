@@ -3,6 +3,10 @@
 #include "ObjectPlayer.h"
 #include "../GameContext.h"
 
+#define PlayerAnimStand (0)
+#define PlayerAnimTurn (0)
+#define PlayerAnimWalk (0)
+
 #define gravity FIX16(0.25)
 #define air_acceleration FIX16(0.75)
 #define acceleration FIX16(1.0)
@@ -284,10 +288,12 @@ void ObjectPlayerUpdate(void* object)
         if(pressed_left)
         {
             Player->VelocityX = fix16Sub(Player->VelocityX, acceleration);
+            SPR_setAnim(Player->Base.spr, PlayerAnimWalk);
         }
         else if (pressed_right)
         {
             Player->VelocityX = fix16Add(Player->VelocityX, acceleration);
+            SPR_setAnim(Player->Base.spr, PlayerAnimWalk);
         }
     }
     else    // In air
@@ -339,4 +345,10 @@ void ObjectPlayerInit(void* object)
 void ObjectPlayerInput(ObjectPlayer *Player, uint8_t changed)
 {
     Player->changed = changed;
+}
+
+void ObjectPlayerFree(void* object)
+{
+    ObjectPlayer* Player = (ObjectPlayer*)object;
+    SPR_releaseSprite(Player->Base.spr);
 }

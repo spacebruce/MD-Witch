@@ -21,4 +21,9 @@ out/src/StateGame.o: src/StateGame.c src/StateGame.h \
  C:/dev/sgdk190/inc/task_cst.h C:/dev/sgdk190/inc/ext/flash-save/flash.h \
  C:/dev/sgdk190/inc/types.h C:/dev/sgdk190/inc/ext/flash-save/saveman.h \
  src/Types/StateType.h res/resources.h src/GameContext.h src/defines.h \
- src/Types/StageBase.h src/Stages/Stages.h src/Stages/E1M1.h
+ src/Types/StageBase.h src/Objects/ObjectCamera.h \
+ src/Objects/ObjectBase.h src/Objects/../Types/Collision.h \
+ src/Stages/Stages.h src/Stages/E1M1.h src/ObjectManager.h \
+ src/ObjectList.h src/Objects/ObjectPlayer.h src/Objects/ObjectPickup.h \
+ src/Objects/Enemies/EnemyBloober.h src/Objects/Enemies/EnemyFrogman.h \
+ C:/dev/sgdk190/inc/maths.h

@@ -31,4 +31,5 @@ typedef struct ObjectPlayer
 
 void ObjectPlayerUpdate(void* object);
 void ObjectPlayerInit(void* object);
+void ObjectPlayerFree(void* object);
 void ObjectPlayerInput(ObjectPlayer *Player, uint8_t changed);
