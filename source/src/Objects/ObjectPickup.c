@@ -30,7 +30,7 @@ void ObjectPickupUpdate(void* object)
     //SetCollisionCircle(object->Base.Collision, fix32ToInt(object->Base.x), fix32ToInt(object->Base.y), 4);
 }
 
-void ObjectPickupKill(void* object)
+void ObjectPickupFree(void* object)
 {
     SPR_releaseSprite(((struct ObjectBase*)object)->spr);
     SPR_defragVRAM();

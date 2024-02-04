@@ -11,4 +11,4 @@ typedef struct ObjectPickup
 
 void ObjectPickupInit(void* object);
 void ObjectPickupUpdate(void* object);
-void ObjectPickupKill(void* object);
+void ObjectPickupFree(void* object);
