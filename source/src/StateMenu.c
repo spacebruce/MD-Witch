@@ -146,7 +146,7 @@ void StateMenu_Tick()
     VDP_setVerticalScroll(BG_A, min(ScrollInt, 216));    
     if((ScrollInt / 2) <= 250)
     {
-        SCROLL_Y = fix16Add(SCROLL_Y, FIX16(1.2));
+        SCROLL_Y = (SCROLL_Y + FIX16(1.2));
     }
     sprintf(buffer, "%i", ScrollInt);
     VDP_drawText(buffer,5,38);

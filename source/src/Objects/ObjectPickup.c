@@ -19,7 +19,7 @@ void ObjectPickupUpdate(void* object)
 
     //Pickup->Base.x = FIX32(32);
     //Pickup->Base.y = FIX32(32);
-    Pickup->Base.x = fix32Add(Pickup->Base.x, FIX32(2));
+    Pickup->Base.x = (Pickup->Base.x + FIX32(2));
     if(Pickup->Base.x > FIX32(256))
     {
         Pickup->Base.Flags |= OBJECT_DESTROY;

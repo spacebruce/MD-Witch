@@ -21,7 +21,7 @@ void ObjectCameraUpdate(void* object)
 
     if(Camera->Target != NULL)
     {
-        x = fix32Sub(Camera->Target->x, FIX32(320 /2));
+        x = (Camera->Target->x - FIX32(320 /2));
         int cx = fix32ToInt(x);
         if(cx < 0)
         {
@@ -46,7 +46,7 @@ void ObjectCameraUpdate(void* object)
             border = 224;
         }
         
-        y = fix32Sub(Camera->Target->y, minus);
+        y = (Camera->Target->y - minus);
         int cy = fix32ToInt(y);
         if(cy < 0)
         {
@@ -72,11 +72,11 @@ void ObjectCameraSetStageSize(ObjectCamera* Camera, const u16 W, const u16 H)
 void ObjectCameraFreecam(ObjectCamera* Camera, u16 State)
 {
     if((State & BUTTON_LEFT) == BUTTON_LEFT)    
-        Camera->Base.x = fix32Sub(Camera->Base.x, FIX32(1));
+        Camera->Base.x = Camera->Base.x - FIX32(1);
     if((State & BUTTON_RIGHT) == BUTTON_RIGHT) 
-        Camera->Base.x = fix32Add(Camera->Base.x, FIX32(1));
+        Camera->Base.x = Camera->Base.x + FIX32(1);
     if((State & BUTTON_UP) == BUTTON_UP)
-        Camera->Base.y = fix32Sub(Camera->Base.y, FIX32(1));
+        Camera->Base.y = Camera->Base.y - FIX32(1);
     if((State & BUTTON_DOWN) == BUTTON_DOWN)
-        Camera->Base.y = fix32Add(Camera->Base.y, FIX32(1));
+        Camera->Base.y = Camera->Base.y + FIX32(1);
 }

@@ -89,14 +89,14 @@ void ObjectPlayerUpdate(void* object)
     // Apply momentum from frame
     if(GameContext.Speedup == FIX16(1.0)) // NTSC mode
     {
-        Player->Base.x = fix32Add(Player->Base.x, fix16ToFix32(Player->VelocityX));
-        Player->Base.y = fix32Add(Player->Base.y, fix16ToFix32(Player->VelocityY));
+        Player->Base.x = Player->Base.x + fix16ToFix32(Player->VelocityX);
+        Player->Base.y = Player->Base.y + fix16ToFix32(Player->VelocityY);
     }
     else    // PAL Mode
     {
         // implement speed correction here... 
-        Player->Base.x = fix32Add(Player->Base.x, fix16ToFix32(Player->VelocityX));
-        Player->Base.y = fix32Add(Player->Base.y, fix16ToFix32(Player->VelocityY));
+        Player->Base.x = Player->Base.x + fix16ToFix32(Player->VelocityX);
+        Player->Base.y = Player->Base.y + fix16ToFix32(Player->VelocityY);
     }
 
     //
@@ -225,7 +225,7 @@ void ObjectPlayerUpdate(void* object)
     }
     else
     {
-        Player->VelocityY = fix16Add(Player->VelocityY, gravity);
+        Player->VelocityY = Player->VelocityY + gravity;
         // Player is not on floor
         // Pretend we're in air for a fraction of a second after leaving a ledge to make jumps feel better
         if(Player->CoyoteFrames == 0)
@@ -261,7 +261,7 @@ void ObjectPlayerUpdate(void* object)
             // If held time is within bounds of effect
             if(vel < 0 && Player->JumpHold >= MinJumpHoldTime && Player->JumpHold < MaxJumpHoldTime)
             {
-                Player->VelocityY = fix16Add(Player->VelocityY, JumpAdd);
+                Player->VelocityY = Player->VelocityY + JumpAdd;
             }
             Player->JumpHold++;
         }
@@ -287,12 +287,12 @@ void ObjectPlayerUpdate(void* object)
         Player->VelocityY = FIX16(0);
         if(pressed_left)
         {
-            Player->VelocityX = fix16Sub(Player->VelocityX, acceleration);
+            Player->VelocityX = Player->VelocityX - acceleration;
             SPR_setAnim(Player->Base.spr, PlayerAnimWalk);
         }
         else if (pressed_right)
         {
-            Player->VelocityX = fix16Add(Player->VelocityX, acceleration);
+            Player->VelocityX = Player->VelocityX + acceleration;
             SPR_setAnim(Player->Base.spr, PlayerAnimWalk);
         }
     }
@@ -301,11 +301,11 @@ void ObjectPlayerUpdate(void* object)
         Player->VelocityX = fix16Mul(Player->VelocityX, friction);
         if(pressed_left)
         {
-            Player->VelocityX = fix16Sub(Player->VelocityX, air_acceleration);
+            Player->VelocityX = Player->VelocityX - air_acceleration;
         }
         else if (pressed_right)
         {
-            Player->VelocityX = fix16Add(Player->VelocityX, air_acceleration);
+            Player->VelocityX = Player->VelocityX + air_acceleration;
         }
     }
 
