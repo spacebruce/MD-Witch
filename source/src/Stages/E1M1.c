@@ -139,15 +139,9 @@ void E1M1_Init()
 	memcpy(&GameContext.paletteEffect[PAL_BACKGROUND],  pal_stage_01b.data, 16 * 2);
 	memcpy(&GameContext.paletteEffect[PAL_TILES],  pal_stage_01b.data, 16 * 2);
 
-	VDP_drawImageEx(BG_B, &bg_e1m1, bg_index, 0,0, true, true);	
-
-	//memcpy(&GameContext.palette[PAL_BACKGROUND * 16], bg_e1m1.palette->data, 16);
-	//memcpy(&GameContext.palette[PAL_TILES * 16], pal_stage_01b.data, 16);
-	//memcpy(&GameContext.palette[PAL_PLAYER * 16], sprPlayer.palette->data, 16 * 2);
-	//memcpy(&GameContext.palette[PAL_ENEMIES * 16], (u16*) palette_black, 16 * 2);
+	VDP_drawImageEx(BG_B, &bg_e1m1, bg_index, 0,0, false, true);
 //
 	//// Fade In
-	//PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, GameContext.Framerate, FALSE);
 }
 void E1M1_Tick()
 {

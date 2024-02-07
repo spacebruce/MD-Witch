@@ -20,10 +20,15 @@ void ObjectPickupUpdate(void* object)
     //Pickup->Base.x = FIX32(32);
     //Pickup->Base.y = FIX32(32);
     Pickup->Base.x = (Pickup->Base.x + FIX32(2));
-    if(Pickup->Base.x > FIX32(256))
+    Pickup->Base.y = (Pickup->Base.y + FIX32(1.5));
+    if(Pickup->Base.x > FIX32(Pickup->Base.StartX + 256))
     {
         //Pickup->Base.Flags |= OBJECT_DESTROY;
-        Pickup->Base.x = FIX32(0);
+        Pickup->Base.x = FIX32(Pickup->Base.StartX - 256);
+    }
+    if(Pickup->Base.x > FIX32(Pickup->Base.StartY + 256))
+    {
+        Pickup->Base.y = FIX32(Pickup->Base.StartY - 256);
     }
     
     SetCollisionRectangle(&Pickup->Base.Collision, fix32ToInt(Pickup->Base.x), fix32ToInt(Pickup->Base.y), 8,8);

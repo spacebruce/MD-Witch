@@ -178,8 +178,17 @@ void StateGame_Tick()
             ObjectCameraSetTarget(GameContext.Camera, &Player->Base);
             GameContext.Player = &Player->Base;
 
-            //
+            // Perform fade-in
             SYS_enableInts();
+            TickObjects(); 
+            
+            GameContext.CurrentStage->Draw(
+                fix32ToInt(GameContext.Camera->Base.x), 
+                fix32ToInt(GameContext.Camera->Base.x)
+            );
+
+            VDP_waitDMACompletion();
+            PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, GameContext.Framerate, FALSE);
         }
     }
     
