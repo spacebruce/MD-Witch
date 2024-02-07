@@ -4,7 +4,11 @@
         "font.h": "c",
         "statemenu.h": "c",
         "stategame.h": "c",
-        "pal.h": "c"
+        "pal.h": "c",
+        "stages.h": "c",
+        "e1m1.h": "c",
+        "gamecontext.h": "c",
+        "mapcollision.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
