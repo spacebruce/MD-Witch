@@ -18,7 +18,17 @@ void EnemyBlooberInit(void* object)
 
 void EnemyBlooberUpdate(void* object)
 {
+    EnemyBloober* Bloober = (EnemyBloober*)object;
 
+    StageFunctionCollision col = GameContext.CurrentStage->Collision;
+
+    int16_t x = fix32ToInt(Bloober->Base.x);
+    int16_t y = fix32ToInt(Bloober->Base.y);
+    while(col(x, y + 1) == false)
+    {
+        ++y;
+    }
+    y = FIX32(y);
 }
 
 void EnemyBlooberFree(void* object)

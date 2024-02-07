@@ -18,6 +18,10 @@ struct GameContextType
     enum STATE_ID CurrentStateID;
     enum STATE_ID NextStateID;
     const StateType* CurrentState;
+    // Game globals
+    s16 BackgroundScroll[240];
+    u16 palette[4][16];
+    u16 paletteEffect[4][16];
     // Region / speed stuff
     u8 Framerate;
     fix16 Speedup;
@@ -32,7 +36,6 @@ struct GameContextType
     u16 StageFrame;
     fix32 StageTime;
     bool Paused;
-	u16 palette[64];
     //  Debug switches
     bool Freecam;   // debug
     //

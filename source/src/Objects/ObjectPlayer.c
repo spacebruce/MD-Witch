@@ -339,7 +339,13 @@ void ObjectPlayerInit(void* object)
     SPR_setVisibility(Player->Base.spr, AUTO_FAST);
     Player->Base.spriteOffset.x = -24;
     Player->Base.spriteOffset.y = -48;
-    PAL_setPalette(PAL_PLAYER, sprPlayer.palette->data, DMA);
+
+    u16 pal[16];
+    for(int i = 0; i < 16; ++i)
+        pal[i] = sprPlayer.palette->data[i] / 2;
+
+    memcpy(&GameContext.palette[PAL_PLAYER], sprPlayer.palette->data, 16 * 2);
+    memcpy(&GameContext.paletteEffect[PAL_PLAYER], pal, 16 * 2);
 }
 
 void ObjectPlayerInput(ObjectPlayer *Player, uint8_t changed)

@@ -7,7 +7,7 @@ void ObjectPickupInit(void* object)
     ObjectPickup* Pickup = (ObjectPickup*)object;
 
     Pickup->Base.spr = SPR_addSprite(&sprCursor, Pickup->Base.StartX, Pickup->Base.StartY, TILE_ATTR(PAL_PLAYER, 1, false, false));
-    //SPR_setVisibility(Pickup->Base.spr, AUTO_FAST);
+    SPR_setVisibility(Pickup->Base.spr, VISIBLE);
 
     Pickup->Base.Collision.Type = CT_Circle;
     Pickup->Base.Collision.Collision.Circle.Radius = 4;
@@ -22,7 +22,7 @@ void ObjectPickupUpdate(void* object)
     Pickup->Base.x = (Pickup->Base.x + FIX32(2));
     if(Pickup->Base.x > FIX32(256))
     {
-        Pickup->Base.Flags |= OBJECT_DESTROY;
+        //Pickup->Base.Flags |= OBJECT_DESTROY;
         Pickup->Base.x = FIX32(0);
     }
     

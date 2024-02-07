@@ -58,16 +58,19 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
                 {
                     fix32 x = GameContext.Camera->Base.x + FIX32(320 / 2);
                     fix32 y = GameContext.Camera->Base.y + FIX32(224 / 2);
-                    
+
+                    CreateObject(TypeObjectPickup, x, y);
+                    /*
                     static int thing = 0;
                     switch(thing)
                     {
-                        case 0: CreateObject(TypeObjectPlayer, x, y); break;
+                        //case 0: CreateObject(TypeObjectPlayer, x, y); break;
                         case 1: CreateObject(TypeObjectPickup, x, y); break;
                         case 2: CreateObject(TypeEnemyBloober, x, y); break;
-                        //case 3: CreateObject(TypeEnemyFrogman, x, y); break;
+                        case 3: CreateObject(TypeEnemyFrogman, x, y); break;
                     }
                     thing = (thing + 1) % 3;
+                    */
                 }
                 if(State & BUTTON_B)
                     GameContext.NextStateID = STATE_MENU;
@@ -140,11 +143,6 @@ void StateGame_Tick()
 {
     s16 CameraX = fix32ToInt(GameContext.Camera->Base.x);
     s16 CameraY = fix32ToInt(GameContext.Camera->Base.y);
-    
-    if(GameContext.MapA != NULL)
-        MAP_scrollTo(GameContext.MapA, CameraX, CameraY);
-    if(GameContext.MapB != NULL)
-        MAP_scrollTo(GameContext.MapB, (CameraX >> 2), (CameraY >> 2));
 
     // Stage logic
     if((GameContext.CurrentStageID != GameContext.NextStageID))   // If stage change triggered
@@ -213,7 +211,7 @@ void StateGame_Tick()
     {
         if(GameContext.CurrentStage != NULL)
         {
-            GameContext.CurrentStage->Tick();
+            //GameContext.CurrentStage->Tick();
             TickObjects();
             if(!GameContext.Freecam)
             {
@@ -252,7 +250,7 @@ void StateGame_Tick()
 //
     // Paused or not, run map drawing logic
     if(GameContext.CurrentStage != NULL)
-        GameContext.CurrentStage->Draw();
+        GameContext.CurrentStage->Draw(CameraX, CameraY);
 
     ++GameContext.StageFrame;
     SPR_update();

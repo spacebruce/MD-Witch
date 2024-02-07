@@ -8,6 +8,7 @@
 */
 typedef void (*StageFunctionVoid)();
 typedef u8 (*StageFunctionCollision)(const s16, const s16);
+typedef bool (*StageFunctionDraw)(const s16, const s16);
 
 typedef struct 
 {
@@ -15,7 +16,7 @@ typedef struct
     StageFunctionVoid Init;
     StageFunctionVoid Tick;     // Tick and draw are independant so pause doesn't fuck drawing up
     StageFunctionCollision Collision;
-    StageFunctionVoid Draw;     
+    StageFunctionDraw Draw;     
     StageFunctionVoid Cleanup;
     u16 Width;
     u16 Height;
