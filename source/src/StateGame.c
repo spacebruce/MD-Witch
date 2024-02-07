@@ -56,11 +56,11 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
             {
                 if(State & BUTTON_A)
                 {
-                    fix32 x = GameContext.Camera->Base.x + FIX32(320 / 2);
-                    fix32 y = GameContext.Camera->Base.y + FIX32(224 / 2);
+                    fix32 x = GameContext.Camera->Base.x + FIX32(screenWidth / 2);
+                    fix32 y = GameContext.Camera->Base.y + FIX32(screenHeight/ 2);
 
-                    CreateObject(TypeObjectPickup, x, y);
-                    /*
+                    //CreateObject(TypeObjectPickup, x, y);
+                    
                     static int thing = 0;
                     switch(thing)
                     {
@@ -70,7 +70,7 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
                         case 3: CreateObject(TypeEnemyFrogman, x, y); break;
                     }
                     thing = (thing + 1) % 3;
-                    */
+                    
                 }
                 if(State & BUTTON_B)
                     GameContext.NextStateID = STATE_MENU;
@@ -161,6 +161,9 @@ void StateGame_Tick()
             EndObjectManager();
             InitObjectManager();
         }
+        // Blank the screen out
+        PAL_setColors(0, (u16*) palette_black, 64, DMA);
+
         // Find next
         GameContext.CurrentStage = GetStageData(GameContext.NextStageID);
         GameContext.CurrentStageID = GameContext.NextStageID;
@@ -180,15 +183,15 @@ void StateGame_Tick()
 
             // Perform fade-in
             SYS_enableInts();
+
             TickObjects(); 
-            
+            ObjectCameraUpdate(GameContext.Camera);
             GameContext.CurrentStage->Draw(
                 fix32ToInt(GameContext.Camera->Base.x), 
                 fix32ToInt(GameContext.Camera->Base.x)
             );
-
             VDP_waitDMACompletion();
-            PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, GameContext.Framerate, FALSE);
+            PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, GameContext.Framerate, false);
         }
     }
     

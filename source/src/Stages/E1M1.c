@@ -21,17 +21,17 @@ static vs16 WaterY = 600;
 void VBlankHandler()
 {
 	WaterLine = (WaterY - CameraPositionY);
-	if(WaterLine > 240)		// Waterline off-screen
+	if(WaterLine > screenHeight)		// Waterline off-screen bottom
 	{	
 		VDP_setHInterrupt(0);	//Disable effect
 		PAL_setColors(0, &GameContext.palette, 64, DMA);	// load normal stage palette
 	}
-	else if(WaterLine > 0)	// Camera above waterline, on-screen
+	else if(WaterLine > 1)	// Camera above waterline, on-screen
 	{
 		VDP_setHInterrupt(1);	// Enable effect
 		PAL_setColors(0, &GameContext.palette, 64, DMA);	// load normal stage palette
 	}
-	else				// Below - 
+	else				// 
 	{	
 		VDP_setHInterrupt(0);	// Disable int
 		PAL_setColors(0, &GameContext.paletteEffect, 64, DMA);	// Load effect palette
@@ -44,6 +44,7 @@ HINTERRUPT_CALLBACK HIntHandler()
 	if(WaterLine == 0)
 	{
 		PAL_setColors(0,&GameContext.paletteEffect, 64, DMA);
+		VDP_setHInterrupt(0);
 	}
 }
 

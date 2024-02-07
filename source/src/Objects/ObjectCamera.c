@@ -33,17 +33,14 @@ void ObjectCameraUpdate(void* object)
         }
 
         fix32 minus;
-        s16 border;
         
         if(IS_PAL_SYSTEM)   // Give PAL players a little more screen space... they've earned it
         {
             minus = FIX32(188);
-            border = 240;
         }
         else    // NTSC has a slightly shorter window
         {
             minus = FIX32(180);
-            border = 224;
         }
         
         y = (Camera->Target->y - minus);
@@ -52,9 +49,9 @@ void ObjectCameraUpdate(void* object)
         {
             y = FIX32(0);
         }
-        else if (cy > (Camera->StageHeight - border))
+        else if (cy > (Camera->StageHeight - screenHeight))
         {
-            y = FIX32(Camera->StageWidth - border);
+            y = FIX32(Camera->StageWidth - screenHeight);
         }
 
         //
