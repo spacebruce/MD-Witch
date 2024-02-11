@@ -17,6 +17,9 @@ void GameContextInit()
 	//
 	GameContext.CurrentStageID = 0xFF;
 
+	InitHitboxGroup(&GameContext.HurtsPlayer, 10);
+	InitHitboxGroup(&GameContext.HurtsEnemy, 10);
+
 	if(IS_PAL_SYSTEM)
 	{
 		GameContext.Framerate = 50;

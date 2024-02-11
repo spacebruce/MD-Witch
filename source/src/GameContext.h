@@ -5,6 +5,7 @@
 
 #include "Types/StateType.h"
 #include "Types/StageBase.h"
+#include "Types/HitboxGroup.h"
 
 #include "Objects/ObjectCamera.h"
 
@@ -28,6 +29,9 @@ struct GameContextType
     //
     Map* MapA;
     Map* MapB;
+    // 
+    struct HitboxGroup HurtsPlayer;
+    struct HitboxGroup HurtsEnemy;
     //
     Map* CurrentMap;
     const StageBase* CurrentStage;

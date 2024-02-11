@@ -313,7 +313,7 @@ void ObjectPlayerUpdate(void* object)
 
     Player->OnfloorLast = Grounded;
     
-    SetCollisionRectangleAligned(&Player->Base.Collision, fix32ToInt(Player->Base.x), fix32ToInt(Player->Base.y)-2, 20, 40, BottomMiddle);
+    //SetCollisionRectangleAligned(&Player->Base.Collision, fix32ToInt(Player->Base.x), fix32ToInt(Player->Base.y)-2, 20, 40, BottomMiddle);
     //SetCollisionRectangle(&Player->Base.Collision, fix32ToInt(Player->Base.x) - 20, fix32ToInt(Player->Base.y) + 24, 20, 40);
 }
 

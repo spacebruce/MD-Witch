@@ -25,7 +25,6 @@ typedef enum
 // Needs optimising
 struct ObjectBase
 {
-    struct CollisionObject Collision;
     fix32 x, y;                 //  True coordinates
     int16_t StartX, StartY;     //  lower res
     Sprite* spr;

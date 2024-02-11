@@ -12,8 +12,8 @@ void EnemyBlooberInit(void* object)
     Bloober->Base.spriteOffset.x = -16;
     Bloober->Base.spriteOffset.y = -32;
 
-    Bloober->Base.Collision.Type = CT_Circle;
-    Bloober->Base.Collision.Collision.Circle.Radius = 4;
+    //Bloober->Base.Collision.Type = CT_Circle;
+    //Bloober->Base.Collision.Collision.Circle.Radius = 4;
 }
 
 void EnemyBlooberUpdate(void* object)
@@ -28,7 +28,7 @@ void EnemyBlooberUpdate(void* object)
     {
         ++y;
     }
-    y = FIX32(y);
+    Bloober->Base.y = FIX32(y);
 }
 
 void EnemyBlooberFree(void* object)
