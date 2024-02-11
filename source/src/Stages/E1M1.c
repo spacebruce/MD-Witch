@@ -24,26 +24,25 @@ void VBlankHandler()
 	if(WaterLine > screenHeight)		// Waterline off-screen bottom
 	{	
 		VDP_setHInterrupt(0);	//Disable effect
-		PAL_setColors(0, &GameContext.palette, 64, DMA);	// load normal stage palette
+		PAL_setColors(0, &GameContext.palette[0][0], 64, DMA);	// load normal stage palette
 	}
 	else if(WaterLine > 1)	// Camera above waterline, on-screen
 	{
 		VDP_setHInterrupt(1);	// Enable effect
-		PAL_setColors(0, &GameContext.palette, 64, DMA);	// load normal stage palette
+		PAL_setColors(0, &GameContext.palette[0][0], 64, DMA);	// load normal stage palette
 	}
 	else				// 
 	{	
 		VDP_setHInterrupt(0);	// Disable int
-		PAL_setColors(0, &GameContext.paletteEffect, 64, DMA);	// Load effect palette
+		PAL_setColors(0, &GameContext.paletteEffect[0][0], 64, DMA);	// Load effect palette
 	}
 }
-
 HINTERRUPT_CALLBACK HIntHandler()
 {
 	--WaterLine;
 	if(WaterLine == 0)
 	{
-		PAL_setColors(0,&GameContext.paletteEffect, 64, DMA);
+		PAL_setColors(0,&GameContext.paletteEffect[0][0], 64, DMA);
 		VDP_setHInterrupt(0);
 	}
 }
@@ -109,6 +108,7 @@ void E1M1_Init()
 {
     GameContext.PlayerSpawn.x = 128;
     GameContext.PlayerSpawn.y = 90;
+	WaterY = 580;
 
 	SYS_setHIntCallback(HIntHandler);
 	SYS_setVBlankCallback(VBlankHandler);
@@ -131,16 +131,23 @@ void E1M1_Init()
 	//VDP_drawImage(BG_B, &bg_e1m1, 256,0);
 	//VDP_drawImage(BG_B, &bg_e1m1, 384,0);
     
-	GameContext.MapA = MAP_create(&map_stage_01, BG_A, tile_index);
+	GameContext.MapA = MAP_create(&map_stage_01, BG_A, TILE_ATTR_FULL(PAL_TILES, FALSE, FALSE, true, tile_index));
 	//GameContext.MapB = MAP_create(&map_stage_01_bg, BG_B, bg_tile_id);
+
+	// Generate temp water palette, please fix
+    u16 pal[16];
+    for(int i = 0; i < 16; ++i)
+	{
+        pal[i] = bg_e1m1.palette->data[i] / 2;
+	}
 
 	// buffer the palettes to memory, these get sent to hardware on vsync
 	memcpy(&GameContext.palette[PAL_BACKGROUND],  bg_e1m1.palette->data, 16 * 2);
 	memcpy(&GameContext.palette[PAL_TILES],  pal_stage_01b.data, 16 * 2);
-	memcpy(&GameContext.paletteEffect[PAL_BACKGROUND],  pal_stage_01b.data, 16 * 2);
-	memcpy(&GameContext.paletteEffect[PAL_TILES],  pal_stage_01b.data, 16 * 2);
+	memcpy(&GameContext.paletteEffect[PAL_BACKGROUND],  pal, 16 * 2);
+	memcpy(&GameContext.paletteEffect[PAL_TILES],  pal, 16 * 2);
 
-	VDP_drawImageEx(BG_B, &bg_e1m1, bg_index, 0,0, false, true);
+	VDP_drawImageEx(BG_B, &bg_e1m1, TILE_ATTR_FULL(PAL_BACKGROUND, FALSE, FALSE, FALSE, bg_index), 0,0, true, true);
 //
 	//// Fade In
 }
@@ -159,7 +166,7 @@ void E1M1_Draw(s16 CameraX, s16 CameraY)
 
     if(GameContext.MapA != NULL)
         MAP_scrollTo(GameContext.MapA, CameraX, CameraY);
-
+	
     //if(GameContext.MapB != NULL)
     //    MAP_scrollTo(GameContext.MapB, (CameraX >> 2), (CameraY >> 2));
 }
