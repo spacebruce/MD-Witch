@@ -2,11 +2,15 @@
 
 #include "Collision.h"
 
+#define MAX_COLLISIONS_RETURN (5)
+
 struct HitboxGroup
 {
-    struct CollisionObject* Objects;
-    u16 Capacity;
+    struct CollisionObject **Objects;
+    s16 Count;
+    s16 Capacity;
 };
 
-void InitHitboxGroup(struct HitboxGroup* Group, const u16 Capacity);
-//bool CheckCollision(struct HitboxGroup* Group, 
+void HitboxGroupInit(struct HitboxGroup* Group, const u16 Capacity);
+void HitboxGroupRegisterCollider(struct HitboxGroup *group, struct CollisionObject *object);
+struct CollisionObject **HitboxGroupCheckCollision(struct HitboxGroup *group, struct CollisionObject *newObject);

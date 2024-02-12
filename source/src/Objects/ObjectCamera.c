@@ -1,6 +1,6 @@
 #include "ObjectCamera.h"
 
-#include "../Types/FixedPointHelpers.h"
+#include "../Types/NumericHelpers.h"
 
 void ObjectCameraSetTarget(ObjectCamera* Camera, struct ObjectBase* Target)
 {

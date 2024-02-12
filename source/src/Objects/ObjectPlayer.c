@@ -5,7 +5,7 @@
 
 #define PlayerAnimStand (0)
 #define PlayerAnimTurn (0)
-#define PlayerAnimWalk (0)
+#define PlayerAnimWalk (1)
 
 #define gravity FIX16(0.25)
 #define air_acceleration FIX16(0.75)

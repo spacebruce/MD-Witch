@@ -1,5 +1,7 @@
 #include "Collision.h"
 
+#include "NumericHelpers.h"
+
 void SetCollisionRectangle(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Width, const s16 Height)
 {
     Object->Type = CT_Rectangle;
@@ -136,25 +138,45 @@ bool CheckCollisionRectangleRectangle(struct CollisionObject* C1, struct Collisi
 
     return (l1 && l2 && l3 && l4);
 }
+
 bool CheckCollisionRectangleCircle(struct CollisionObject* C1, struct CollisionObject* C2)
 {
     struct CollisionRectangle* R1 = &C1->Collision.Rectangle;
     struct CollisionCircle* S2 = &C2->Collision.Circle;
-    return FALSE;
+
+    s16 circleDistanceX = abs(S2->X - R1->X1);
+    s16 circleDistanceY = abs(S2->Y - R1->Y1);
+
+    if (circleDistanceX > (R1->X2 - R1->X1)/2 + S2->Radius) { return FALSE; }
+    if (circleDistanceY > (R1->Y2 - R1->Y1)/2 + S2->Radius) { return FALSE; }
+
+    if (circleDistanceX <= (R1->X2 - R1->X1)/2) { return TRUE; } 
+    if (circleDistanceY <= (R1->Y2 - R1->Y1)/2) { return TRUE; }
+
+    s16 cornerDistance_sq = powS16((circleDistanceX - (R1->X2 - R1->X1)/2),2) + powS16((circleDistanceY - (R1->Y2 - R1->Y1)/2),2);
+
+    return (cornerDistance_sq <= powS16(S2->Radius,2));
 }
 bool CheckCollisionRectangleLine(struct CollisionObject* C1, struct CollisionObject* C2)
 {
     struct CollisionRectangle* R1 = &C1->Collision.Rectangle;
     struct CollisionLine* L2 = &C2->Collision.Line;
-    return FALSE;
+
+    return (L2->X1 >= R1->X1 && L2->X1 <= R1->X2 && L2->Y1 >= R1->Y1 && L2->Y1 <= R1->Y2) ||
+           (L2->X2 >= R1->X1 && L2->X2 <= R1->X2 && L2->Y2 >= R1->Y1 && L2->Y2 <= R1->Y2);
 }
-//
 bool CheckCollisionCircleCircle(struct CollisionObject* C1, struct CollisionObject* C2)
 {
     struct CollisionCircle* S1 = &C1->Collision.Circle;
     struct CollisionCircle* S2 = &C2->Collision.Circle;
-    return FALSE;
+
+    s16 distX = S1->X - S2->X;
+    s16 distY = S1->Y - S2->Y;
+    s16 distance = sqrtS16(distX*distX + distY*distY);
+
+    return distance <= (S1->Radius + S2->Radius);
 }
+
 bool CheckCollisionCircleLine(struct CollisionObject* C1, struct CollisionObject* C2)
 {
     struct CollisionLine* L = &C1->Collision.Line;
@@ -225,7 +247,6 @@ bool CheckCollisionLineLine(struct CollisionObject* C1, struct CollisionObject* 
 }
 
 /*
-    Burn some ROM in exchange for a lookup table
     only 1 or 2 active bit combinations allowed, 3 or more is a fail
 */
 
