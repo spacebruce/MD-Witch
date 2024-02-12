@@ -21,18 +21,28 @@ static vs16 WaterY = 600;
 void VBlankHandler()
 {
 	WaterLine = (WaterY - CameraPositionY);
+	VDP_setVerticalScroll(BG_B, (CameraPositionY >> 2));
+
+	BackgroundPositionX = (CameraPositionX >> 2);
+	BackgroundPositionY = (CameraPositionY >> 2);
+	WaterPositionX = (CameraPositionX >> 2) + 64;
+	WaterPositionY = (CameraPositionY >> 2) + 16;
+	
 	if(WaterLine > screenHeight)		// Waterline off-screen bottom
 	{	
+		VDP_setVerticalScroll(BG_B, BackgroundPositionY);
 		VDP_setHInterrupt(0);	//Disable effect
 		PAL_setColors(0, &GameContext.palette[0][0], 64, DMA);	// load normal stage palette
 	}
 	else if(WaterLine > 1)	// Camera above waterline, on-screen
 	{
+		VDP_setVerticalScroll(BG_B, BackgroundPositionY);
 		VDP_setHInterrupt(1);	// Enable effect
 		PAL_setColors(0, &GameContext.palette[0][0], 64, DMA);	// load normal stage palette
 	}
 	else				// 
-	{	
+	{
+		VDP_setVerticalScroll(BG_B, WaterPositionY);
 		VDP_setHInterrupt(0);	// Disable int
 		PAL_setColors(0, &GameContext.paletteEffect[0][0], 64, DMA);	// Load effect palette
 	}
@@ -43,6 +53,7 @@ HINTERRUPT_CALLBACK HIntHandler()
 	if(WaterLine == 0)
 	{
 		PAL_setColors(0,&GameContext.paletteEffect[0][0], 64, DMA);
+		VDP_setVerticalScroll(BG_B, WaterPositionY);
 		VDP_setHInterrupt(0);
 	}
 }
@@ -115,7 +126,7 @@ void E1M1_Init()
 	VDP_setHIntCounter(0);
 	VDP_setHInterrupt(1);
 
-	VDP_setScrollingMode(HSCROLL_LINE, VSCROLL_PLANE);
+	VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
 
 	tile_id = TILE_USER_INDEX;
 
@@ -138,7 +149,7 @@ void E1M1_Init()
     u16 pal[16];
     for(int i = 0; i < 16; ++i)
 	{
-        pal[i] = bg_e1m1.palette->data[i] / 2;
+        pal[i] = bg_e1m1.palette->data[i] >> 1;
 	}
 
 	// buffer the palettes to memory, these get sent to hardware on vsync
@@ -158,6 +169,10 @@ void E1M1_End()
 {
 	MAP_release(GameContext.MapA);
 	MAP_release(GameContext.MapB);
+
+	SYS_setHIntCallback(NULL);
+	SYS_setVBlankCallback(NULL);
+	VDP_setHInterrupt(false);
 }
 void E1M1_Draw(s16 CameraX, s16 CameraY)
 {
