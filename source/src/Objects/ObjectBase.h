@@ -31,6 +31,7 @@ struct ObjectBase
     Vect2D_s16 spriteOffset;
     //
     uint16_t Flags;
+    struct CollisionObject Collider;
     // Bookkeeping
     uint8_t ActiveObjectID;
     int ObjectType;

@@ -29,6 +29,25 @@ struct CollisionLine
 };
 
 /*
+    Store data alongside collision
+*/
+typedef enum 
+{
+    NO_DATA  = 0,
+    DAMAGE_PLAYER,
+    DAMAGE_ENEMY,
+    HEAL_PLAYER,
+    TELEPORTER,
+    LEVEL_END,
+} Collision_Datatype;
+
+struct CollisionData
+{
+    Collision_Datatype Type : 8;
+    u16 Data : 16;
+};
+
+/*
     Make it generic
 */
 typedef enum
@@ -49,8 +68,15 @@ struct CollisionObject
         struct CollisionCircle Circle;
         struct CollisionLine Line;
     } Collision;
-    CollisionType Type;
+    CollisionType Type : 8;
+    struct CollisionData Data;
+    struct CollisionObject* Next;
+    struct CollisionObject* Prev;
 };
+
+// Metadata
+void ClearCollisionData(struct CollisionObject* Object);
+void SetCollisionData(struct CollisionObject* Object, const CollisionType Type, const u16 Data);
 
 // Move shapes
 void SetCollisionRectangle(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Width, const  s16 Height);

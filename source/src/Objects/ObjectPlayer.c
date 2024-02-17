@@ -309,6 +309,14 @@ void ObjectPlayerUpdate(void* object)
         }
     }
 
+    if(Player->VelocityX > 0)
+        SPR_setHFlip(Player->Base.spr, false);
+    else if (Player->VelocityX < 0)
+        SPR_setHFlip(Player->Base.spr, true);
+
+    if(Player->VelocityX == 0)
+        SPR_setAnim(Player->Base.spr, PlayerAnimStand);
+
     ObjectPlayerUpdateSprite(object);
 
     Player->OnfloorLast = Grounded;

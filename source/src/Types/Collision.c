@@ -2,6 +2,19 @@
 
 #include "NumericHelpers.h"
 
+// 
+void ClearCollisionData(struct CollisionObject* Object)
+{
+    Object->Data.Type = NO_DATA;
+    Object->Data.Data = 0x0000;
+};
+void SetCollisionData(struct CollisionObject* Object, const CollisionType Type, const u16 Data)
+{
+    Object->Data.Type = Type;
+    Object->Data.Data = Data;
+};
+
+//
 void SetCollisionRectangle(struct CollisionObject* Object, const s16 X, const s16 Y, const s16 Width, const s16 Height)
 {
     Object->Type = CT_Rectangle;
