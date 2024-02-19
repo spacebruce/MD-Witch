@@ -334,7 +334,7 @@ void ObjectPlayerInit(void* object)
     Player->Health = 100;
     Player->MaxHealth = 100;
     //
-    Player->AnimationState = AnimaionStanding;
+    Player->AnimationState = AnimationStanding;
     Player->AnimationTick = 0;
     // Physics
     Player->VelocityX = FIX16(0);
