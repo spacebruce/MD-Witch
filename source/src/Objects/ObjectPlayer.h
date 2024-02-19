@@ -5,8 +5,16 @@
 
 typedef enum 
 {
-    PlayerStateStanding, PlayerStateWalking, 
+    AnimationStanding, AnimationWalking, 
 } PlayerAnimationState;
+
+typedef enum 
+{
+    PlayerStanding, PlayerWalking,
+    PlayerCrouching, PlayerCrawling, PlayerSkidding, 
+    PlayerHitting, PlayerShooting, PlayerFishing, 
+    PlayerJumping, PlayerFalling, PlayerLanding, PlayerBonked, 
+} PlayerControlState;
 
 typedef struct ObjectPlayer
 {
