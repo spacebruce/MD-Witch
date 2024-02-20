@@ -26,6 +26,50 @@ const uint16_t ButtonMask[] =
     BUTTON_A, BUTTON_B, BUTTON_C, BUTTON_START,
 };
 
+void ObjectPlayerInput(ObjectPlayer *Player, uint8_t Changed)
+{
+    struct PlayerController* Controller = &Player->Controller;
+    //  Check for input holds & releases
+
+    if(DEBUG_MODE)
+    {
+        kprintf("INPUT : %02X", Changed);
+    }
+
+    for(uint8_t i = 0; i < 8; ++i)
+    {
+        bool down = ((Changed & ButtonMask[i]) == ButtonMask[i]);
+        if(down == false)
+        {
+            if(Controller->ButtonFrames[i] == 0xFF || Controller->ButtonFrames[i] == 0x00)
+                Controller->ButtonFrames[i] = 0;
+            else
+                Controller->ButtonFrames[i] = 0xFF;
+        }
+        else if(Controller->ButtonFrames[i] < (GameContext.Framerate * 2))  // don't overflow, just hold at 2 seconds
+        {
+            Controller->ButtonFrames[i] = Controller->ButtonFrames[i] + 1;
+        }
+    }
+    
+    // Unmangle!
+    Controller->Release_A = (Controller->ButtonFrames[4] == 0xFF);
+    Controller->Release_B = (Controller->ButtonFrames[5] == 0xFF);
+    Controller->Release_C = (Controller->ButtonFrames[6] == 0xFF);
+    Controller->Release_Left = (Controller->ButtonFrames[0] == 0xFF);
+    Controller->Release_Right = (Controller->ButtonFrames[1] == 0xFF);
+    Controller->Release_Up = (Controller->ButtonFrames[2] == 0xFF);
+    Controller->Release_Down = (Controller->ButtonFrames[3] == 0xFF);
+
+    Controller->Pressed_A = !(Controller->Release_A) && (Controller->ButtonFrames[4] > 0);
+    Controller->Pressed_B = !(Controller->Release_B) && (Controller->ButtonFrames[5] > 0);
+    Controller->Pressed_C = !(Controller->Release_C) && (Controller->ButtonFrames[6] > 0);
+    Controller->Pressed_Left = !(Controller->Release_Left) && (Controller->ButtonFrames[0] > 0);
+    Controller->Pressed_Right = !(Controller->Release_Right) && (Controller->ButtonFrames[1] > 0);
+    Controller->Pressed_Up = !(Controller->Release_Up) && (Controller->ButtonFrames[2] > 0);
+    Controller->Pressed_Down = !(Controller->Release_Down) && (Controller->ButtonFrames[3] > 0);
+}
+
 inline void ObjectPlayerUpdateSprite(ObjectPlayer* Player)
 {
     // Countdown even if offscreen
@@ -40,41 +84,18 @@ inline void ObjectPlayerUpdateSprite(ObjectPlayer* Player)
     }
 }
 
+void ObjectPlayerStateStanding(ObjectPlayer* Player)
+{
+
+}
+void ObjectPlayerStateWalking(ObjectPlayer* Player)
+{
+
+}
+
 void ObjectPlayerUpdate(void* object)
 {
     ObjectPlayer* Player = (ObjectPlayer*)object;
-    //  Check for input holds
-    for(uint8_t i = 0; i < 8; ++i)
-    {
-        bool down = ((Player->changed & ButtonMask[i]) == ButtonMask[i]);
-        if(down == false)
-        {
-            if(Player->ButtonFrames[i] == 0xFF || Player->ButtonFrames[i] == 0x00)
-                Player->ButtonFrames[i] = 0;
-            else
-                Player->ButtonFrames[i] = 0xFF;
-        }
-        else if(Player->ButtonFrames[i] < (GameContext.Framerate * 2))  // don't overflow, just hold at 2 seconds
-        {
-            Player->ButtonFrames[i] = Player->ButtonFrames[i] + 1;
-        }
-    }
-    
-    const bool released_A = (Player->ButtonFrames[4] == 0xFF);
-    const bool released_B = (Player->ButtonFrames[5] == 0xFF);
-    const bool released_C = (Player->ButtonFrames[6] == 0xFF);
-    const bool released_left = (Player->ButtonFrames[0] == 0xFF);
-    const bool released_right = (Player->ButtonFrames[1] == 0xFF);
-    const bool released_up = (Player->ButtonFrames[2] == 0xFF);
-    const bool released_down = (Player->ButtonFrames[3] == 0xFF);
-
-    const bool pressed_A = !released_A && (Player->ButtonFrames[4] > 0);
-    const bool pressed_B = !released_B && (Player->ButtonFrames[5] > 0);
-    const bool pressed_C = !released_C && (Player->ButtonFrames[6] > 0);
-    const bool pressed_left = !released_left && (Player->ButtonFrames[0] > 0);
-    const bool pressed_right = !released_right && (Player->ButtonFrames[1] > 0);
-    const bool pressed_up = !released_up && (Player->ButtonFrames[2] > 0);
-    const bool pressed_down = !released_down && (Player->ButtonFrames[3] > 0);
 
     bool Grounded = false;
 
@@ -241,7 +262,7 @@ void ObjectPlayerUpdate(void* object)
 
     if(Grounded)
     {
-        if(pressed_B)  // Jump
+        if(Player->Controller.Pressed_B)  // Jump
         {
             Player->VelocityY = JumpForce;  // Jump velocity
             Player->OnFloor = false;        // Detatch from floor
@@ -251,7 +272,7 @@ void ObjectPlayerUpdate(void* object)
     }
     else
     {
-        if(pressed_B && Player->JumpHold != 0xFF)
+        if(Player->Controller.Pressed_B && Player->JumpHold != 0xFF)
         {
             const u8 MinJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMin), GameContext.Speedup));
             const u8 MaxJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMax), GameContext.Speedup));
@@ -274,7 +295,7 @@ void ObjectPlayerUpdate(void* object)
     if(Player->OnFloor)
     {
         // Apply friction. If < 0, stop.
-        if((abs(fix16ToInt(Player->VelocityX)) <= 1) && (!pressed_left && !pressed_right))
+        if((abs(fix16ToInt(Player->VelocityX)) <= 1) && (!Player->Controller.Pressed_Left && !Player->Controller.Pressed_Right))
         {
             Player->VelocityX = FIX16(0);
         }
@@ -285,12 +306,12 @@ void ObjectPlayerUpdate(void* object)
 
         // Gravity 
         Player->VelocityY = FIX16(0);
-        if(pressed_left)
+        if(Player->Controller.Pressed_Left)
         {
             Player->VelocityX = Player->VelocityX - acceleration;
             SPR_setAnim(Player->Base.spr, PlayerAnimWalk);
         }
-        else if (pressed_right)
+        else if (Player->Controller.Pressed_Right)
         {
             Player->VelocityX = Player->VelocityX + acceleration;
             SPR_setAnim(Player->Base.spr, PlayerAnimWalk);
@@ -299,11 +320,11 @@ void ObjectPlayerUpdate(void* object)
     else    // In air
     {
         Player->VelocityX = fix16Mul(Player->VelocityX, friction);
-        if(pressed_left)
+        if(Player->Controller.Pressed_Left)
         {
             Player->VelocityX = Player->VelocityX - air_acceleration;
         }
-        else if (pressed_right)
+        else if (Player->Controller.Pressed_Right)
         {
             Player->VelocityX = Player->VelocityX + air_acceleration;
         }
@@ -334,7 +355,7 @@ void ObjectPlayerInit(void* object)
     Player->Health = 100;
     Player->MaxHealth = 100;
     //
-    Player->AnimationState = AnimaionStanding;
+    Player->AnimationState = AnimationStanding;
     Player->AnimationTick = 0;
     // Physics
     Player->VelocityX = FIX16(0);
@@ -354,11 +375,6 @@ void ObjectPlayerInit(void* object)
 
     memcpy(&GameContext.palette[PAL_PLAYER], sprPlayer.palette->data, 16 * 2);
     memcpy(&GameContext.paletteEffect[PAL_PLAYER], pal, 16 * 2);
-}
-
-void ObjectPlayerInput(ObjectPlayer *Player, uint8_t changed)
-{
-    Player->changed = changed;
 }
 
 void ObjectPlayerFree(void* object)
