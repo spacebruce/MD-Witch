@@ -3,36 +3,38 @@
 
 #include <genesis.h>
 
-typedef enum 
-{
-    AnimationStanding, AnimationWalking, 
-} PlayerAnimationState;
+#define PlayerAnimStand (0)
+#define PlayerAnimTurn (0)
+#define PlayerAnimWalk (1)
+
+typedef int PlayerAnimationState;
 
 typedef enum 
 {
-    PlayerStanding, PlayerWalking,
-    PlayerCrouching, PlayerCrawling, PlayerSkidding, 
-    PlayerHitting, PlayerShooting, PlayerFishing, 
-    PlayerJumping, PlayerFalling, PlayerLanding, PlayerBonked, 
+    PlayerStanding = 0, PlayerWalking = 1,
+    PlayerCrouching = 2, PlayerCrawling = 3, PlayerSkidding = 4, 
+    PlayerHitting = 5, PlayerShooting = 6, PlayerFishing = 6, 
+    PlayerJumping = 7, PlayerFalling = 8, PlayerLanding = 9, PlayerBonked = 10, 
 } PlayerControlState;
-
 
 struct PlayerController
 {
     uint8_t Changed;
     uint8_t ButtonFrames[8];
-    bool Pressed_A : 1, Pressed_B : 1, Pressed_C : 1, Pressed_Left : 1, Pressed_Right : 1, Pressed_Up : 1, Pressed_Down : 1;
-    bool Release_A : 1, Release_B : 1, Release_C : 1, Release_Left : 1, Release_Right : 1, Release_Up : 1, Release_Down : 1;
+    uint8_t Pressed_Jump : 1, Pressed_B : 1, Pressed_C : 1, Pressed_Left : 1, Pressed_Right : 1, Pressed_Up : 1, Pressed_Down : 1;
+    uint8_t Release_Jump : 1, Release_B : 1, Release_C : 1, Release_Left : 1, Release_Right : 1, Release_Up : 1, Release_Down : 1;
+    uint8_t Moving : 1, WalkDir : 1;
 };
-//const size_t CS = sizeof(struct PlayerController);
+//static const size_t CS = sizeof(struct PlayerController);
 
 typedef struct ObjectPlayer
 {
     struct ObjectBase Base;
     //
     struct PlayerController Controller;
-    PlayerAnimationState AnimationState;
-    PlayerControlState State;
+    PlayerAnimationState LastAnimationState, AnimationState;
+    PlayerControlState LastState, State;
+    uint16_t StateFrame;
     int16_t AnimationTick;
     // 
     s16 MaxHealth;

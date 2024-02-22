@@ -3,10 +3,6 @@
 #include "ObjectPlayer.h"
 #include "../GameContext.h"
 
-#define PlayerAnimStand (0)
-#define PlayerAnimTurn (0)
-#define PlayerAnimWalk (1)
-
 #define gravity FIX16(0.25)
 #define air_acceleration FIX16(0.75)
 #define acceleration FIX16(1.0)
@@ -29,16 +25,15 @@ const uint16_t ButtonMask[] =
 void ObjectPlayerInput(ObjectPlayer *Player, uint8_t Changed)
 {
     struct PlayerController* Controller = &Player->Controller;
+    Controller->Changed = Changed;
+}
+
+void ObjectPlayerProcessInputs(struct PlayerController* Controller)
+{
     //  Check for input holds & releases
-
-    if(DEBUG_MODE)
-    {
-        kprintf("INPUT : %02X", Changed);
-    }
-
     for(uint8_t i = 0; i < 8; ++i)
     {
-        bool down = ((Changed & ButtonMask[i]) == ButtonMask[i]);
+        bool down = ((Controller->Changed & ButtonMask[i]) == ButtonMask[i]);
         if(down == false)
         {
             if(Controller->ButtonFrames[i] == 0xFF || Controller->ButtonFrames[i] == 0x00)
@@ -53,7 +48,7 @@ void ObjectPlayerInput(ObjectPlayer *Player, uint8_t Changed)
     }
     
     // Unmangle!
-    Controller->Release_A = (Controller->ButtonFrames[4] == 0xFF);
+    Controller->Release_Jump = (Controller->ButtonFrames[4] == 0xFF);
     Controller->Release_B = (Controller->ButtonFrames[5] == 0xFF);
     Controller->Release_C = (Controller->ButtonFrames[6] == 0xFF);
     Controller->Release_Left = (Controller->ButtonFrames[0] == 0xFF);
@@ -61,17 +56,46 @@ void ObjectPlayerInput(ObjectPlayer *Player, uint8_t Changed)
     Controller->Release_Up = (Controller->ButtonFrames[2] == 0xFF);
     Controller->Release_Down = (Controller->ButtonFrames[3] == 0xFF);
 
-    Controller->Pressed_A = !(Controller->Release_A) && (Controller->ButtonFrames[4] > 0);
+    Controller->Pressed_Jump = !(Controller->Release_Jump) && (Controller->ButtonFrames[4] > 0);
     Controller->Pressed_B = !(Controller->Release_B) && (Controller->ButtonFrames[5] > 0);
     Controller->Pressed_C = !(Controller->Release_C) && (Controller->ButtonFrames[6] > 0);
     Controller->Pressed_Left = !(Controller->Release_Left) && (Controller->ButtonFrames[0] > 0);
     Controller->Pressed_Right = !(Controller->Release_Right) && (Controller->ButtonFrames[1] > 0);
     Controller->Pressed_Up = !(Controller->Release_Up) && (Controller->ButtonFrames[2] > 0);
     Controller->Pressed_Down = !(Controller->Release_Down) && (Controller->ButtonFrames[3] > 0);
+
+    Controller->Moving = (
+        (Controller->ButtonFrames[0] > 0 && Controller->ButtonFrames[0] != 0xFF) 
+        || (Controller->ButtonFrames[1] > 0 && Controller->ButtonFrames[1] != 0xFF)
+    );
 }
 
-inline void ObjectPlayerUpdateSprite(ObjectPlayer* Player)
+inline void ObjectPlayerUpdateSprite(ObjectPlayer* Player, const bool StateBegin)
 {
+    const int16_t OldAnimation = Player->LastAnimationState;
+    int16_t NewAnimation;
+
+    if(Player->VelocityX > FIX16(0))
+        SPR_setHFlip(Player->Base.spr, false);
+    else if (Player->VelocityX < FIX16(0))
+        SPR_setHFlip(Player->Base.spr, true);
+
+
+    switch(Player->AnimationState)
+    {
+        case PlayerAnimStand:   NewAnimation = PlayerAnimStand; break;
+        case PlayerAnimWalk:    NewAnimation = PlayerAnimWalk;  break;
+        default:
+            NewAnimation = 0xFF;
+        break;
+    }
+
+    if(NewAnimation != 0xFF && (NewAnimation != OldAnimation))
+    {
+        SPR_setAnim(Player->Base.spr, NewAnimation);
+    }
+    
+    Player->LastAnimationState = Player->AnimationState;
     // Countdown even if offscreen
     --(Player->AnimationTick);
     if(SPR_isVisible(Player->Base.spr, false))
@@ -86,16 +110,121 @@ inline void ObjectPlayerUpdateSprite(ObjectPlayer* Player)
 
 void ObjectPlayerStateStanding(ObjectPlayer* Player)
 {
+    Player->AnimationState = PlayerAnimStand;
 
+    // State exits
+    if(Player->Controller.Moving)
+    {
+        if(Player->Controller.Pressed_Left)
+            Player->Controller.WalkDir = 0;
+        if(Player->Controller.Pressed_Right)
+            Player->Controller.WalkDir = 1;
+        Player->State = PlayerWalking;
+        return;
+    }
+    if(!Player->OnFloor)
+    {
+        Player->State = PlayerFalling;
+        return;
+    }
+    if(Player->Controller.Pressed_Jump)
+    {
+        Player->State = PlayerJumping;
+        return;
+    }
 }
 void ObjectPlayerStateWalking(ObjectPlayer* Player)
 {
+    Player->AnimationState = PlayerAnimWalk;
 
+    // State exits
+    if(!Player->Controller.Moving)
+    {
+        Player->State = PlayerStanding;
+        return;
+    }
+    if(!Player->OnFloor)
+    {
+        Player->State = PlayerFalling;
+        return;
+    }
+
+    switch(Player->Controller.WalkDir)
+    {
+        case 0: Player->VelocityX = Player->VelocityX - acceleration;   break;
+        case 1: Player->VelocityX = Player->VelocityX + acceleration;   break;
+    }
+    if(Player->Controller.Pressed_Jump)
+    {
+        Player->State = PlayerJumping;
+        return;
+    }
 }
+void ObjectPlayerStateJumping(ObjectPlayer* Player)
+{
+    Player->AnimationState = PlayerAnimStand;
+    // Jump logic
+    if(Player->StateFrame == 0)
+    {
+        if(DEBUG_MODE)        kprintf("UP!");
+        Player->VelocityY = JumpForce;
+        Player->JumpHold = true;
+    }
+    else
+    {
+        if(Player->Controller.Release_Jump) // Cancel hold boost
+        {
+            Player->JumpHold = ~0;
+        }
+    }
+
+    if(Player->VelocityY >= FIX16(0))
+    {
+        if(DEBUG_MODE)        kprintf("FALL!");
+        Player->State = PlayerFalling;
+        return;
+    }
+
+    
+    /*
+    if((Player->JumpHold !=0) && (Player->JumpHold != 0xFF))
+    {
+        //
+        const u8 MinJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMin), GameContext.Speedup));
+        const u8 MaxJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMax), GameContext.Speedup));
+        // If in hold window, add a bit of extra momentum to jump
+        if(Player->VelocityY < FIX16(0) && Player->JumpHold >= MinJumpHoldTime && Player->JumpHold < MaxJumpHoldTime)
+        {
+            Player->VelocityY = Player->VelocityY + JumpAdd;
+        }
+        else if (Player->JumpHold >= MaxJumpHoldTime)   // Can't hold for too long
+        {
+            Player->JumpHold = ~0;
+        }
+        ++Player->JumpHold;
+    }
+    */
+}
+void ObjectPlayerStateFalling(ObjectPlayer* Player)
+{
+    Player->AnimationState = PlayerAnimStand;
+    //
+    if(Player->OnFloor)
+    {
+        if(Player->VelocityX != FIX16(0))
+            Player->State = PlayerWalking;
+        else
+            Player->State = PlayerStanding;
+    }
+    //
+}
+
 
 void ObjectPlayerUpdate(void* object)
 {
     ObjectPlayer* Player = (ObjectPlayer*)object;
+
+    ObjectPlayerProcessInputs(&Player->Controller);
 
     bool Grounded = false;
 
@@ -103,9 +232,18 @@ void ObjectPlayerUpdate(void* object)
     const s32 halfwidth = width / 2;
     const s32 height = 40;
 
-    // Cache current velocity for later
-    const fix16 OldVelocityX = Player->VelocityX;
-    const fix16 OldVelocityY = Player->VelocityY;
+    const int16_t x = fix32ToInt(Player->Base.x);
+    const int16_t y = fix32ToInt(Player->Base.y);
+
+    const int16_t x_left = x - halfwidth;
+    const int16_t x_right = x + halfwidth;
+
+    StageFunctionCollision col = GameContext.CurrentStage->Collision;
+    
+    const bool sens_feet_left  = col(x_left + 1,y + 1);
+    const bool sens_feet_mid   = col(x,y + 1);
+    const bool sens_feet_right = col(x_right - 1,y + 1);
+    Player->OnFloor = (sens_feet_left | sens_feet_mid | sens_feet_right);
 
     // Apply momentum from frame
     if(GameContext.Speedup == FIX16(1.0)) // NTSC mode
@@ -120,6 +258,53 @@ void ObjectPlayerUpdate(void* object)
         Player->Base.y = Player->Base.y + fix16ToFix32(Player->VelocityY);
     }
 
+    PlayerControlState LastState = Player->State;
+    switch(Player->State)
+    {
+        case PlayerStanding:    ObjectPlayerStateStanding(Player);  break;
+        case PlayerWalking:     ObjectPlayerStateWalking(Player);   break;
+        case PlayerJumping:     ObjectPlayerStateJumping(Player);   break;
+        case PlayerFalling:     ObjectPlayerStateFalling(Player);   break;
+        default:
+            if(DEBUG_MODE)  kprintf("Unimplemented playerstate %i", Player->State);
+        break;
+    }
+    const bool StateChanged = (LastState != Player->State);
+
+    ObjectPlayerUpdateSprite(Player, StateChanged);
+
+    if(StateChanged)
+    {
+        Player->StateFrame = 0;
+        if(DEBUG_MODE)  kprintf("State change, %02X to %02X", LastState, Player->State);
+    }
+    else
+    {
+        ++Player->StateFrame;
+    }
+
+    // Physics
+    if(Player->OnFloor)
+    {
+        Player->VelocityY = min(Player->VelocityY, 0);  // Allow negative speed (i.e. jumping) but no falling
+        // Apply friction. If < 0, stop.
+        if((abs(fix16ToInt(Player->VelocityX)) <= 1) && (!Player->Controller.Pressed_Left && !Player->Controller.Pressed_Right))
+        {
+            Player->VelocityX = FIX16(0);
+        }
+        else
+        {
+            Player->VelocityX = fix16Mul(Player->VelocityX, friction);
+        }
+    }
+    else
+    {
+        Player->VelocityY = Player->VelocityY + gravity;
+    }
+
+
+    /*
+
     //
     s32 x = fix32ToInt(Player->Base.x);
     s32 y = fix32ToInt(Player->Base.y);
@@ -128,8 +313,6 @@ void ObjectPlayerUpdate(void* object)
     s32 y_top = y - height;
     s32 y_mid = y - (height / 2);
     s32 y_low = y - 1;
-
-    StageFunctionCollision col = GameContext.CurrentStage->Collision;
 
     // Walking into walls sensor
     bool sens_top, sens_mid, sens_low;
@@ -341,7 +524,7 @@ void ObjectPlayerUpdate(void* object)
     ObjectPlayerUpdateSprite(object);
 
     Player->OnfloorLast = Grounded;
-    
+    */
     //SetCollisionRectangleAligned(&Player->Base.Collision, fix32ToInt(Player->Base.x), fix32ToInt(Player->Base.y)-2, 20, 40, BottomMiddle);
     //SetCollisionRectangle(&Player->Base.Collision, fix32ToInt(Player->Base.x) - 20, fix32ToInt(Player->Base.y) + 24, 20, 40);
 }
@@ -351,11 +534,13 @@ void ObjectPlayerInit(void* object)
     ObjectPlayer* Player = (ObjectPlayer*)object;
     //
     ObjectPlayerInput(Player, 0x00);
+    Player->State = PlayerStanding;
+    Player->StateFrame = 0;
     //
     Player->Health = 100;
     Player->MaxHealth = 100;
     //
-    Player->AnimationState = AnimationStanding;
+    Player->AnimationState = PlayerAnimStand;
     Player->AnimationTick = 0;
     // Physics
     Player->VelocityX = FIX16(0);
