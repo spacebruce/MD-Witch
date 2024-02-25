@@ -12,7 +12,7 @@
 #define coyote_time (10)
 
 #define JumpForce FIX16(-4)
-#define JumpAdd FIX16(-0.5)
+#define JumpAdd FIX16(-0.15)
 #define JumpTimeMin (5)
 #define JumpTimeMax (10)
 
@@ -64,10 +64,13 @@ void ObjectPlayerProcessInputs(struct PlayerController* Controller)
     Controller->Pressed_Up = !(Controller->Release_Up) && (Controller->ButtonFrames[2] > 0);
     Controller->Pressed_Down = !(Controller->Release_Down) && (Controller->ButtonFrames[3] > 0);
 
-    Controller->Moving = (
-        (Controller->ButtonFrames[0] > 0 && Controller->ButtonFrames[0] != 0xFF) 
-        || (Controller->ButtonFrames[1] > 0 && Controller->ButtonFrames[1] != 0xFF)
-    );
+    Controller->Moving = (Controller->Pressed_Left || Controller->Pressed_Right);
+
+    if(Controller->Moving)
+    {
+        if(Controller->Pressed_Left)    Controller->WalkDir = 0;
+        if(Controller->Pressed_Right)   Controller->WalkDir = 1;
+    }
 }
 
 inline void ObjectPlayerUpdateSprite(ObjectPlayer* Player, const bool StateBegin)
@@ -157,6 +160,7 @@ void ObjectPlayerStateWalking(ObjectPlayer* Player)
     if(Player->Controller.Pressed_Jump)
     {
         Player->State = PlayerJumping;
+        Player->OnFloor = false;
         return;
     }
 }
@@ -168,13 +172,14 @@ void ObjectPlayerStateJumping(ObjectPlayer* Player)
     {
         if(DEBUG_MODE)        kprintf("UP!");
         Player->VelocityY = JumpForce;
-        Player->JumpHold = true;
+        Player->OnFloor = false;        // Detatch from floor
+        Player->JumpHold = 0;           // Hold timer start
     }
     else
     {
         if(Player->Controller.Release_Jump) // Cancel hold boost
         {
-            Player->JumpHold = ~0;
+            Player->JumpHold = 0xFF;
         }
     }
 
@@ -185,25 +190,16 @@ void ObjectPlayerStateJumping(ObjectPlayer* Player)
         return;
     }
 
-    
-    /*
-    if((Player->JumpHold !=0) && (Player->JumpHold != 0xFF))
+    if(Player->JumpHold != 0xFF)
     {
-        //
-        const u8 MinJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMin), GameContext.Speedup));
-        const u8 MaxJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMax), GameContext.Speedup));
-        // If in hold window, add a bit of extra momentum to jump
-        if(Player->VelocityY < FIX16(0) && Player->JumpHold >= MinJumpHoldTime && Player->JumpHold < MaxJumpHoldTime)
+        Player->VelocityY += JumpAdd;
+        // Can't hold for 2 long
+        if(Player->JumpHold >= fix16Div(JumpTimeMax, GameContext.Speedup))
         {
-            Player->VelocityY = Player->VelocityY + JumpAdd;
-        }
-        else if (Player->JumpHold >= MaxJumpHoldTime)   // Can't hold for too long
-        {
-            Player->JumpHold = ~0;
+            Player->JumpHold = 0xFF;
         }
         ++Player->JumpHold;
     }
-    */
 }
 void ObjectPlayerStateFalling(ObjectPlayer* Player)
 {
@@ -226,24 +222,28 @@ void ObjectPlayerUpdate(void* object)
 
     ObjectPlayerProcessInputs(&Player->Controller);
 
-    bool Grounded = false;
-
     const s32 width = 20;
     const s32 halfwidth = width / 2;
     const s32 height = 40;
 
-    const int16_t x = fix32ToInt(Player->Base.x);
-    const int16_t y = fix32ToInt(Player->Base.y);
+    int16_t x = fix32ToInt(Player->Base.x);
+    int16_t y = fix32ToInt(Player->Base.y);
+    
+    int16_t x_left  = x - halfwidth;
+    int16_t x_right = x + halfwidth;
+    int16_t y_top = y - height;
+    int16_t y_mid = y - (height / 2);
+    int16_t y_low = y - 10;
 
-    const int16_t x_left = x - halfwidth;
-    const int16_t x_right = x + halfwidth;
+    bool stuck;
+    
+    int16_t velX = fix16ToInt(Player->VelocityX);
+    int16_t velXFrac = fix16ToRoundedInt(Player->VelocityX);
+    int16_t velY = fix16ToInt(Player->VelocityY);
 
     StageFunctionCollision col = GameContext.CurrentStage->Collision;
-    
-    const bool sens_feet_left  = col(x_left + 1,y + 1);
-    const bool sens_feet_mid   = col(x,y + 1);
-    const bool sens_feet_right = col(x_right - 1,y + 1);
-    Player->OnFloor = (sens_feet_left | sens_feet_mid | sens_feet_right);
+
+    // Just landed - pop out of floor
 
     // Apply momentum from frame
     if(GameContext.Speedup == FIX16(1.0)) // NTSC mode
@@ -256,6 +256,50 @@ void ObjectPlayerUpdate(void* object)
         // implement speed correction here... 
         Player->Base.x = Player->Base.x + fix16ToFix32(Player->VelocityX);
         Player->Base.y = Player->Base.y + fix16ToFix32(Player->VelocityY);
+    }
+
+    // Sideways collisions
+    if(velX !=0 || velXFrac != 0)
+    {
+        bool sens_top, sens_mid, sens_low;
+        bool moved = false;
+        uint8_t its = 0;
+        
+        int16_t xsens = x;
+        if(velX > 0 || velXFrac > 0)
+        {
+            xsens += halfwidth;
+        }
+        else
+        {
+            xsens -= halfwidth;
+        }
+
+        stuck = (col(xsens, y_top) | col(xsens, y_mid) | col(xsens, y_low)) > 0;
+
+        int16_t budge = 0;
+        while(stuck && (its < 10))
+        {
+            if(velX > 0 || velXFrac > 0)
+            {
+                budge -= 1;
+            }
+            if(velX < 0 || velXFrac < 0)
+            {
+                budge += 1;
+            }
+            sens_top = col(xsens + budge, y_top);
+            sens_mid = col(xsens + budge, y_mid);
+            sens_low = col(xsens + budge, y_low);
+            stuck = (sens_top | sens_mid | sens_low) > 0;
+            moved = true;
+            ++its;
+        }
+        if(moved)
+        {
+            Player->VelocityX = FIX16(0);
+            Player->Base.x = FIX32(x + budge);
+        }
     }
 
     PlayerControlState LastState = Player->State;
@@ -284,10 +328,38 @@ void ObjectPlayerUpdate(void* object)
     }
 
     // Physics
+    const bool sens_feet_left  = col(x_left + 1,y + 1);
+    const bool sens_feet_mid   = col(x,y + 1);
+    const bool sens_feet_right = col(x_right - 1,y + 1);
+    Player->OnFloor = (sens_feet_left | sens_feet_mid | sens_feet_right) > 0;
+
     if(Player->OnFloor)
     {
-        Player->VelocityY = min(Player->VelocityY, 0);  // Allow negative speed (i.e. jumping) but no falling
-        // Apply friction. If < 0, stop.
+        if(!Player->OnfloorLast)
+        {
+            stuck = true;
+            int its = 0;
+            while(stuck && (its < 10))
+            {
+                const bool sens_stuck_left = col(x_left,y);
+                const bool sens_stuck_mid = col(x,y);
+                const bool sens_stuck_right = col(x_right,y);
+                stuck = (sens_stuck_left + sens_stuck_mid + sens_stuck_right) > 0; 
+                if(stuck)
+                {
+                    --y;
+                }
+                ++its;
+            };
+            if(its > 0 && DEBUG_MODE)
+            {
+                kprintf("Popped %i", its);
+            }
+            Player->Base.y = FIX32(y);
+        }
+
+        Player->VelocityY = min(Player->VelocityY, FIX16(0));  // Allow negative speed (i.e. jumping) but no falling
+        // Apply friction. If ~ 0, stop.
         if((abs(fix16ToInt(Player->VelocityX)) <= 1) && (!Player->Controller.Pressed_Left && !Player->Controller.Pressed_Right))
         {
             Player->VelocityX = FIX16(0);
@@ -297,32 +369,23 @@ void ObjectPlayerUpdate(void* object)
             Player->VelocityX = fix16Mul(Player->VelocityX, friction);
         }
     }
-    else
+    else    // In air - apply gravity
     {
         Player->VelocityY = Player->VelocityY + gravity;
     }
 
-
+    Player->OnfloorLast = Player->OnFloor;
     /*
 
     //
     s32 x = fix32ToInt(Player->Base.x);
     s32 y = fix32ToInt(Player->Base.y);
-    s32 x_left  = x - halfwidth;
-    s32 x_right = x + halfwidth;
-    s32 y_top = y - height;
-    s32 y_mid = y - (height / 2);
-    s32 y_low = y - 1;
 
     // Walking into walls sensor
     bool sens_top, sens_mid, sens_low;
 
     bool stuck = true;  // assume stuck
     int its = 0;
-    int velX = fix16ToInt(Player->VelocityX);
-    int velXFrac = fix16ToRoundedInt(Player->VelocityX);
-    int velY = fix16ToInt(Player->VelocityY);
-
     bool moved = false;
     do
     {

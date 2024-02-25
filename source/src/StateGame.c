@@ -33,7 +33,7 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
 {
     if(Joy == JOY_1)
     {
-        if(State & BUTTON_START)
+        if((State & BUTTON_START) == BUTTON_START)
         {
             GameContext.Paused = !GameContext.Paused;
         }
