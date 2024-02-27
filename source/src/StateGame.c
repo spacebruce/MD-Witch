@@ -84,12 +84,12 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
 }
 
 // Reloads graphics we always want in memory
-void StateGame_Reload() 
+uint16_t StateGame_Reload(uint16_t Vram) 
 {
     SPR_init();
 
     // Load attack sprites
-    PlayerInitAttacks(0);
+    Vram = PlayerInitAttacks(Vram);
     
     SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
     SPR_setPriority(SpritePaused, true);
@@ -102,6 +102,8 @@ void StateGame_Reload()
 
     memcpy(&(GameContext.palette)[PAL_BACKGROUND], sprPlayer.palette->data, 16);
     memcpy(&(GameContext.palette)[PAL_PLAYER], sprPlayer.palette->data, 16);
+
+    return Vram;
 }
 
 // State entry points
@@ -114,7 +116,7 @@ void StateGame_Start()
 
     JOY_setEventHandler(&StateGame_Joystick);
 
-    StateGame_Reload();
+    //StateGame_Reload();
 
     ObjectCameraInit(GameContext.Camera);
     //ObjectCameraSetTarget(GameContext.Camera, &Player1.Base);
@@ -177,7 +179,8 @@ void StateGame_Tick()
         {
             SYS_disableInts();
 
-            GameContext.CurrentStage->Init();       // Init incoming stage
+            uint16_t Index = GameContext.CurrentStage->Init();       // Init incoming stage
+            Index = StateGame_Reload(Index);
             
             ObjectCameraSetStageSize(GameContext.Camera, GameContext.CurrentStage->Width, GameContext.CurrentStage->Height);
             GameContext.Paused = false;             // Ensure game is unpaused
@@ -194,12 +197,13 @@ void StateGame_Tick()
 
             TickObjects(); 
             ObjectCameraUpdate(GameContext.Camera);
-            GameContext.CurrentStage->Draw(
+            GameContext.CurrentStage->Draw
+            (
                 fix32ToInt(GameContext.Camera->Base.x), 
                 fix32ToInt(GameContext.Camera->Base.x)
             );
             VDP_waitDMACompletion();
-            PAL_fadeIn(0, (4 * 16) - 1, GameContext.palette, GameContext.Framerate, false);
+            PAL_fadeIn(0, (4 * 16) - 1, (u16*)GameContext.palette, GameContext.Framerate, false);
         }
     }
     

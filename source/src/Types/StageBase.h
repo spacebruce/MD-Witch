@@ -7,13 +7,14 @@
     Levels define a struct containing callbacks for init/tick/draw code, this way they are easily expandable and can have custom logic.
 */
 typedef void (*StageFunctionVoid)();
+typedef uint16_t (*StageFunctionInit)();
 typedef u8 (*StageFunctionCollision)(const s16, const s16);
 typedef bool (*StageFunctionDraw)(const s16, const s16);
 
 typedef struct 
 {
     const char* Name;
-    StageFunctionVoid Init;
+    StageFunctionInit Init;
     StageFunctionVoid Tick;     // Tick and draw are independant so pause doesn't fuck drawing up
     StageFunctionCollision Collision;
     StageFunctionDraw Draw;     

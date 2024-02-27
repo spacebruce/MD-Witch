@@ -113,7 +113,7 @@ u8 E1M1_Collide(const s16 x, const s16 y)
     return false;
 }
 
-void E1M1_Init()
+uint16_t E1M1_Init()
 {
     GameContext.PlayerSpawn.x = 128;
     GameContext.PlayerSpawn.y = 90;
@@ -126,7 +126,7 @@ void E1M1_Init()
 
 	VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
 
-	tile_id = TILE_USER_INDEX;
+	tile_id = 0;
 
 	VDP_loadTileSet(&bg_e1m1.tileset, tile_id, DMA);
 	uint16_t bg_index = tile_id;
@@ -159,6 +159,8 @@ void E1M1_Init()
 	VDP_drawImageEx(BG_B, &bg_e1m1, TILE_ATTR_FULL(PAL_BACKGROUND, FALSE, FALSE, FALSE, bg_index), 0,0, true, true);
 //
 	//// Fade In
+
+	return tile_id;
 }
 void E1M1_Tick()
 {
