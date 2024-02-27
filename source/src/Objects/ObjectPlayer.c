@@ -227,7 +227,7 @@ void ObjectPlayerStateShooting(ObjectPlayer* Player)
     Player->AnimationState = PlayerAnimShoot;
 
     //
-    PlayerCreateAttack(fix16ToInt(Player->Base.x), fix16ToInt(Player->Base.y), Player->Controller.WalkDir, PLAYER_ATTACK_BLAST);
+    PlayerCreateAttack(fix16ToInt(Player->x), fix16ToInt(Player->y), Player->Controller.WalkDir, PLAYER_ATTACK_BLAST);
     
     if(Player->Controller.Release_Shoot)
     {

@@ -88,6 +88,7 @@ void StateGame_Reload()
 {
     SPR_init();
 
+    // Load attack sprites
     PlayerInitAttacks(0);
     
     SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
