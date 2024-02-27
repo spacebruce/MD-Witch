@@ -6,6 +6,8 @@
 #define PlayerAnimStand (0)
 #define PlayerAnimTurn (0)
 #define PlayerAnimWalk (1)
+#define PlayerAnimShoot (2)
+#define PlayerAnimHitting (2)
 
 typedef int PlayerAnimationState;
 
@@ -21,8 +23,8 @@ struct PlayerController
 {
     uint8_t Changed;
     uint8_t ButtonFrames[8];
-    uint8_t Pressed_Jump : 1, Pressed_B : 1, Pressed_C : 1, Pressed_Left : 1, Pressed_Right : 1, Pressed_Up : 1, Pressed_Down : 1;
-    uint8_t Release_Jump : 1, Release_B : 1, Release_C : 1, Release_Left : 1, Release_Right : 1, Release_Up : 1, Release_Down : 1;
+    uint8_t Pressed_Jump : 1, Pressed_Shoot : 1, Pressed_C : 1, Pressed_Left : 1, Pressed_Right : 1, Pressed_Up : 1, Pressed_Down : 1;
+    uint8_t Release_Jump : 1, Release_Shoot : 1, Release_C : 1, Release_Left : 1, Release_Right : 1, Release_Up : 1, Release_Down : 1;
     uint8_t Moving : 1, WalkDir : 1;
 };
 //static const size_t CS = sizeof(struct PlayerController);
@@ -40,6 +42,7 @@ typedef struct ObjectPlayer
     s16 MaxHealth;
     s16 Health;
     // Physics
+    fix32 x, y;
     fix16 VelocityX;
     fix16 VelocityY;
     bool OnFloor;

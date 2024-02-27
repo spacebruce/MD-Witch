@@ -3,6 +3,10 @@
 #include "ObjectPlayer.h"
 #include "../GameContext.h"
 
+#include "../Types/NumericHelpers.h"
+
+#include "../PlayerAttacks.h"
+
 #define gravity FIX16(0.25)
 #define air_acceleration FIX16(0.75)
 #define acceleration FIX16(1.0)
@@ -48,21 +52,23 @@ void ObjectPlayerProcessInputs(struct PlayerController* Controller)
     }
     
     // Unmangle!
-    Controller->Release_Jump = (Controller->ButtonFrames[4] == 0xFF);
-    Controller->Release_B = (Controller->ButtonFrames[5] == 0xFF);
-    Controller->Release_C = (Controller->ButtonFrames[6] == 0xFF);
     Controller->Release_Left = (Controller->ButtonFrames[0] == 0xFF);
     Controller->Release_Right = (Controller->ButtonFrames[1] == 0xFF);
     Controller->Release_Up = (Controller->ButtonFrames[2] == 0xFF);
     Controller->Release_Down = (Controller->ButtonFrames[3] == 0xFF);
 
-    Controller->Pressed_Jump = !(Controller->Release_Jump) && (Controller->ButtonFrames[4] > 0);
-    Controller->Pressed_B = !(Controller->Release_B) && (Controller->ButtonFrames[5] > 0);
-    Controller->Pressed_C = !(Controller->Release_C) && (Controller->ButtonFrames[6] > 0);
+    Controller->Release_Jump = (Controller->ButtonFrames[4] == 0xFF);   // A
+    Controller->Release_Shoot = (Controller->ButtonFrames[5] == 0xFF);  // B
+    Controller->Release_C = (Controller->ButtonFrames[6] == 0xFF);      // C
+
     Controller->Pressed_Left = !(Controller->Release_Left) && (Controller->ButtonFrames[0] > 0);
     Controller->Pressed_Right = !(Controller->Release_Right) && (Controller->ButtonFrames[1] > 0);
     Controller->Pressed_Up = !(Controller->Release_Up) && (Controller->ButtonFrames[2] > 0);
     Controller->Pressed_Down = !(Controller->Release_Down) && (Controller->ButtonFrames[3] > 0);
+
+    Controller->Pressed_Jump = !(Controller->Release_Jump) && (Controller->ButtonFrames[4] > 0);    // A
+    Controller->Pressed_Shoot = !(Controller->Release_Shoot) && (Controller->ButtonFrames[5] > 0);  // B
+    Controller->Pressed_C = !(Controller->Release_C) && (Controller->ButtonFrames[6] > 0);          // C
 
     Controller->Moving = (Controller->Pressed_Left || Controller->Pressed_Right);
 
@@ -83,15 +89,7 @@ inline void ObjectPlayerUpdateSprite(ObjectPlayer* Player, const bool StateBegin
     else if (Player->VelocityX < FIX16(0))
         SPR_setHFlip(Player->Base.spr, true);
 
-
-    switch(Player->AnimationState)
-    {
-        case PlayerAnimStand:   NewAnimation = PlayerAnimStand; break;
-        case PlayerAnimWalk:    NewAnimation = PlayerAnimWalk;  break;
-        default:
-            NewAnimation = 0xFF;
-        break;
-    }
+    NewAnimation = Player->AnimationState;
 
     if(NewAnimation != 0xFF && (NewAnimation != OldAnimation))
     {
@@ -135,6 +133,11 @@ void ObjectPlayerStateStanding(ObjectPlayer* Player)
         Player->State = PlayerJumping;
         return;
     }
+    if(Player->Controller.Pressed_Shoot)
+    {
+        Player->State = PlayerShooting;
+        return;
+    }
 }
 void ObjectPlayerStateWalking(ObjectPlayer* Player)
 {
@@ -161,6 +164,11 @@ void ObjectPlayerStateWalking(ObjectPlayer* Player)
     {
         Player->State = PlayerJumping;
         Player->OnFloor = false;
+        return;
+    }
+    if(Player->Controller.Pressed_Shoot)
+    {
+        Player->State = PlayerShooting;
         return;
     }
 }
@@ -214,7 +222,21 @@ void ObjectPlayerStateFalling(ObjectPlayer* Player)
     }
     //
 }
+void ObjectPlayerStateShooting(ObjectPlayer* Player)
+{
+    Player->AnimationState = PlayerAnimShoot;
 
+    //
+    PlayerCreateAttack(fix16ToInt(Player->Base.x), fix16ToInt(Player->Base.y), Player->Controller.WalkDir, PLAYER_ATTACK_BLAST);
+    
+    if(Player->Controller.Release_Shoot)
+    {
+        if(Player->VelocityX != FIX16(0))
+            Player->State = PlayerWalking;
+        else
+            Player->State = PlayerStanding;
+    }
+}
 
 void ObjectPlayerUpdate(void* object)
 {
@@ -309,6 +331,7 @@ void ObjectPlayerUpdate(void* object)
         case PlayerWalking:     ObjectPlayerStateWalking(Player);   break;
         case PlayerJumping:     ObjectPlayerStateJumping(Player);   break;
         case PlayerFalling:     ObjectPlayerStateFalling(Player);   break;
+        case PlayerShooting:    ObjectPlayerStateShooting(Player);  break;
         default:
             if(DEBUG_MODE)  kprintf("Unimplemented playerstate %i", Player->State);
         break;
@@ -508,7 +531,7 @@ void ObjectPlayerUpdate(void* object)
 
     if(Grounded)
     {
-        if(Player->Controller.Pressed_B)  // Jump
+        if(Player->Controller.Pressed_Shoot)  // Jump
         {
             Player->VelocityY = JumpForce;  // Jump velocity
             Player->OnFloor = false;        // Detatch from floor
@@ -518,7 +541,7 @@ void ObjectPlayerUpdate(void* object)
     }
     else
     {
-        if(Player->Controller.Pressed_B && Player->JumpHold != 0xFF)
+        if(Player->Controller.Pressed_Shoot && Player->JumpHold != 0xFF)
         {
             const u8 MinJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMin), GameContext.Speedup));
             const u8 MaxJumpHoldTime = fix16ToInt(fix16Mul(intToFix16(JumpTimeMax), GameContext.Speedup));

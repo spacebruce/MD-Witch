@@ -17,6 +17,8 @@
 #include "Objects/ObjectPlayer.h"
 #include "Objects/ObjectPickup.h"
 
+#include "PlayerAttacks.h"
+
 struct Sprite* SpriteFreecam;
 struct Sprite* SpritePaused;
 
@@ -85,6 +87,9 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
 void StateGame_Reload() 
 {
     SPR_init();
+
+    PlayerInitAttacks(0);
+    
     SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
     SPR_setPriority(SpritePaused, true);
     SPR_setDepth(SpritePaused, 0);
@@ -178,6 +183,8 @@ void StateGame_Tick()
             GameContext.StageFrame = 0;             // Reset stage timer    
 
             Player = CreateObject(TypeObjectPlayer, FIX32(GameContext.PlayerSpawn.x), FIX32(GameContext.PlayerSpawn.y));
+            Player->x = GameContext.PlayerSpawn.x;
+            Player->y = GameContext.PlayerSpawn.y;
             ObjectCameraSetTarget(GameContext.Camera, &Player->Base);
             GameContext.Player = &Player->Base;
 
@@ -223,8 +230,9 @@ void StateGame_Tick()
     {
         if(GameContext.CurrentStage != NULL)
         {
-            //GameContext.CurrentStage->Tick();
+            GameContext.CurrentStage->Tick();
             TickObjects();
+            PlayerUpdateAttacks();
             if(!GameContext.Freecam)
             {
                 ObjectCameraUpdate(GameContext.Camera);
