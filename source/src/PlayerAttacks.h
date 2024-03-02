@@ -25,13 +25,14 @@ typedef enum PLAYER_ATTACK_FACING
 #define PlayerAttacksMax (10)
 struct PlayerAttackData
 {
+    Vect2D_f32 Position;
     u16 Lifespan;
-    PLAYER_ATTACK Type;
-    PLAYER_ATTACK_FACING Direction;
     Sprite* Graphic;
     struct PlayerAttackData* Next;
+    PLAYER_ATTACK Type;
+    PLAYER_ATTACK_FACING Direction;
 };
 
 uint16_t PlayerInitAttacks(uint16_t VRAM);
-bool PlayerCreateAttack(s16 x, s16 y, PLAYER_ATTACK_FACING direction, PLAYER_ATTACK type);
-void PlayerUpdateAttacks();
+bool PlayerCreateAttack(fix32 x, fix32 y, PLAYER_ATTACK_FACING direction, PLAYER_ATTACK type);
+void PlayerUpdateAttacks(const fix32 CameraX, const fix32 CameraY);

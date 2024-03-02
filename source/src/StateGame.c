@@ -84,16 +84,21 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
 }
 
 // Reloads graphics we always want in memory
-uint16_t StateGame_Reload(uint16_t Vram) 
+uint16_t StateGame_Reload(uint16_t VRAM) 
 {
     SPR_init();
 
     // Load attack sprites
-    Vram = PlayerInitAttacks(Vram);
+    VRAM = PlayerInitAttacks(VRAM);
     
     SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
+    SPR_setAutoTileUpload(SpritePaused, false);
     SPR_setPriority(SpritePaused, true);
     SPR_setDepth(SpritePaused, 0);
+    TileSet* ts = sprPaused.animations[0]->frames[0]->tileset;
+    VDP_loadTileSet(ts, VRAM, DMA);
+    SPR_setVRAMTileIndex(SpritePaused, VRAM);
+    VRAM += ts->numTile;
 
     SpriteFreecam = SPR_addSprite(&sprFreecam, 16,16, TILE_ATTR(PAL_PLAYER, 0,false,false));
     SPR_setVisibility(SpriteFreecam, HIDDEN);
@@ -103,7 +108,7 @@ uint16_t StateGame_Reload(uint16_t Vram)
     memcpy(&(GameContext.palette)[PAL_BACKGROUND], sprPlayer.palette->data, 16);
     memcpy(&(GameContext.palette)[PAL_PLAYER], sprPlayer.palette->data, 16);
 
-    return Vram;
+    return VRAM;
 }
 
 // State entry points
@@ -165,7 +170,7 @@ void StateGame_Tick()
         if(GameContext.CurrentStage != NULL)
         {
             PAL_fadeOutAll(GameContext.Framerate, false);
-            GameContext.CurrentStage->Cleanup();    // Clear out stage memory/vram
+            GameContext.CurrentStage->Cleanup();    // Clear out stage memory/VRAM
             EndObjectManager();
             InitObjectManager();
         }
@@ -181,6 +186,10 @@ void StateGame_Tick()
 
             uint16_t Index = GameContext.CurrentStage->Init();       // Init incoming stage
             Index = StateGame_Reload(Index);
+
+            #if(DEBUG_MODE)
+                kprintf("VRAM USAGE : %i", Index);
+            #endif
             
             ObjectCameraSetStageSize(GameContext.Camera, GameContext.CurrentStage->Width, GameContext.CurrentStage->Height);
             GameContext.Paused = false;             // Ensure game is unpaused
@@ -237,7 +246,7 @@ void StateGame_Tick()
         {
             GameContext.CurrentStage->Tick();
             TickObjects();
-            PlayerUpdateAttacks();
+            PlayerUpdateAttacks(GameContext.Camera->Base.x, GameContext.Camera->Base.y);
             if(!GameContext.Freecam)
             {
                 ObjectCameraUpdate(GameContext.Camera);

@@ -178,7 +178,9 @@ void ObjectPlayerStateJumping(ObjectPlayer* Player)
     // Jump logic
     if(Player->StateFrame == 0)
     {
-        if(DEBUG_MODE)        kprintf("UP!");
+        #if(DEBUG_MODE)        
+            kprintf("UP!");
+        #endif
         Player->VelocityY = JumpForce;
         Player->OnFloor = false;        // Detatch from floor
         Player->JumpHold = 0;           // Hold timer start
@@ -193,7 +195,9 @@ void ObjectPlayerStateJumping(ObjectPlayer* Player)
 
     if(Player->VelocityY >= FIX16(0))
     {
-        if(DEBUG_MODE)        kprintf("FALL!");
+        #if(DEBUG_MODE)        
+            kprintf("FALL!");
+        #endif
         Player->State = PlayerFalling;
         return;
     }
@@ -227,7 +231,7 @@ void ObjectPlayerStateShooting(ObjectPlayer* Player)
     Player->AnimationState = PlayerAnimShoot;
 
     //
-    PlayerCreateAttack(fix16ToInt(Player->x), fix16ToInt(Player->y), Player->Controller.WalkDir, PLAYER_ATTACK_BLAST);
+    PlayerCreateAttack(Player->x, Player->y, Player->Controller.WalkDir, PLAYER_ATTACK_BLAST);
     
     if(Player->Controller.Release_Shoot)
     {
@@ -329,7 +333,9 @@ void ObjectPlayerUpdate(void* object)
         case PlayerFalling:     ObjectPlayerStateFalling(Player);   break;
         case PlayerShooting:    ObjectPlayerStateShooting(Player);  break;
         default:
-            if(DEBUG_MODE)  kprintf("Unimplemented playerstate %i", Player->State);
+            #if(DEBUG_MODE)  
+                kprintf("Unimplemented playerstate %i", Player->State);
+            #endif
         break;
     }
     const bool StateChanged = (LastState != Player->State);
@@ -339,7 +345,9 @@ void ObjectPlayerUpdate(void* object)
     if(StateChanged)
     {
         Player->StateFrame = 0;
-        if(DEBUG_MODE)  kprintf("State change, %02X to %02X", LastState, Player->State);
+        #if(DEBUG_MODE)  
+            kprintf("State change, %02X to %02X", LastState, Player->State);
+        #endif
     }
     else
     {
@@ -370,10 +378,12 @@ void ObjectPlayerUpdate(void* object)
                 }
                 ++its;
             };
-            if(its > 0 && DEBUG_MODE)
-            {
-                kprintf("Popped %i", its);
-            }
+            #if(DEBUG_MODE)
+                if(its > 0)
+                {
+                    kprintf("Popped %i", its);
+                }
+            #endif
             Player->y = FIX32(y);
         }
         Player->VelocityY = min(Player->VelocityY, FIX16(0));  // Allow negative speed (i.e. jumping) but no falling
