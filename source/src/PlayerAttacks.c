@@ -4,17 +4,18 @@
 
 struct PlayerAttackData PlayerAttackList[PlayerAttacksMax];
 u16 PlayerAttacksRunning = 0;
-u16 PlayerAttackSlot = 0;
 
 u16 AttackSpriteVRAM[4];
 
 // Attack definitions
 void AttackSwipeInit(struct PlayerAttackData* Attack)
 {
+    // PLACEHOLDER
     Attack->Lifespan = 10;
 }
 void AttackSwipeTick(struct PlayerAttackData* Attack)
 {
+    // PLACEHOLDER
 }
 void AttackBlastInit(struct PlayerAttackData* Attack)
 {
@@ -22,18 +23,17 @@ void AttackBlastInit(struct PlayerAttackData* Attack)
     SPR_setVRAMTileIndex(spr, AttackSpriteVRAM[0]);
     SPR_setFrame(spr, 0);
     SPR_setVisibility(spr, VISIBLE);
-
     Attack->Lifespan = 10;
 }
 void AttackBlastTick(struct PlayerAttackData* Attack)
 {
+    // PLACEHOLDER
 }
 
 uint16_t PlayerInitAttacks(uint16_t VRAM)
 {
     memset(PlayerAttackList, '\0', sizeof(PlayerAttackList));
     PlayerAttacksRunning = 0;
-    PlayerAttackSlot = 0;
     // Graphics
 
     /*
@@ -89,20 +89,23 @@ bool PlayerCreateAttack(fix32 X, fix32 Y, PLAYER_ATTACK_FACING Direction, PLAYER
 
     PlayerAttacksRunning++;
     
-    return false;
+    return true;
 }
+
 void PlayerUpdateAttacks(const fix32 CameraX, const fix32 CameraY)
 {
     for (int i = 0; i < PlayerAttacksRunning; i++)
     {
         struct PlayerAttackData *p = &PlayerAttackList[i];
+        
         switch(p->Type)
         {
-            case PLAYER_ATTACK_SWIPE:   AttackSwipeTick(&PlayerAttackList[PlayerAttacksRunning]);   break;
-            case PLAYER_ATTACK_BLAST:   AttackBlastTick(&PlayerAttackList[PlayerAttacksRunning]);   break;
+            case PLAYER_ATTACK_SWIPE:   AttackSwipeTick(&PlayerAttackList[i]);   break;
+            case PLAYER_ATTACK_BLAST:   AttackBlastTick(&PlayerAttackList[i]);   break;
             default:
             break;
         }
+
         p->Lifespan--;
         if (p->Lifespan == 0)
         {
