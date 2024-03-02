@@ -27,8 +27,8 @@ void VBlankHandler()
 
 	BackgroundPositionX = (CameraPositionX >> 2);
 	BackgroundPositionY = (CameraPositionY >> 3);
-	WaterPositionX = (CameraPositionX >> 2) + 64;
-	WaterPositionY = (CameraPositionY >> 2) + 16;
+	WaterPositionX = (CameraPositionX >> 2);// + 64;
+	WaterPositionY = (CameraPositionY >> 2);// + 16;
 	
 	if(WaterLine > screenHeight)		// Waterline off-screen bottom
 	{	
@@ -54,18 +54,6 @@ HINTERRUPT_CALLBACK HIntHandler()
 	--WaterLine;
 	if(WaterLine == 0)
 	{
-    	vu16 count = 90;
-    	asm volatile	
-		(
-        	"mov.l %0, %%d0;"    
-        	"1:;"				
-        	"nop;"              
-        	"subq.l #1, %%d0;"  
-        	"bne.b 1b"             
-        	:                      
-        	: "r" (count)      
-        	: "d0"                 
-   		);
     	PAL_setColors(0,&GameContext.paletteEffect[0][0], 64, DMA);
     	VDP_setVerticalScroll(BG_B, WaterPositionY);
 		VDP_setHInterrupt(0);
