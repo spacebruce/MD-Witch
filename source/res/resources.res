@@ -8,6 +8,7 @@ SPRITE sprPlayer "sprites/player2.png" 6 6 NONE 0
 SPRITE sprPaused "sprites/sprPaused.png" 12 4 FAST 1
 SPRITE sprFreecam "sprites/sprFreecam.png" 4 4 FAST 1
 SPRITE sprHudMeter "sprites/sprHudMeter.png" 4 2 FAST 1
+SPRITE sprHudStaff "sprites/sprHudStaff.gif" 16 4 FAST 1
 
 ## Stage backgrounds
 IMAGE bg_e1m1 "backgrounds/e1m1_background.png" FAST

@@ -21,6 +21,7 @@
 
 struct Sprite* SpriteFreecam;
 struct Sprite* SpritePaused;
+struct Sprite* SpriteHudStaff;
 
 struct ObjectPlayer* Player;
 
@@ -98,6 +99,16 @@ uint16_t StateGame_Reload(uint16_t VRAM)
     TileSet* ts = sprPaused.animations[0]->frames[0]->tileset;
     VDP_loadTileSet(ts, VRAM, DMA);
     SPR_setVRAMTileIndex(SpritePaused, VRAM);
+    VRAM += ts->numTile;
+
+    SpriteHudStaff = SPR_addSprite(&sprHudStaff, 0, 0, TILE_ATTR(PAL_PLAYER,0,false,false));
+    SPR_setAutoTileUpload(SpriteHudStaff, false);
+    SPR_setPriority(SpriteHudStaff, true);
+    SPR_setDepth(SpriteHudStaff, 0);
+    SPR_setVisibility(SpriteHudStaff, VISIBLE);
+    ts = sprHudStaff.animations[0]->frames[0]->tileset;
+    VDP_loadTileSet(ts, VRAM, DMA);
+    SPR_setVRAMTileIndex(SpriteHudStaff, VRAM);
     VRAM += ts->numTile;
 
     SpriteFreecam = SPR_addSprite(&sprFreecam, 16,16, TILE_ATTR(PAL_PLAYER, 0,false,false));
