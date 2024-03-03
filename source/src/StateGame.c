@@ -101,7 +101,7 @@ uint16_t StateGame_Reload(uint16_t VRAM)
     SPR_setVRAMTileIndex(SpritePaused, VRAM);
     VRAM += ts->numTile;
 
-    SpriteHudStaff = SPR_addSprite(&sprHudStaff, 0, 0, TILE_ATTR(PAL_PLAYER,0,false,false));
+    SpriteHudStaff = SPR_addSprite(&sprHudStaff, 16, 16, TILE_ATTR(PAL_PLAYER,0,false,false));
     SPR_setAutoTileUpload(SpriteHudStaff, false);
     SPR_setPriority(SpriteHudStaff, true);
     SPR_setDepth(SpriteHudStaff, 0);
