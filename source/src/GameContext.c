@@ -7,9 +7,9 @@ void GameContextInit()
 {
 	GameContext.Freecam = false;
 	
-	//#if(DEBUG_MODE == true)
+	#if(DEBUG_PERF == true)
 		SYS_showFrameLoad(false);
-	//#endif
+	#endif
 
 	GameContext.Frame = 0;
 	GameContext.Camera = &GameCamera;
