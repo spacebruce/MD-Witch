@@ -231,7 +231,10 @@ void ObjectPlayerStateShooting(ObjectPlayer* Player)
     Player->AnimationState = PlayerAnimShoot;
 
     //
-    PlayerCreateAttack(Player->x, Player->y, Player->Controller.WalkDir, PLAYER_ATTACK_BLAST);
+    if(SPR_getAnimationDone(Player->Base.spr))
+    {
+        PlayerCreateAttack(Player->x, Player->y, Player->Controller.WalkDir, PLAYER_ATTACK_BLAST);
+    }
     
     if(Player->Controller.Release_Shoot)
     {
