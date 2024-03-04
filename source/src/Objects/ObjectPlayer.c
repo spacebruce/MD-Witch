@@ -272,8 +272,6 @@ void ObjectPlayerUpdate(void* object)
 
     StageFunctionCollision col = GameContext.CurrentStage->Collision;
 
-    // Just landed - pop out of floor
-
     // Sideways collisions
     if(velX !=0 || velXFrac != 0)
     {
@@ -358,11 +356,12 @@ void ObjectPlayerUpdate(void* object)
     }
 
     // Physics
-    const bool sens_feet_left  = col(x_left + 1,y + 1);
+    const bool sens_feet_left  = col(x_left,y + 1);
     const bool sens_feet_mid   = col(x,y + 1);
-    const bool sens_feet_right = col(x_right - 1,y + 1);
+    const bool sens_feet_right = col(x_right,y + 1);
     Player->OnFloor = (sens_feet_left | sens_feet_mid | sens_feet_right) > 0;
 
+    // Just landed - pop out of floor
     if(Player->OnFloor)
     {
         if(!Player->OnfloorLast)
