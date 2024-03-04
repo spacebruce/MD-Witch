@@ -55,7 +55,7 @@ HINTERRUPT_CALLBACK HIntHandler()
 	if(WaterLine == 0)
 	{
     	PAL_setColors(0,&GameContext.paletteEffect[0][0], 64, DMA);
-    	VDP_setVerticalScroll(BG_B, WaterPositionY);
+    	//VDP_setVerticalScroll(BG_B, WaterPositionY);
 		VDP_setHInterrupt(0);
 	}
 }
@@ -135,14 +135,18 @@ uint16_t E1M1_Init()
     u16 pal[16];
     for(int i = 0; i < 16; ++i)
 	{
-        pal[i] = bg_e1m1.palette->data[i] >> 1;
+        pal[i] = pal_stage_01b.data[i] >> 1;
 	}
+	memcpy(&GameContext.paletteEffect[PAL_BACKGROUND],  pal, 16 * 2);
+    for(int i = 0; i < 16; ++i)
+	{
+        pal[i] = pal_stage_01a.data[i] >> 1;
+	}
+	memcpy(&GameContext.paletteEffect[PAL_TILES],  pal, 16 * 2);
 
 	// buffer the palettes to memory, these get sent to hardware on vsync
 	memcpy(&GameContext.palette[PAL_BACKGROUND],  bg_e1m1.palette->data, 16 * 2);
 	memcpy(&GameContext.palette[PAL_TILES],  pal_stage_01b.data, 16 * 2);
-	memcpy(&GameContext.paletteEffect[PAL_BACKGROUND],  pal, 16 * 2);
-	memcpy(&GameContext.paletteEffect[PAL_TILES],  pal, 16 * 2);
 
 	VDP_drawImageEx(BG_B, &bg_e1m1, TILE_ATTR_FULL(PAL_BACKGROUND, FALSE, FALSE, FALSE, bg_index), 0,0, true, true);
 //
