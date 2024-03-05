@@ -233,7 +233,9 @@ void ObjectPlayerStateShooting(ObjectPlayer* Player)
     //
     if(SPR_getAnimationDone(Player->Base.spr))
     {
-        PlayerCreateAttack(Player->x, Player->y, Player->Controller.WalkDir, PLAYER_ATTACK_BLAST);
+        fix16 xoff = Player->Controller.WalkDir ? FIX32(20) : FIX32(-20);
+        fix16 yoff = FIX32(-20);
+        PlayerCreateAttack(Player->x + xoff, Player->y + yoff, Player->Controller.WalkDir, PLAYER_ATTACK_BLAST);
     }
     
     if(Player->Controller.Release_Shoot)
