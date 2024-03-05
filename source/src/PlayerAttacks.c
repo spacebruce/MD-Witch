@@ -120,8 +120,8 @@ void PlayerUpdateAttacks(const fix32 CameraX, const fix32 CameraY)
         }
         else
         {
-            int16_t x = fix32ToInt(CameraX - p->Position.x);
-            int16_t y = fix32ToInt(CameraY - p->Position.y);
+            int16_t x = fix32ToInt(p->Position.x - CameraX);
+            int16_t y = fix32ToInt(p->Position.y - CameraY);
             SPR_setPosition(p->Graphic, x, y);
         }
     }
