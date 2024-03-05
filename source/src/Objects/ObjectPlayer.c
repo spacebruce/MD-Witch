@@ -226,16 +226,17 @@ void ObjectPlayerStateFalling(ObjectPlayer* Player)
     }
     //
 }
+
 void ObjectPlayerStateShooting(ObjectPlayer* Player)
 {
     Player->AnimationState = PlayerAnimShoot;
 
     //
-    if(SPR_getAnimationDone(Player->Base.spr))
+    if((Player->StateFrame % 10) == 0)
     {
         fix16 xoff = Player->Controller.WalkDir ? FIX32(20) : FIX32(-20);
         fix16 yoff = FIX32(-20);
-        PlayerCreateAttack(Player->x + xoff, Player->y + yoff, Player->Controller.WalkDir, PLAYER_ATTACK_BLAST);
+        PlayerCreateAttack(Player->x + xoff, Player->y + yoff, Player->Controller.WalkDir ? ATTACK_FACING_RIGHT : ATTACK_FACING_LEFT, PLAYER_ATTACK_BLAST);
     }
     
     if(Player->Controller.Release_Shoot)

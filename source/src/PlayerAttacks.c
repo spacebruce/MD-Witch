@@ -11,7 +11,7 @@ u16 AttackSpriteVRAM[4];
 void AttackSwipeInit(struct PlayerAttackData* Attack)
 {
     // PLACEHOLDER
-    Attack->Lifespan = 10;
+    Attack->Lifespan = GameContext.Framerate / 10;
 }
 void AttackSwipeTick(struct PlayerAttackData* Attack)
 {
@@ -23,11 +23,19 @@ void AttackBlastInit(struct PlayerAttackData* Attack)
     SPR_setVRAMTileIndex(spr, AttackSpriteVRAM[0]);
     SPR_setFrame(spr, 0);
     SPR_setVisibility(spr, VISIBLE);
-    Attack->Lifespan = 10;
+    Attack->Lifespan = GameContext.Framerate * 2;
 }
 void AttackBlastTick(struct PlayerAttackData* Attack)
 {
-    // PLACEHOLDER
+    switch(Attack->Direction)
+    {
+        case ATTACK_FACING_LEFT:
+            Attack->Position.x -= FIX32(4);
+        break;
+        case ATTACK_FACING_RIGHT:
+            Attack->Position.x += FIX32(4);
+        break;
+    }
 }
 
 uint16_t PlayerInitAttacks(uint16_t VRAM)
@@ -77,6 +85,8 @@ bool PlayerCreateAttack(fix32 X, fix32 Y, PLAYER_ATTACK_FACING Direction, PLAYER
 
     Attack->Position.x = X;
     Attack->Position.y = Y;
+    Attack->Direction = Direction;
+    Attack->Type = Type;
 
     switch(Type)
     {
@@ -110,18 +120,18 @@ void PlayerUpdateAttacks(const fix32 CameraX, const fix32 CameraY)
         if (p->Lifespan == 0)
         {
             #if(DEBUG_MODE)
-                int16_t sx = SPR_getPositionX(p->Graphic);
-                int16_t sy = SPR_getPositionY(p->Graphic);
+                const int16_t sx = SPR_getPositionX(p->Graphic);
+                const int16_t sy = SPR_getPositionY(p->Graphic);
                 kprintf("DEL ATK X:%i Y:%i", sx,sy);
             #endif
             SPR_setVisibility(PlayerAttackList[i].Graphic, HIDDEN);
-            PlayerAttackList[i] = PlayerAttackList[--PlayerAttacksRunning];
+            memcpy(&PlayerAttackList[i], &PlayerAttackList[--PlayerAttacksRunning], sizeof(struct PlayerAttackData));
             i--;
         }
         else
         {
-            int16_t x = fix32ToInt(p->Position.x - CameraX);
-            int16_t y = fix32ToInt(p->Position.y - CameraY);
+            const int16_t x = fix32ToInt(p->Position.x - CameraX);
+            const int16_t y = fix32ToInt(p->Position.y - CameraY);
             SPR_setPosition(p->Graphic, x, y);
         }
     }
