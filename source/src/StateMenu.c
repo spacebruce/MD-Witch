@@ -117,8 +117,9 @@ void StateMenu_Start()
 	VDP_drawImageEx(BG_B, &sprWitch, TILE_ATTR_FULL(0,false,false,false,index), 1,32, true, false);
 
     //PAL_fadeIn(0,63, image_titlescreen.palette->data, GameContext.Framerate * 2, true);
+	VDP_loadFontData(sprFont.tiles, 96, DMA);
 
-    VDP_setTextPlane(BG_A);
+    //VDP_setTextPlane(BG_A);
 
     SPR_init();
     for(int i = 0; i < 3; ++i)

@@ -2,6 +2,7 @@
 #define _RES_RESOURCES_H_
 
 extern const SpriteDefinition sprCursor;
+extern const TileSet sprFont;
 extern const Image bgtile;
 extern const SpriteDefinition sprPlayer;
 extern const SpriteDefinition sprPaused;
