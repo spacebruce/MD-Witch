@@ -410,13 +410,10 @@ void ObjectPlayerUpdate(void* object)
 
     Player->OnfloorLast = Player->OnFloor;
 
-    
-    Player->Base.x = fix32Lerp(Player->x, Player->Base.x, 0.5);
-    Player->Base.y = fix32Lerp(Player->y, Player->Base.y, 0.5);
+    Player->Base.x = Player->x;
+    Player->Base.y = Player->y;
 
     /*
-
-    //
     s32 x = fix32ToInt(Player->x);
     s32 y = fix32ToInt(Player->y);
 
@@ -654,7 +651,7 @@ void ObjectPlayerInit(void* object)
     
     SPR_setVisibility(Player->Base.spr, AUTO_FAST);
     Player->Base.spriteOffset.x = -24;
-    Player->Base.spriteOffset.y = -48;
+    Player->Base.spriteOffset.y = -46;
 
     u16 pal[16];
     for(int i = 0; i < 16; ++i)

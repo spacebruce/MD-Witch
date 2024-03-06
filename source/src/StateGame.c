@@ -206,9 +206,12 @@ void StateGame_Tick()
             GameContext.Paused = false;             // Ensure game is unpaused
             GameContext.StageFrame = 0;             // Reset stage timer    
 
-            Player = CreateObject(TypeObjectPlayer, FIX32(GameContext.PlayerSpawn.x), FIX32(GameContext.PlayerSpawn.y));
-            Player->x = FIX32(GameContext.PlayerSpawn.x);
-            Player->y = FIX32(GameContext.PlayerSpawn.y);
+            fix32 px, py;
+            px = FIX32(GameContext.PlayerSpawn.x);
+            py = FIX32(GameContext.PlayerSpawn.y);
+            Player = CreateObject(TypeObjectPlayer, px,py);
+            Player->x = px; // Player has two sets of coordinates, needs special attention
+            Player->y = py;
             ObjectCameraSetTarget(GameContext.Camera, &Player->Base);
             GameContext.Player = &Player->Base;
 
