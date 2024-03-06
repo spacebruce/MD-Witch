@@ -207,8 +207,8 @@ void StateGame_Tick()
             GameContext.StageFrame = 0;             // Reset stage timer    
 
             Player = CreateObject(TypeObjectPlayer, FIX32(GameContext.PlayerSpawn.x), FIX32(GameContext.PlayerSpawn.y));
-            Player->x = GameContext.PlayerSpawn.x;
-            Player->y = GameContext.PlayerSpawn.y;
+            Player->x = FIX32(GameContext.PlayerSpawn.x);
+            Player->y = FIX32(GameContext.PlayerSpawn.y);
             ObjectCameraSetTarget(GameContext.Camera, &Player->Base);
             GameContext.Player = &Player->Base;
 
