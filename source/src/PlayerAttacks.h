@@ -26,7 +26,8 @@ typedef enum PLAYER_ATTACK_FACING
 struct PlayerAttackData
 {
     Vect2D_f32 Position;
-    u16 Lifespan;
+    Vect2D_f16 Vector;
+    s16 Lifespan;
     Sprite* Graphic;
     struct PlayerAttackData* Next;
     PLAYER_ATTACK Type;

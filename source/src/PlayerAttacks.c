@@ -22,20 +22,21 @@ void AttackBlastInit(struct PlayerAttackData* Attack)
     Sprite* spr = Attack->Graphic;
     SPR_setVRAMTileIndex(spr, AttackSpriteVRAM[0]);
     SPR_setFrame(spr, 0);
-    SPR_setVisibility(spr, VISIBLE);
+    SPR_setVisibility(spr, AUTO_FAST);
     Attack->Lifespan = GameContext.Framerate * 2;
+
+    switch(Attack->Direction)
+    {
+        case ATTACK_FACING_LEFT:    Attack->Vector = (Vect2D_f16){ FIX16(-4), FIX16(+0) };    break;
+        case ATTACK_FACING_RIGHT:   Attack->Vector = (Vect2D_f16){ FIX16(+4), FIX16(+0) };    break;
+        case ATTACK_FACING_UP:      Attack->Vector = (Vect2D_f16){ FIX16(+0), FIX16(-4) };    break;
+        case ATTACK_FACING_DOWN:    Attack->Vector = (Vect2D_f16){ FIX16(+0), FIX16(+4) };    break;
+    }
 }
 void AttackBlastTick(struct PlayerAttackData* Attack)
 {
-    switch(Attack->Direction)
-    {
-        case ATTACK_FACING_LEFT:
-            Attack->Position.x -= FIX32(4);
-        break;
-        case ATTACK_FACING_RIGHT:
-            Attack->Position.x += FIX32(4);
-        break;
-    }
+    Attack->Position.x += fix16ToFix32(Attack->Vector.x);
+    Attack->Position.y += fix16ToFix32(Attack->Vector.y);
 }
 
 uint16_t PlayerInitAttacks(uint16_t VRAM)
@@ -75,7 +76,7 @@ bool PlayerCreateAttack(fix32 X, fix32 Y, PLAYER_ATTACK_FACING Direction, PLAYER
     #if(DEBUG_MODE)  
         kprintf("ATTACK : %i/%i", (int)PlayerAttacksRunning, PlayerAttacksMax);
     #endif
-    
+
     if (PlayerAttacksRunning == PlayerAttacksMax)
     {
         return false;
@@ -117,7 +118,7 @@ void PlayerUpdateAttacks(const fix32 CameraX, const fix32 CameraY)
         }
 
         p->Lifespan--;
-        if (p->Lifespan == 0)
+        if (p->Lifespan <= 0)
         {
             #if(DEBUG_MODE)
                 const int16_t sx = SPR_getPositionX(p->Graphic);
@@ -125,6 +126,7 @@ void PlayerUpdateAttacks(const fix32 CameraX, const fix32 CameraY)
                 kprintf("DEL ATK X:%i Y:%i", sx,sy);
             #endif
             SPR_setVisibility(PlayerAttackList[i].Graphic, HIDDEN);
+            SPR_setPosition(PlayerAttackList[i].Graphic, -32, -32);
             memcpy(&PlayerAttackList[i], &PlayerAttackList[--PlayerAttacksRunning], sizeof(struct PlayerAttackData));
             i--;
         }
