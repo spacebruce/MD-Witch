@@ -114,7 +114,7 @@ void StateMenu_Start()
     uint16_t index = 0;
 	VDP_drawImageEx(BG_A, &sprLogo, TILE_ATTR_FULL(0,false,false,false,index), 18,29, true, false);
     index += sprLogo.tileset->numTile;
-	VDP_drawImageEx(BG_B, &sprWitch, TILE_ATTR_FULL(0,false,false,false,index), 1,32, true, false);
+	VDP_drawImageEx(BG_B, &sprMenuWitch, TILE_ATTR_FULL(0,false,false,false,index), 1,32, true, false);
 
     //PAL_fadeIn(0,63, image_titlescreen.palette->data, GameContext.Framerate * 2, true);
 	VDP_loadFontData(sprFont.tiles, 96, DMA);
