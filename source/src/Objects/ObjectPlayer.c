@@ -147,29 +147,43 @@ void ObjectPlayerStateWalking(ObjectPlayer* Player)
     if(!Player->Controller.Moving)
     {
         Player->State = PlayerStanding;
+        Player->CoyoteMode = false;
         return;
     }
     if(!Player->OnFloor)
     {
-        Player->State = PlayerFalling;
-        return;
+        Player->CoyoteFrames--;
+        Player->CoyoteMode = true;
+        if(Player->CoyoteFrames <= 0)
+        {
+            Player->State = PlayerFalling;
+            Player->CoyoteMode = false;
+            return;
+        }
     }
-
-    switch(Player->Controller.WalkDir)
+    else
     {
-        case 0: Player->VelocityX = Player->VelocityX - acceleration;   break;
-        case 1: Player->VelocityX = Player->VelocityX + acceleration;   break;
+        Player->CoyoteMode = false;
+        Player->CoyoteFrames = fix16ToInt(fix16Mul(intToFix16(coyote_time), GameContext.Speedup));
     }
     if(Player->Controller.Pressed_Jump)
     {
         Player->State = PlayerJumping;
         Player->OnFloor = false;
+        Player->CoyoteMode = false;
         return;
     }
     if(Player->Controller.Pressed_Shoot)
     {
         Player->State = PlayerShooting;
+        Player->CoyoteMode = false;
         return;
+    }
+    
+    switch(Player->Controller.WalkDir)
+    {
+        case 0: Player->VelocityX = Player->VelocityX - acceleration;   break;
+        case 1: Player->VelocityX = Player->VelocityX + acceleration;   break;
     }
 }
 void ObjectPlayerStateJumping(ObjectPlayer* Player)
@@ -391,6 +405,15 @@ void ObjectPlayerUpdate(void* object)
             #endif
             Player->y = FIX32(y);
         }
+    }
+    else    // In air - apply gravity
+    {
+        Player->VelocityY = Player->VelocityY + gravity;
+        //Player->VelocityX = fix16Mul(Player->VelocityX, friction);
+    }
+
+    if(Player->OnFloor || Player->CoyoteMode)
+    {
         Player->VelocityY = min(Player->VelocityY, FIX16(0));  // Allow negative speed (i.e. jumping) but no falling
         // Apply friction. If ~ 0, stop.
         if((abs(fix16ToInt(Player->VelocityX)) <= 1) && (!Player->Controller.Pressed_Left && !Player->Controller.Pressed_Right))
@@ -401,11 +424,6 @@ void ObjectPlayerUpdate(void* object)
         {
             Player->VelocityX = fix16Mul(Player->VelocityX, friction);
         }
-    }
-    else    // In air - apply gravity
-    {
-        Player->VelocityY = Player->VelocityY + gravity;
-        //Player->VelocityX = fix16Mul(Player->VelocityX, friction);
     }
 
     Player->OnfloorLast = Player->OnFloor;
