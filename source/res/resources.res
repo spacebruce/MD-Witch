@@ -3,6 +3,7 @@ SPRITE sprCursor "sprites/cursor.png" 1 1 BEST 10
 TILESET sprFont "sprites/font.png"
 IMAGE bgtile "tilesets/bgtile.png" -1
 
+SPRITE sprProjectile "sprites/sprProjectileTest.png" 3 3 BEST 0
 SPRITE sprPlayer "sprites/player2.png" 6 6 NONE 0
 
 ## UI

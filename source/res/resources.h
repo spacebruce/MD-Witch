@@ -4,6 +4,7 @@
 extern const SpriteDefinition sprCursor;
 extern const TileSet sprFont;
 extern const Image bgtile;
+extern const SpriteDefinition sprProjectile;
 extern const SpriteDefinition sprPlayer;
 extern const SpriteDefinition sprPaused;
 extern const SpriteDefinition sprFreecam;

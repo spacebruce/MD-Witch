@@ -5,7 +5,7 @@
 struct PlayerAttackData PlayerAttackList[PlayerAttacksMax];
 u16 PlayerAttacksRunning = 0;
 
-u16 AttackSpriteVRAM[4];
+u16 AttackSpriteVRAM[9];
 
 // Attack definitions
 void AttackSwipeInit(struct PlayerAttackData* Attack)
@@ -21,7 +21,6 @@ void AttackBlastInit(struct PlayerAttackData* Attack)
 {
     Sprite* spr = Attack->Graphic;
     SPR_setVRAMTileIndex(spr, AttackSpriteVRAM[0]);
-    SPR_setFrame(spr, 0);
     SPR_setVisibility(spr, AUTO_FAST);
     Attack->Lifespan = GameContext.Framerate * 2;
 
@@ -48,13 +47,15 @@ uint16_t PlayerInitAttacks(uint16_t VRAM)
     /*
         Allocate every sprite... Maybe fix later to recycle vram 
     */
-    Animation* anim = sprCursor.animations[0];
+    Animation* anim = sprProjectile.animations[0];
+    kprintf("frames : %i", anim->numFrame);
     for(int16_t i = 0; i < anim->numFrame; i++)
     {
         TileSet* tileset = anim->frames[i]->tileset;
-        VDP_loadTileSet(tileset, VRAM, TRUE);
+        VDP_loadTileSet(tileset, VRAM, DMA);
         AttackSpriteVRAM[i] = VRAM;
         VRAM += tileset->numTile;
+        kprintf("tiles : %i", tileset->numTile);
     }
 
     /*
@@ -64,9 +65,7 @@ uint16_t PlayerInitAttacks(uint16_t VRAM)
     for(int16_t i = 0; i < PlayerAttacksMax; ++i)
     {
         struct PlayerAttackData* A = &PlayerAttackList[i];
-        A->Graphic = SPR_addSprite(&sprCursor, 64,64, TILE_ATTR_FULL(PAL2, TRUE, FALSE, FALSE, 0));
-        SPR_setAutoTileUpload(A->Graphic, false);
-        SPR_setVisibility(A->Graphic, HIDDEN);
+        A->Graphic = SPR_addSpriteEx(&sprProjectile, -64, -64, TILE_ATTR_FULL(PAL_PLAYER, TRUE, FALSE, FALSE, 0), SPR_FLAG_AUTO_VISIBILITY );
     }
 
     return VRAM;
@@ -134,7 +133,7 @@ void PlayerUpdateAttacks(const fix32 CameraX, const fix32 CameraY)
         {
             const int16_t x = fix32ToInt(p->Position.x - CameraX);
             const int16_t y = fix32ToInt(p->Position.y - CameraY);
-            SPR_setPosition(p->Graphic, x, y);
+            SPR_setPosition(p->Graphic, x - 12, y - 12);
         }
     }
 }
