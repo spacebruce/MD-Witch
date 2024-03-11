@@ -18,7 +18,7 @@ static vs16 WaterLine = 0;
 static vs16 CameraPositionX = 0;
 static vs16 CameraPositionY = 0;
 static vs16 WaterPositionY, WaterPositionX, BackgroundPositionX, BackgroundPositionY;
-static vs16 WaterY = 200;
+static vs16 WaterY = 64;
 
 void VBlankHandler()
 {
@@ -105,7 +105,7 @@ uint16_t E1M1_Init()
 {
     GameContext.PlayerSpawn.x = 128;
     GameContext.PlayerSpawn.y = 90;
-	WaterY = 400;
+	WaterY = 390;
 
 	SYS_setHIntCallback(HIntHandler);
 	SYS_setVBlankCallback(VBlankHandler);
