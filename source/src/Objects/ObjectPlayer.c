@@ -664,6 +664,7 @@ void ObjectPlayerInit(void* object)
     Player->VelocityY = FIX16(0);
     Player->OnFloor = FALSE;
     Player->CoyoteFrames = 0;
+    Player->CoyoteMode = false;
     // sprite
     Player->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
     

@@ -15,7 +15,7 @@ fix16 SCROLL_Y = FIX16(0);
 
 // Forward declare options here so they can poke state around later
 void Menu_StartGame();
-void Menu_LoadGame();
+void Menu_GoInfo();
 void Menu_GotoOptions();
 void Menu_SoundOptions();
 void Menu_VideoOptions();
@@ -26,8 +26,8 @@ void Menu_GotoMainMenu();
 struct MenuItem MenuTopItems[MenuTopSize] = 
 {
     { "START", Menu_StartGame },
-    { "LOAD", Menu_LoadGame },
     { "OPTIONS", Menu_GotoOptions },
+    { "INFO", Menu_GoInfo },
 };
 struct MenuPage MenuTop = 
 {
@@ -54,9 +54,8 @@ void Menu_StartGame()
     VDP_drawText("StartGame", 0,36);
 }
 
-void Menu_LoadGame()
+void Menu_GoInfo()
 {
-    VDP_drawText("LoadGame", 0,36);
 }
 void Menu_SoundOptions()
 {
@@ -171,6 +170,7 @@ void StateMenu_Tick()
     }
     
     char mode[5];
+    char debug[5];
     if(IS_PAL_SYSTEM)
     {
         strncpy(mode, "PAL\0",4);
@@ -178,7 +178,8 @@ void StateMenu_Tick()
     {
         strncpy(mode,"NTSC\0",5);
     }
-    sprintf(buffer, "VIDEO : %s (%ihz)", mode, GameContext.Framerate);
+    strncpy(debug, (DEBUG_MODE) ? "ON\0\0" : "OFF\0", 4);
+    sprintf(buffer, "VIDEO : %s (%ihz)\nDEBUG : %s", mode, GameContext.Framerate, debug);
     VDP_drawText(buffer,2,54);
 
     SPR_update();
