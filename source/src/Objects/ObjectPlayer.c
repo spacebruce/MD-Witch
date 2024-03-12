@@ -261,9 +261,9 @@ void ObjectPlayerStateShooting(ObjectPlayer* Player)
             Player->State = PlayerStanding;
     }
 }
-void ObjectPlayerStateKnockback(ObjectPlayer* Player)
+void ObjectPlayerStateHurt(ObjectPlayer* Player)
 {
-    Player->AnimationState = PlayerAnimKnockback;
+    Player->AnimationState = PlayerAnimHurt;
 
     // Entry
     if(Player->StateFrame == 0)
@@ -372,7 +372,7 @@ void ObjectPlayerUpdate(void* object)
         case PlayerJumping:     ObjectPlayerStateJumping(Player);   break;
         case PlayerFalling:     ObjectPlayerStateFalling(Player);   break;
         case PlayerShooting:    ObjectPlayerStateShooting(Player);  break;
-        case PlayerKnockback:   ObjectPlayerStateKnockback(Player); break;
+        case PlayerHurt:   ObjectPlayerStateHurt(Player); break;
         default:
             #if(DEBUG_MODE)  
                 kprintf("Unimplemented playerstate %i", Player->State);
@@ -677,6 +677,7 @@ void ObjectPlayerInit(void* object)
     //
     ObjectPlayerInput(Player, 0x00);
     Player->State = PlayerFalling;
+    Player->Controller.WalkDir = 1;
     Player->StateFrame = 0;
     //
     Player->Health = 100;
@@ -713,7 +714,7 @@ void ObjectPlayerFree(void* object)
 
 void HurtPlayer(ObjectPlayer* Player)
 {
-    Player->State = PlayerKnockback;
+    Player->State = PlayerHurt;
     Player->Health -= 1;
     Player->StateFrame = 0;
 }
