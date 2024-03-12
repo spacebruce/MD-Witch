@@ -59,11 +59,12 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
             {
                 if(State & BUTTON_A)
                 {
+                    if(GameContext.Player != NULL)
+                        HurtPlayer((struct ObjectPlayer*)(GameContext.Player));
+                    /*
                     fix32 x = GameContext.Camera->Base.x + FIX32(screenWidth / 2);
                     fix32 y = GameContext.Camera->Base.y + FIX32(screenHeight/ 2);
-
                     //CreateObject(TypeObjectPickup, x, y);
-                    
                     static int thing = 0;
                     switch(thing)
                     {
@@ -73,6 +74,7 @@ void StateGame_Joystick(u16 Joy, u16 Changed, u16 State)
                         case 3: CreateObject(TypeEnemyFrogman, x, y); break;
                     }
                     thing = (thing + 1) % 3;
+                    */
                     
                 }
                 if(State & BUTTON_B)

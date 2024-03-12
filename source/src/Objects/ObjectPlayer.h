@@ -8,6 +8,7 @@
 #define PlayerAnimWalk (1)
 #define PlayerAnimShoot (2)
 #define PlayerAnimHitting (2)
+#define PlayerAnimKnockback (3)
 
 typedef int PlayerAnimationState;
 
@@ -17,6 +18,7 @@ typedef enum
     PlayerCrouching = 2, PlayerCrawling = 3, PlayerSkidding = 4, 
     PlayerHitting = 5, PlayerShooting = 6, PlayerFishing = 6, 
     PlayerJumping = 7, PlayerFalling = 8, PlayerLanding = 9, PlayerBonked = 10, 
+    PlayerKnockback = 11,
 } PlayerControlState;
 
 struct PlayerController
@@ -58,3 +60,7 @@ void ObjectPlayerUpdate(void* object);
 void ObjectPlayerInit(void* object);
 void ObjectPlayerFree(void* object);
 void ObjectPlayerInput(ObjectPlayer *Player, uint8_t changed);
+
+//
+
+void HurtPlayer(ObjectPlayer* Player);

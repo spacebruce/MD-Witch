@@ -261,6 +261,29 @@ void ObjectPlayerStateShooting(ObjectPlayer* Player)
             Player->State = PlayerStanding;
     }
 }
+void ObjectPlayerStateKnockback(ObjectPlayer* Player)
+{
+    Player->AnimationState = PlayerAnimKnockback;
+
+    // Entry
+    if(Player->StateFrame == 0)
+    {
+        // Physics stuff
+    }
+    
+    if(Player->StateFrame >= fix16ToInt(fix16Mul(FIX16(15),GameContext.Speedup)))
+    {
+        SPR_setPalette(Player->Base.spr, PAL_PLAYER);
+        if(Player->OnFloor) 
+            Player->State = PlayerStanding;
+        else
+            Player->State = PlayerFalling;
+    }
+    else
+    {
+        SPR_setPalette(Player->Base.spr, (Player->StateFrame / 3) % 4);
+    }
+}
 
 void ObjectPlayerUpdate(void* object)
 {
@@ -342,7 +365,6 @@ void ObjectPlayerUpdate(void* object)
     else
         Player->y = Player->y + fix16ToFix32(Player->VelocityY);
 
-    PlayerControlState LastState = Player->State;
     switch(Player->State)
     {
         case PlayerStanding:    ObjectPlayerStateStanding(Player);  break;
@@ -350,13 +372,14 @@ void ObjectPlayerUpdate(void* object)
         case PlayerJumping:     ObjectPlayerStateJumping(Player);   break;
         case PlayerFalling:     ObjectPlayerStateFalling(Player);   break;
         case PlayerShooting:    ObjectPlayerStateShooting(Player);  break;
+        case PlayerKnockback:   ObjectPlayerStateKnockback(Player); break;
         default:
             #if(DEBUG_MODE)  
                 kprintf("Unimplemented playerstate %i", Player->State);
             #endif
         break;
     }
-    const bool StateChanged = (LastState != Player->State);
+    const bool StateChanged = (Player->LastState != Player->State);
 
     ObjectPlayerUpdateSprite(Player, StateChanged);
 
@@ -364,7 +387,7 @@ void ObjectPlayerUpdate(void* object)
     {
         Player->StateFrame = 0;
         #if(DEBUG_MODE)  
-            kprintf("State change, %02X to %02X", LastState, Player->State);
+            kprintf("State change, %02X to %02X", Player->LastState, Player->State);
         #endif
     }
     else
@@ -430,6 +453,8 @@ void ObjectPlayerUpdate(void* object)
 
     Player->Base.x = Player->x;
     Player->Base.y = Player->y;
+    
+    Player->LastState = Player->State;
 
     /*
     s32 x = fix32ToInt(Player->x);
@@ -651,7 +676,7 @@ void ObjectPlayerInit(void* object)
     ObjectPlayer* Player = (ObjectPlayer*)object;
     //
     ObjectPlayerInput(Player, 0x00);
-    Player->State = PlayerStanding;
+    Player->State = PlayerFalling;
     Player->StateFrame = 0;
     //
     Player->Health = 100;
@@ -684,4 +709,11 @@ void ObjectPlayerFree(void* object)
 {
     ObjectPlayer* Player = (ObjectPlayer*)object;
     SPR_releaseSprite(Player->Base.spr);
+}
+
+void HurtPlayer(ObjectPlayer* Player)
+{
+    Player->State = PlayerKnockback;
+    Player->Health -= 1;
+    Player->StateFrame = 0;
 }
