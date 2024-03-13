@@ -3,7 +3,7 @@ SPRITE sprPalPlayer "sprites/sprPalPlayer.gif" 2 2 BEST 0
 SPRITE sprPalPlayerWater "sprites/sprPalPlayerWater.gif" 2 2 BEST 0
 
 SPRITE sprCursor "sprites/cursor.png" 1 1 BEST 10
-TILESET sprFont "sprites/font.png"
+SPRITE sprFontNumber "sprites/fontNum.gif" 2 4 BEST 0
 IMAGE bgtile "tilesets/bgtile.png" BEST
 
 SPRITE sprProjectile "sprites/sprProjectileTest.png" 3 3 BEST 0

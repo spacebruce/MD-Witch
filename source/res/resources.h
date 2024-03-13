@@ -1,7 +1,10 @@
 #ifndef _RES_RESOURCES_H_
 #define _RES_RESOURCES_H_
 
+extern const SpriteDefinition sprPalPlayer;
+extern const SpriteDefinition sprPalPlayerWater;
 extern const SpriteDefinition sprCursor;
+extern const SpriteDefinition sprFontNumber;
 extern const TileSet sprFont;
 extern const Image bgtile;
 extern const SpriteDefinition sprProjectile;
