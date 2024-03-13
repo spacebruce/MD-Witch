@@ -159,6 +159,9 @@ void StateGame_Start()
 void StateGame_End()
 {    
     PAL_fadeOutAll(GameContext.Framerate, false);   // Fadeout animation
+    SYS_setHIntCallback(NULL);
+
+    GameContext.CurrentStage->Cleanup();    // Clear out stage memory/VRAM
 
     SPR_end();          // Kill sprite engine
     EndObjectManager(); // Dump all game objects from memory
@@ -184,6 +187,7 @@ void StateGame_Tick()
         {
             PAL_fadeOutAll(GameContext.Framerate, false);
             GameContext.CurrentStage->Cleanup();    // Clear out stage memory/VRAM
+	        SYS_setHIntCallback(NULL);
             EndObjectManager();
             InitObjectManager();
         }
