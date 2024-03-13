@@ -118,6 +118,9 @@ void StateMenu_Start()
     //PAL_fadeIn(0,63, image_titlescreen.palette->data, GameContext.Framerate * 2, true);
 	VDP_loadFontData(sprFont.tiles, 96, DMA);
 
+    PAL_setPalette(BG_A, sprPlayer.palette->data, DMA);
+    PAL_setPalette(BG_B, sprMenuWitch.palette->data, DMA);
+
     //VDP_setTextPlane(BG_A);
 
     SPR_init();
