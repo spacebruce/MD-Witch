@@ -698,12 +698,8 @@ void ObjectPlayerInit(void* object)
     Player->Base.spriteOffset.x = -24;
     Player->Base.spriteOffset.y = -46;
 
-    u16 pal[16];
-    for(int i = 0; i < 16; ++i)
-        pal[i] = sprPlayer.palette->data[i] / 2;
-
-    memcpy(&GameContext.palette[PAL_PLAYER], sprPlayer.palette->data, 16 * 2);
-    memcpy(&GameContext.paletteEffect[PAL_PLAYER], pal, 16 * 2);
+    memcpy(&GameContext.palette[PAL_PLAYER], sprPalPlayer.palette->data, 16 * 2);
+    memcpy(&GameContext.paletteEffect[PAL_PLAYER], sprPalPlayerWater.palette->data, 16 * 2);
 }
 
 void ObjectPlayerFree(void* object)
