@@ -65,7 +65,7 @@ uint16_t PlayerInitAttacks(uint16_t VRAM)
     for(int16_t i = 0; i < PlayerAttacksMax; ++i)
     {
         struct PlayerAttackData* A = &PlayerAttackList[i];
-        A->Graphic = SPR_addSpriteEx(&sprProjectile, -64, -64, TILE_ATTR_FULL(PAL_PLAYER, TRUE, FALSE, FALSE, 0), SPR_FLAG_AUTO_VISIBILITY );
+        A->Graphic = SPR_addSpriteEx(&sprProjectile, -64, -64, TILE_ATTR_FULL(PAL_COMMON, TRUE, FALSE, FALSE, 0), SPR_FLAG_AUTO_VISIBILITY );
     }
 
     return VRAM;

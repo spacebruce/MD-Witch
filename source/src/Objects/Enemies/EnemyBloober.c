@@ -6,7 +6,7 @@ void EnemyBlooberInit(void* object)
 {
     EnemyBloober* Bloober = (EnemyBloober*)object;
 
-    Bloober->Base.spr = SPR_addSprite(&sprBloober, 0,0, TILE_ATTR(PAL_PLAYER, 0, FALSE, FALSE));
+    Bloober->Base.spr = SPR_addSprite(&sprBloober, 0,0, TILE_ATTR(PAL_COMMON, 0, FALSE, FALSE));
     SPR_setVisibility(Bloober->Base.spr, AUTO_FAST);
     
     Bloober->Base.spriteOffset.x = -16;

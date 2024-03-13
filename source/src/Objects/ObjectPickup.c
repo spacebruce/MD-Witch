@@ -6,7 +6,7 @@ void ObjectPickupInit(void* object)
 {
     ObjectPickup* Pickup = (ObjectPickup*)object;
 
-    Pickup->Base.spr = SPR_addSprite(&sprCursor, Pickup->Base.StartX, Pickup->Base.StartY, TILE_ATTR(PAL_PLAYER, 1, false, false));
+    Pickup->Base.spr = SPR_addSprite(&sprCursor, Pickup->Base.StartX, Pickup->Base.StartY, TILE_ATTR(PAL_COMMON, 1, false, false));
     SPR_setVisibility(Pickup->Base.spr, VISIBLE);
 
     //Pickup->Base.Collision.Type = CT_Circle;

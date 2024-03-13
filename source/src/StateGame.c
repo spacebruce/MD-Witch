@@ -94,7 +94,7 @@ uint16_t StateGame_Reload(uint16_t VRAM)
     // Load attack sprites
     VRAM = PlayerInitAttacks(VRAM);
     
-    SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_PLAYER,0,false,false));
+    SpritePaused = SPR_addSprite(&sprPaused, 112, 90, TILE_ATTR(PAL_COMMON,0,false,false));
     SPR_setAutoTileUpload(SpritePaused, false);
     SPR_setPriority(SpritePaused, true);
     SPR_setDepth(SpritePaused, 0);
@@ -103,7 +103,7 @@ uint16_t StateGame_Reload(uint16_t VRAM)
     SPR_setVRAMTileIndex(SpritePaused, VRAM);
     VRAM += ts->numTile;
 
-    SpriteHudStaff = SPR_addSprite(&sprHudStaff, 16, 16, TILE_ATTR(PAL_PLAYER,0,false,false));
+    SpriteHudStaff = SPR_addSprite(&sprHudStaff, 16, 16, TILE_ATTR(PAL_COMMON,0,false,false));
     SPR_setAutoTileUpload(SpriteHudStaff, false);
     SPR_setPriority(SpriteHudStaff, true);
     SPR_setDepth(SpriteHudStaff, 0);
@@ -113,13 +113,13 @@ uint16_t StateGame_Reload(uint16_t VRAM)
     SPR_setVRAMTileIndex(SpriteHudStaff, VRAM);
     VRAM += ts->numTile;
 
-    SpriteFreecam = SPR_addSprite(&sprFreecam, 16,64, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    SpriteFreecam = SPR_addSprite(&sprFreecam, 16,64, TILE_ATTR(PAL_COMMON, 0,false,false));
     SPR_setVisibility(SpriteFreecam, HIDDEN);
     
 	PAL_setColors(0, (u16*) palette_black, 64, DMA);
 
     //memcpy(&(GameContext.palette)[PAL_BACKGROUND], sprPlayer.palette->data, 16);
-    memcpy(&(GameContext.palette)[PAL_PLAYER], sprPlayer.palette->data, 16);
+    memcpy(&(GameContext.palette)[PAL_COMMON], sprPlayer.palette->data, 16);
 
     return VRAM;
 }
@@ -153,7 +153,7 @@ void StateGame_Start()
 	//VDP_fillTileMapRect(BG_B,0x0C,0,0,64,39);
 
     VDP_setTextPlane(BG_A);
-    VDP_setTextPalette(PAL_PLAYER);
+    VDP_setTextPalette(PAL_COMMON);
 
 }
 void StateGame_End()

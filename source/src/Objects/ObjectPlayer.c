@@ -273,7 +273,7 @@ void ObjectPlayerStateHurt(ObjectPlayer* Player)
     
     if(Player->StateFrame >= fix16ToInt(fix16Mul(FIX16(15),GameContext.Speedup)))
     {
-        SPR_setPalette(Player->Base.spr, PAL_PLAYER);
+        SPR_setPalette(Player->Base.spr, PAL_COMMON);
         if(Player->OnFloor) 
             Player->State = PlayerStanding;
         else
@@ -692,14 +692,14 @@ void ObjectPlayerInit(void* object)
     Player->CoyoteFrames = 0;
     Player->CoyoteMode = false;
     // sprite
-    Player->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_PLAYER, 0,false,false));
+    Player->Base.spr = SPR_addSprite(&sprPlayer, 0,0, TILE_ATTR(PAL_COMMON, 0,false,false));
     
     SPR_setVisibility(Player->Base.spr, AUTO_FAST);
     Player->Base.spriteOffset.x = -24;
     Player->Base.spriteOffset.y = -46;
 
-    memcpy(&GameContext.palette[PAL_PLAYER], sprPalPlayer.palette->data, 16 * 2);
-    memcpy(&GameContext.paletteEffect[PAL_PLAYER], sprPalPlayerWater.palette->data, 16 * 2);
+    memcpy(&GameContext.palette[PAL_COMMON], sprPalPlayer.palette->data, 16 * 2);
+    memcpy(&GameContext.paletteEffect[PAL_COMMON], sprPalPlayerWater.palette->data, 16 * 2);
 }
 
 void ObjectPlayerFree(void* object)
