@@ -37,6 +37,7 @@ void E1M1VBlank()
 	WaterPositionX = (CameraPositionX >> 2);// + 64;
 	WaterPositionY = (CameraPositionY >> 2);// + 16;
 	
+	SYS_disableInts();
 	if(WaterLine > screenHeight)		// Waterline off-screen bottom
 	{	
 		VDP_setHInterrupt(0);	//Disable effect
@@ -52,6 +53,7 @@ void E1M1VBlank()
 		VDP_setHInterrupt(0);	// Disable int
 		PAL_setColors(0, &GameContext.paletteEffect[0][0], 64, DMA);	// Load effect palette
 	}
+	SYS_enableInts();
 }
 HINTERRUPT_CALLBACK HIntHandler()
 {
@@ -169,7 +171,7 @@ void E1M1_Tick()
 	{
 		BackgroundScroll[i] = wobble1;
 		if(i < 64)
-			BackgroundScroll[i] += tick;
+			BackgroundScroll[i] += cloudscroll;
 	}
 	for(int i = (20 * 8); i < (30 * 8); ++i)
 	{
