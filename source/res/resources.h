@@ -5,7 +5,6 @@ extern const SpriteDefinition sprPalPlayer;
 extern const SpriteDefinition sprPalPlayerWater;
 extern const SpriteDefinition sprCursor;
 extern const SpriteDefinition sprFontNumber;
-extern const TileSet sprFont;
 extern const Image bgtile;
 extern const SpriteDefinition sprProjectile;
 extern const SpriteDefinition sprPlayer;

@@ -1,12 +1,15 @@
 
+# Palette helpers
 SPRITE sprPalPlayer "sprites/sprPalPlayer.gif" 2 2 BEST 0
 SPRITE sprPalPlayerWater "sprites/sprPalPlayerWater.gif" 2 2 BEST 0
 
+# Menu
 SPRITE sprCursor "sprites/cursor.png" 1 1 BEST 10
 SPRITE sprFontNumber "sprites/fontNum.gif" 2 4 BEST 0
 IMAGE bgtile "tilesets/bgtile.png" BEST
 
-SPRITE sprProjectile "sprites/sprProjectileTest.png" 3 3 BEST 0
+# General
+SPRITE sprProjectile "sprites/sprProjectileTest.png" 2 2 BEST 0
 SPRITE sprPlayer "sprites/player2.png" 6 6 NONE 0
 
 ## UI

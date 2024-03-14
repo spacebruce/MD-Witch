@@ -20,10 +20,17 @@ static vs16 CameraPositionY = 0;
 static vs16 WaterPositionY, WaterPositionX, BackgroundPositionX, BackgroundPositionY;
 static vs16 WaterY = 64;
 
-void VBlankHandler()
+u16 BackgroundScroll[240];
+
+void E1M1VBlank()
 {
 	WaterLine = (WaterY - CameraPositionY);
-	VDP_setVerticalScroll(BG_B, (CameraPositionY >> 2));
+	VDP_setVerticalScroll(BG_B, 0);	//(CameraPositionY >> 2));
+
+	if(IS_PAL_SYSTEM)
+		VDP_setHorizontalScrollLine(BG_B, 0, BackgroundScroll, 240, DMA_QUEUE);
+	else
+		VDP_setHorizontalScrollLine(BG_B, 0, BackgroundScroll, 224, DMA_QUEUE);
 
 	BackgroundPositionX = (CameraPositionX >> 2);
 	BackgroundPositionY = (CameraPositionY >> 3);
@@ -32,19 +39,16 @@ void VBlankHandler()
 	
 	if(WaterLine > screenHeight)		// Waterline off-screen bottom
 	{	
-		VDP_setVerticalScroll(BG_B, BackgroundPositionY);
 		VDP_setHInterrupt(0);	//Disable effect
 		PAL_setColors(0, &GameContext.palette[0][0], 64, DMA);	// load normal stage palette
 	}
 	else if(WaterLine > 1)	// Camera above waterline, on-screen
 	{
-		VDP_setVerticalScroll(BG_B, BackgroundPositionY);
 		VDP_setHInterrupt(1);	// Enable effect
 		PAL_setColors(0, &GameContext.palette[0][0], 64, DMA);	// load normal stage palette
 	}
 	else				// 
 	{
-		VDP_setVerticalScroll(BG_B, WaterPositionY);
 		VDP_setHInterrupt(0);	// Disable int
 		PAL_setColors(0, &GameContext.paletteEffect[0][0], 64, DMA);	// Load effect palette
 	}
@@ -108,11 +112,11 @@ uint16_t E1M1_Init()
 	WaterY = 390;
 
 	SYS_setHIntCallback(HIntHandler);
-	SYS_setVBlankCallback(VBlankHandler);
+	SYS_setVBlankCallback(E1M1VBlank);
 	VDP_setHIntCounter(0);
 	VDP_setHInterrupt(1);
 
-	VDP_setScrollingMode(HSCROLL_PLANE, VSCROLL_PLANE);
+	VDP_setScrollingMode(HSCROLL_TILE, VSCROLL_PLANE);
 
 	tile_id = 0;
 
@@ -135,16 +139,16 @@ uint16_t E1M1_Init()
     u16 pal[16];
     for(int i = 0; i < 16; ++i)
 	{
-        pal[i] = pal_stage_01b.data[i] >> 1;
+        pal[i] = pal_stage_01b.data[i];
 	}
 	memcpy(&GameContext.paletteEffect[PAL_BACKGROUND],  pal, 16 * 2);
     for(int i = 0; i < 16; ++i)
 	{
-        pal[i] = pal_stage_01a.data[i] >> 1;
+        pal[i] = pal_stage_01a.data[i];
 	}
 	memcpy(&GameContext.paletteEffect[PAL_TILES],  pal, 16 * 2);
 
-	// buffer the palettes to memory, these get sent to hardware on vsync
+	// buffer the palettes to global memory, these get sent to hardware on vsync
 	memcpy(&GameContext.palette[PAL_BACKGROUND],  bg_e1m1.palette->data, 16 * 2);
 	memcpy(&GameContext.palette[PAL_TILES],  pal_stage_01b.data, 16 * 2);
 
@@ -156,12 +160,25 @@ uint16_t E1M1_Init()
 }
 void E1M1_Tick()
 {
+	static int tick = 0;
+	++tick;
+	const int16_t cloudscroll = GameContext.Frame;
+	const int16_t wobble1 = -(CameraPositionX / 10);
+	const int16_t wobble2 = -(CameraPositionX / 5);
+	for(int i = 00; i < (19 * 8); ++i)
+	{
+		BackgroundScroll[i] = wobble1;
+		if(i < 64)
+			BackgroundScroll[i] += tick;
+	}
+	for(int i = (20 * 8); i < (30 * 8); ++i)
+	{
+		BackgroundScroll[i] = wobble2;
+	}
 }
 void E1M1_End()
 {
 	MAP_release(GameContext.MapA);
-	MAP_release(GameContext.MapB);
-	
 
 	SYS_setHIntCallback(NULL);
 	SYS_setVBlankCallback(NULL);
