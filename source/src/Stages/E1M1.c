@@ -20,7 +20,7 @@ static vs16 CameraPositionY = 0;
 static vs16 WaterPositionY, WaterPositionX, BackgroundPositionX, BackgroundPositionY;
 static vs16 WaterY = 64;
 
-u16 BackgroundScroll[240];
+u16 BackgroundScroll[30];
 
 void E1M1VBlank()
 {
@@ -28,14 +28,12 @@ void E1M1VBlank()
 	VDP_setVerticalScroll(BG_B, 0);	//(CameraPositionY >> 2));
 
 	if(IS_PAL_SYSTEM)
-		VDP_setHorizontalScrollLine(BG_B, 0, BackgroundScroll, 240, DMA_QUEUE);
+		VDP_setHorizontalScrollTile(BG_B, 0, BackgroundScroll, 30, DMA);
 	else
-		VDP_setHorizontalScrollLine(BG_B, 0, BackgroundScroll, 224, DMA_QUEUE);
+		VDP_setHorizontalScrollTile(BG_B, 0, BackgroundScroll, 28, DMA);
 
 	BackgroundPositionX = (CameraPositionX >> 2);
 	BackgroundPositionY = (CameraPositionY >> 3);
-	WaterPositionX = (CameraPositionX >> 2);// + 64;
-	WaterPositionY = (CameraPositionY >> 2);// + 16;
 	
 	SYS_disableInts();
 	if(WaterLine > screenHeight)		// Waterline off-screen bottom
@@ -164,16 +162,16 @@ void E1M1_Tick()
 {
 	static int tick = 0;
 	++tick;
-	const int16_t cloudscroll = GameContext.Frame;
-	const int16_t wobble1 = -(CameraPositionX / 10);
-	const int16_t wobble2 = -(CameraPositionX / 5);
-	for(int i = 00; i < (19 * 8); ++i)
+	const int16_t cloudscroll = -GameContext.Frame;
+	const int16_t wobble1 = -(CameraPositionX / 5);
+	const int16_t wobble2 = -(CameraPositionX / 2);
+	for(int i = 00; i < 19; ++i)
 	{
 		BackgroundScroll[i] = wobble1;
-		if(i < 64)
+		if(i < 8)
 			BackgroundScroll[i] += cloudscroll;
 	}
-	for(int i = (20 * 8); i < (30 * 8); ++i)
+	for(int i = (20); i < 30; ++i)
 	{
 		BackgroundScroll[i] = wobble2;
 	}
