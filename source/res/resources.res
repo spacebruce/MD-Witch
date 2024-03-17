@@ -1,7 +1,7 @@
 
 # Palette helpers
-SPRITE sprPalPlayer "sprites/sprPalPlayer.gif" 2 2 BEST 0
-SPRITE sprPalPlayerWater "sprites/sprPalPlayerWater.gif" 2 2 BEST 0
+SPRITE sprPalPlayer "sprites/sprPalPlayer.gif" 2 1 BEST 0
+SPRITE sprPalPlayerWater "sprites/sprPalPlayerWater.gif" 2 1 BEST 0
 
 # Menu
 SPRITE sprCursor "sprites/cursor.png" 1 1 BEST 10
