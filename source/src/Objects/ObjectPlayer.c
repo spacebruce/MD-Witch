@@ -331,7 +331,43 @@ void ObjectPlayerUpdate(void* object)
             xsens -= halfwidth;
         }
 
-        stuck = (col(xsens, y_top) | col(xsens, y_mid)) > 0;
+        sens_top = col(xsens, y_top);
+        sens_mid = col(xsens, y_mid);
+        sens_low = col(xsens, y_low);
+
+        // potential slope
+        if((sens_low == true) && ((sens_mid || sens_top) == false))
+        {
+            const s16 old_low = y_low;
+            const s16 old_mid = y_mid;
+            const s16 old_top = y_top;
+            bool stepped = false;
+            for(u16 i = 1; i < 4; ++i)
+            {                        
+                --y_low;
+                --y_mid;
+                --y_top;
+                sens_low = col(xsens, y_low);
+                if(!sens_low)
+                {
+                    sens_top = col(xsens, y_top);
+                    if(!sens_top)
+                    {
+                        y -= i;
+                        stepped = true;
+                        break;
+                    }
+                }
+            }
+            if(!stepped)
+            {
+                y_low = old_low;
+                y_mid = old_mid;
+                y_top = old_top;
+            }
+        }
+
+        stuck = (sens_low || sens_mid || sens_top);
         if(stuck)
         {
             int16_t its = 0;
@@ -339,7 +375,7 @@ void ObjectPlayerUpdate(void* object)
             { 
                 xsens += budge;
                 x += budge;
-                stuck = (col(xsens, y_top) | col(xsens, y_mid)) > 0;
+                stuck = (col(xsens, y_top) || col(xsens, y_mid)) > 0;
                 ++its;
             }
             Player->VelocityX = FIX16(0);
