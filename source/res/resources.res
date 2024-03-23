@@ -19,7 +19,7 @@ SPRITE sprHudMeter "sprites/sprHudMeter.png" 4 2 BEST 1
 SPRITE sprHudStaff "sprites/sprHudStaff.gif" 4 16 BEST 1
 
 ## Stage backgrounds
-IMAGE bg_e1m1 "backgrounds/e1m1_background.png" BEST
+IMAGE bg_e1m1 "backgrounds/e1m1_alt.png" BEST
 
 ## ENEMIES
 SPRITE sprFrogman "sprites/Frogman.png" 6 6 FAST 0

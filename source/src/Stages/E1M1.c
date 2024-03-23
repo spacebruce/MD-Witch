@@ -14,19 +14,28 @@ const int e1m1_tile_ysize = 2 * 8;
 /*
 	hint test 
 */
-static vs16 WaterLine = 0;            
-static vs16 CameraPositionX = 0;
-static vs16 CameraPositionY = 0;
+static vs16 WaterLine;            
+static vs16 CameraPositionX;
+static vs16 CameraPositionY;
+static vs16 ForegroundLine;
 static vs16 WaterPositionY, WaterPositionX, BackgroundPositionX, BackgroundPositionY;
-static vs16 WaterY = 64;
+static vs16 WaterY;
 
 s16 BackgroundScroll[30];
 
 void E1M1VBlank()
 {
+	WaterY = (308 - 64);	
 	WaterLine = (WaterY - CameraPositionY);
+
+	// Reset background scroll
 	VDP_setVerticalScroll(BG_B, 0);	//(CameraPositionY >> 2));
 
+	// Where to start foreground overlay
+	ForegroundLine = (336 - 32) - CameraPositionY;
+
+	// Reset BG
+	VDP_setVerticalScroll(BG_B, 0);
 	if(IS_PAL_SYSTEM)
 		VDP_setHorizontalScrollTile(BG_B, 0, BackgroundScroll, 30, DMA);
 	else
@@ -36,7 +45,8 @@ void E1M1VBlank()
 	BackgroundPositionY = (CameraPositionY >> 3);
 	
 	SYS_disableInts();
-	if(WaterLine > screenHeight)		// Waterline off-screen bottom
+
+	if(WaterLine > screenHeight || ForegroundLine > screenHeight)		// Waterline off-screen bottom
 	{	
 		VDP_setHInterrupt(0);	//Disable effect
 		PAL_setColors(0, &GameContext.palette[0][0], 64, DMA);	// load normal stage palette
@@ -48,7 +58,10 @@ void E1M1VBlank()
 	}
 	else				// 
 	{
-		VDP_setHInterrupt(0);	// Disable int
+		if(ForegroundLine < screenHeight)
+			VDP_setHInterrupt(1);
+		else
+			VDP_setHInterrupt(0);	// Disable int
 		PAL_setColors(0, &GameContext.paletteEffect[0][0], 64, DMA);	// Load effect palette
 	}
 	SYS_enableInts();
@@ -56,11 +69,15 @@ void E1M1VBlank()
 HINTERRUPT_CALLBACK HIntHandler()
 {
 	--WaterLine;
+	--ForegroundLine;
+	if(ForegroundLine == 0)	// BG_B foreground starts here
+	{
+		VDP_setVerticalScroll(BG_B, 240);
+	}
 	if(WaterLine == 0)
 	{
-    	PAL_setColors(0,&GameContext.paletteEffect[0][0], 64, DMA);
+    	//PAL_setColors(0,&GameContext.paletteEffect[0][0], 64, DMA);
     	//VDP_setVerticalScroll(BG_B, WaterPositionY);
-		VDP_setHInterrupt(0);
 	}
 }
 
@@ -70,6 +87,7 @@ u16 bg_tile_id;
 
 static const int e1m1_width = 58;
 static const int e1m1_height = 21;
+
 
 const u16 e1m1_collisions[1218] =
 {
@@ -98,15 +116,55 @@ const u16 e1m1_collisions[1218] =
 
 u8 E1M1_Collide(const s16 x, const s16 y)
 {
-    const u16 tx = (((u16)(x)) / e1m1_tile_xsize);
-    const u16 ty = (((u16)(y)) / e1m1_tile_ysize);
+    const s16 tx = (x / e1m1_tile_xsize);
+    const s16 ty = (y / e1m1_tile_ysize);
 
-    if(e1m1_collisions[tx + (ty * e1m1_width)] > 0)
-    {
-        MapCollision.TileX = tx;
-        MapCollision.TileY = ty;
-        return true;
-    }
+	const uint16_t Tile = e1m1_collisions[tx + (ty * e1m1_width)];
+
+	if(Tile == TILE_NONE)
+	{
+		return 0;
+	}
+	if(Tile == TILE_BLOCK)
+	{
+		return true;
+	}
+	const s16 fracx = x % 16; 
+	const s16 fracy = y % 16;
+
+	u16 Hit;
+
+	kprintf("%i : %i", fracx, fracy);
+
+	switch(Tile)
+	{
+		case TILE_SLOPE_HIGH_LOW_LEFT:
+		{
+			if(fracy > 8)	
+				Hit = TILE_EFFECT_SOLID;
+			else
+				Hit = ((fracx * 2) > fracy) ? TILE_EFFECT_SOLID : TILE_EFFECT_NONE;
+		}
+		break;
+		case TILE_SLOPE_HIGH_LOW_RIGHT:
+			if(fracy < 8)	
+				Hit = TILE_EFFECT_NONE;
+			else
+				Hit =  (((fracx - 8) * 2) > fracy) ? TILE_EFFECT_SOLID : TILE_EFFECT_NONE;
+		default:
+			return TILE_EFFECT_NONE;
+		break;
+	}
+	
+	if(Hit != TILE_EFFECT_NONE)
+	{
+		MapCollision.TileX = tx;
+		MapCollision.TileY = ty;
+		MapCollision.PixelX = x;
+		MapCollision.PixelY = y;
+		return Tile;
+	}
+
     return false;
 }
 
@@ -211,5 +269,5 @@ const StageBase E1M1 =
     E1M1_Collide,
     E1M1_Draw,
     E1M1_End,
-	2048,1024,
+	928,336,
 };
