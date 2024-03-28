@@ -9,7 +9,7 @@ struct StageGroup
     const StageBase* Pointer;
 };
 
-//#include "Cutscene1.h"
+#include "E1M0.h"
 #include "E1M1.h"
 //#include "E1M2.h"
 //#include "E1M3.h"
@@ -17,7 +17,7 @@ struct StageGroup
 // da level lookup table
 static const struct StageGroup Stages[] = 
 {
-    //{ 0, &Cutscene1 },
+    { 0, &E1M0 },
     { 1, &E1M1 },
     // { 2, &E1M2 },
     // { 3, &E1M3 },
